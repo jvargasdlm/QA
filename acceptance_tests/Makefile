@@ -8,6 +8,9 @@ all: prepare run
 run:
 	npm test -- --passWithNoTests --detectOpenHandles --verbose
 
+show:
+	SHOW_BROWSER=true npm test -- --passWithNoTests --detectOpenHandles --verbose
+
 prepare: extract_chrome createDirs install_
 
 reinstall:

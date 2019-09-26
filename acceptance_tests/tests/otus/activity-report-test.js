@@ -91,6 +91,7 @@ Então o sistema não deve mostrar o botão para gerar o relatório
 suiteArray = [
 
     describe('Temp Test', () => {
+
         test('Open window print', async() => {
             await pageOtus.openParticipantFromHomePage('5078934');
             await pageOtus.clickAfterFindInList("button[ng-click='report.expandAndCollapse()']", 7);

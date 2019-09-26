@@ -4,9 +4,6 @@ const PageOtus  = require('./classes/PageOtus');
 // *****************************************************************
 // Constants and variables
 
-const EMAIL_TEST = 'proflaviamat@gmail.com';
-const PASSWORD = 'Teste123';
-
 let logged = false;
 
 // *****************************************************************

@@ -1,7 +1,9 @@
+require('custom-env').env('staging');
+
 const dirPath = process.cwd();
 
 const browser = {
-    SHOW_BROWSER: true,
+    SHOW_BROWSER: (process.env.SHOW_BROWSER === 'true'),
     EXECUTABLE_PATH: dirPath + '/chrome/chrome',
     WINDOW_SIZE: {width: 1920, height: 1080},
     SLOW_TIME_MILLISEC_TO_FOLLOW_INTERACTION: 20
