@@ -64,10 +64,10 @@ async function extractDataFromReportPage(){
 
     console.log('NUM TARGETS = ', targets.length);//.
     for (let i = 0; i < targets.length; i++) {
-        console.log(`[${i+1}]`, targets[i]._targetInfo);
+        console.log(`[${i + 1}]`, targets[i]._targetInfo);
     }
-
-    const reportPage = new ReportPage(lastTarget.page());
+    
+    const reportPage = new ReportPage(await lastTarget.page());
     await reportPage.extractParticipantInfo();
 }
 
@@ -103,7 +103,7 @@ suiteArray = [
             await pageOtus.clickAfterFindInList("button[ng-click='report.expandAndCollapse()']", 7);
             console.log('lets open report at new tab ...');//.
             await pageOtus.clickWithWait("button[ng-click='$ctrl.generateReport(report)']");
-            await pageOtus.waitForMilliseconds(10000);
+            await pageOtus.waitForMilliseconds(2000);
             await extractDataFromReportPage();
         });
 
