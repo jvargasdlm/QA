@@ -1,0 +1,1018 @@
+{
+    "extents": "StudioObject",
+    "objectType": "Survey",
+    "oid": "editADDVSUQ6W3VuZGVmaW5lZF1zdXJ2ZXlVVUlEOltiMzRjNzMxMC1jZGI0LTExZTktODdiMi1jZmRiMzZmMTEwMTBdcmVwb3NpdG9yeVVVSUQ6WyBOb3QgZG9uZSB5ZXQgXQ==",
+    "identity": {
+        "extents": "StudioObject",
+        "objectType": "SurveyIdentity",
+        "name": "Scenario #7: Edit(add) group test",
+        "acronym": "SCE7_",
+        "recommendedTo": "",
+        "description": "",
+        "keywords": []
+    },
+    "metainfo": {
+        "extents": "StudioObject",
+        "objectType": "SurveyMetaInfo",
+        "creationDatetime": "2019-09-02T19:05:59.745Z",
+        "otusStudioVersion": ""
+    },
+    "dataSources": [],
+    "itemContainer": [
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_1",
+            "customID": "SCE7_1",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_2",
+            "customID": "SCE7_2",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_3",
+            "customID": "SCE7_3",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_4",
+            "customID": "SCE7_4",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_5",
+            "customID": "SCE7_5",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_6",
+            "customID": "SCE7_6",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_7",
+            "customID": "SCE7_7",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_8",
+            "customID": "SCE7_8",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_9",
+            "customID": "SCE7_9",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "extents": "SurveyItem",
+            "objectType": "IntegerQuestion",
+            "templateID": "SCE7_10",
+            "customID": "SCE7_10",
+            "dataType": "Integer",
+            "label": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Label",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "metadata": {
+                "extents": "StudioObject",
+                "objectType": "MetadataGroup",
+                "options": []
+            },
+            "unit": {
+                "ptBR": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "enUS": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                },
+                "esES": {
+                    "extends": "StudioObject",
+                    "objectType": "Unit",
+                    "oid": "",
+                    "plainText": "",
+                    "formattedText": ""
+                }
+            },
+            "fillingRules": {
+                "extends": "StudioObject",
+                "objectType": "FillingRules",
+                "options": {
+                    "mandatory": {
+                        "extends": "StudioObject",
+                        "objectType": "Rule",
+                        "validatorType": "mandatory",
+                        "data": {
+                            "canBeIgnored": false,
+                            "reference": true
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "navigationList": [
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "BEGIN NODE",
+            "index": 0,
+            "inNavigations": [],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "BEGIN NODE",
+                    "destination": "SCE7_1",
+                    "name": "BEGIN NODE_SCE7_1",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "END NODE",
+            "index": 1,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_10",
+                    "index": 11
+                }
+            ],
+            "routes": []
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_1",
+            "index": 2,
+            "inNavigations": [
+                {
+                    "origin": "BEGIN NODE",
+                    "index": 0
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_1",
+                    "destination": "SCE7_2",
+                    "name": "SCE7_1_SCE7_2",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_2",
+            "index": 3,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_1",
+                    "index": 2
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_2",
+                    "destination": "SCE7_3",
+                    "name": "SCE7_2_SCE7_3",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_3",
+            "index": 4,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_2",
+                    "index": 3
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_3",
+                    "destination": "SCE7_4",
+                    "name": "SCE7_3_SCE7_4",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_4",
+            "index": 5,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_3",
+                    "index": 4
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_4",
+                    "destination": "SCE7_5",
+                    "name": "SCE7_4_SCE7_5",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_5",
+            "index": 6,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_4",
+                    "index": 5
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_5",
+                    "destination": "SCE7_6",
+                    "name": "SCE7_5_SCE7_6",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_6",
+            "index": 7,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_5",
+                    "index": 6
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_6",
+                    "destination": "SCE7_7",
+                    "name": "SCE7_6_SCE7_7",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_7",
+            "index": 8,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_6",
+                    "index": 7
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_7",
+                    "destination": "SCE7_8",
+                    "name": "SCE7_7_SCE7_8",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_8",
+            "index": 9,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_7",
+                    "index": 8
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_8",
+                    "destination": "SCE7_9",
+                    "name": "SCE7_8_SCE7_9",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_9",
+            "index": 10,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_8",
+                    "index": 9
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_9",
+                    "destination": "SCE7_10",
+                    "name": "SCE7_9_SCE7_10",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        },
+        {
+            "extents": "SurveyTemplateObject",
+            "objectType": "Navigation",
+            "origin": "SCE7_10",
+            "index": 11,
+            "inNavigations": [
+                {
+                    "origin": "SCE7_9",
+                    "index": 10
+                }
+            ],
+            "routes": [
+                {
+                    "extents": "SurveyTemplateObject",
+                    "objectType": "Route",
+                    "origin": "SCE7_10",
+                    "destination": "END NODE",
+                    "name": "SCE7_10_END NODE",
+                    "isDefault": true,
+                    "conditions": []
+                }
+            ]
+        }
+    ],
+    "staticVariableList": [],
+    "surveyItemGroupList": []
+}

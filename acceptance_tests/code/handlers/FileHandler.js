@@ -1,0 +1,66 @@
+const fileSystem    = require('file-system');
+const fs            = require('fs');
+const pathPkg       = require('path');
+const loadJsonFile  = require('load-json-file');
+
+class FileHandler {
+
+    static getDirFiles(dirPath){
+        return fs.readdirSync(dirPath); // array with  relative path files
+    }
+
+    static getBaseName(path) {
+        return pathPkg.basename(path);
+    }
+
+    static getFileName(path) {
+        return pathPkg.parse(path).name;
+        // pathPkg.parse(path) Returns:
+        // { root: '/',
+        //   dir: '/home/user/dir',
+        //   base: 'file.txt',
+        //   ext: '.txt',
+        //   name: 'file' }
+    }
+
+    static write(path, content){
+        fileSystem.writeFile(path, content, function(err) {
+            if(err) {
+                throw err;
+            }
+        });
+        console.log(`The file ${path} was saved!`);
+    }
+
+    static append(path, content) {
+        fs.appendFile(path, content, function (err) {
+            if(err) {
+                throw err;
+            }
+        });
+        console.log(`The file ${path} was appended!`);
+    }
+
+    static delete(path){
+        fs.unlink(path, (err) => {
+            if (err) {
+                throw err;
+            }
+        });
+        //console.log(`The file ${path} was deleted!`);
+    }
+
+    // -------------------------------------------------
+    // json files
+
+    static async readJson(path) {
+        return await loadJsonFile(path);
+    }
+
+    static async readJsonAttribute(path, attributeName) {
+        let data = await loadJsonFile(path);
+        return data[attributeName];
+    }
+}
+
+module.exports = FileHandler;
