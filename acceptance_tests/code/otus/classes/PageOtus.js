@@ -106,8 +106,8 @@ class PageOtus extends PageExtended {
     // ---------------------------------------------------------------
     // Open participant
 
-    async openParticipantFromHomePage(recruitmentNumber){
-        await this.typeWithWait(selectors.searchParticipant.BUSCA_NOME_NUMERO, recruitmentNumber);
+    async openParticipantFromHomePage(recruitmentNumberOrName){
+        await this.typeWithWait(selectors.searchParticipant.BUSCA_NOME_NUMERO, recruitmentNumberOrName);
         let pageElement = new PageElement(this);
         let tempIdArr = await pageElement.findChildren(selectors.searchParticipant.AUTO_COMPLETE_SUGGESTIONS, selectors.searchParticipant.AUTO_COMPLETE_ITEM);
         await this.clickWithWait(`[id='${tempIdArr[0]}']`);

@@ -2,7 +2,8 @@ const PageOtus = require('./PageOtus');
 
 const selectors = {
     PARTICIPANT_INFO: "section[class='participantInfo']",
-    PARTICIPANT_INFO_COLUMN: "section[class='column ng-binding']"
+    PARTICIPANT_INFO_COLUMN: "section[class='column ng-binding']",
+    VALUES: "section[class='contextValues']"
 };
 
 class ReportPage extends PageOtus {
@@ -12,21 +13,35 @@ class ReportPage extends PageOtus {
     }
 
     async extractInfo(){
-
+        const participantInfo = await this.extractParticipantInfo();
+        const values = await this.extractValues();
+        console.log(participantInfo);
+        console.log(values);
     }
 
     async extractParticipantInfo(){
-        let texts = await this.page.evaluate((selectors) => {
-            const texts = [];
+        return await this.page.evaluate((selectors) => {
+            let result = {};
             const infoNode = document.body.querySelector(selectors.PARTICIPANT_INFO);
-            texts.push(infoNode.innerText);
-            const columnNodes = infoNode.querySelectorAll(selectors.PARTICIPANT_INFO_COLUMN);
-            for(let columnNode of columnNodes){
-                texts.push(columnNode.innerText);
+            const infos = infoNode.innerText.split('\n');
+            for(let info of infos){
+                let [data, value] = info.split(': ');
+                result[`${data}`] = value;
             }
-            return texts;
+            return result;
         }, selectors);
-        console.log(texts);
+    }
+
+    async extractValues(){
+        return await this.page.evaluate((valuesSelector) => {
+            let result = [];
+            const elements = Array.from(document.body.querySelectorAll(valuesSelector));
+            for (let i = 0; i < elements.length; i++) {
+                let elementParts = Array.from(elements[i].querySelectorAll('p'));
+                result.push(elementParts.map( (elem) => elem.innerText));
+            }
+            return result;
+        }, selectors.VALUES);
     }
 }
 

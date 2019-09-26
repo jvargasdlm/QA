@@ -2,17 +2,14 @@ const lib = require('../../code/otus/lib');
 
 let browser, suiteArray=[], errorLogger;        // for all tests
 let pageOtus, selectors;                        // only for otus tests
-let newPage, activitiesPage, reportButtonStateIds;
+let activitiesPage, reportButtonStateIds;
 const useOtus607=true;//.
 
 beforeAll(async () => {
     [browser, pageOtus, errorLogger, selectors] = await lib.doBeforeAll(suiteArray);
 
     browser.on('targetcreated', async(target) => {
-        console.log(`Created target type (${target.type()}) url=(${target.url()})\n`, target._targetInfo);
-        if (target.type() === 'page') {
-            newPage = target.page();
-        }
+        console.log(`Created target type (${target.type()}) url=(${target.url()})\n`);//, target._targetInfo);
     });
 
     if(!useOtus607) {//.
@@ -61,14 +58,10 @@ async function savePdfReport(pdfFilenameNoExtension){
 async function extractDataFromReportPage(){
     const targets = await browser.targets();
     let lastTarget = targets[targets.length-1];
-
-    console.log('NUM TARGETS = ', targets.length);//.
-    for (let i = 0; i < targets.length; i++) {
-        console.log(`[${i + 1}]`, targets[i]._targetInfo);
-    }
-    
-    const reportPage = new ReportPage(await lastTarget.page());
-    await reportPage.extractParticipantInfo();
+    let newPage = await lastTarget.page();
+    const reportPage = new ReportPage(newPage);
+    await reportPage.extractInfo();
+    await reportPage.close();
 }
 
 // *****************************************************************
@@ -101,29 +94,9 @@ suiteArray = [
         test('Open window print', async() => {
             await pageOtus.openParticipantFromHomePage('5078934');
             await pageOtus.clickAfterFindInList("button[ng-click='report.expandAndCollapse()']", 7);
-            console.log('lets open report at new tab ...');//.
             await pageOtus.clickWithWait("button[ng-click='$ctrl.generateReport(report)']");
             await pageOtus.waitForMilliseconds(2000);
             await extractDataFromReportPage();
-        });
-
-        xtest('New pages', async() => {
-            console.log("current page count ", (await browser.pages()).length); // 1
-            let page = pageOtus.page;
-
-            let url = 'http://www.google.com';
-            await page.evaluate((url) => {
-                window.open(url, '_blank');
-            }, url);
-            await page.waitFor(2000); // wait for a while
-            console.log(`after open url (${url}): current page count`, (await browser.pages()).length); // 2
-
-            url = 'about:blank';
-            await page.evaluate((url) => {
-                window.open(url, '_blank');
-            }, url);
-            await page.waitFor(2000); // wait for a while
-            console.log(`after open url (${url}): current page count`, (await browser.pages()).length); // 3
         });
     }),
 

@@ -81,6 +81,10 @@ class PageExtended {
     // ----------------------------------------------------------
     // page main functions
 
+    async close(){
+        await this.page.close();
+    }
+
     async setDownloadPath(path=DOWNLOADS_DIR_PATH){
         await this.page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: path});
     }
