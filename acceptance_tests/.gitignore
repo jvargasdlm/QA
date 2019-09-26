@@ -1,0 +1,9 @@
+.idea/*
+chrome/*
+downloads/*
+node_modules/*
+object_structures/*
+output/*
+screenshots/*
+uml_diagrams/*.asta.lock
+package-lock.json
