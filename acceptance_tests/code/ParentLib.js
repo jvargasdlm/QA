@@ -1,10 +1,16 @@
 const utils          = require('./utils');
 const BrowserHandler = require('./handlers/BrowserHandler');
+const FileHandler    = require('./handlers/FileHandler');
 const PageExtended   = require('./classes/PageExtended');
 
 // *****************************************************************
 
 class ParentLib {
+    
+    static async readLoginDataFromFile(platformNameToUpper){
+        const path = process.cwd() + '/login_data.json';
+        return FileHandler.readJsonAttribute(path, platformNameToUpper);
+    }
 
     static async doBeforeAll(suiteArray) {
         utils.timeout.setTestTimeout();
