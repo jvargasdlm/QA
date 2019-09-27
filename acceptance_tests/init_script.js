@@ -27,7 +27,7 @@ function setLoginData(){
     };
 
     const content = JSON.stringify(data,null,4);
-    FileHandler.write('./login_data.json', content);
+    FileHandler.write(process.env.LOGIN_FILE_PATH, content);
     console.log('Login data saved successfully.');
 }
 
