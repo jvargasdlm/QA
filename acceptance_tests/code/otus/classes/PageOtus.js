@@ -75,7 +75,8 @@ class PageOtus extends PageExtended {
             await this.waitForMilliseconds(500); // really disappear, because next page already load at background
         }
         catch (e) {
-            throw `Page load took longer than ${this.WAIT_FOR_SELECTOR_TIMEOUT} ms (url: ${this.page.url()})`;
+            const timeout = parseInt(process.env.WAIT_FOR_SELECTOR_TIMEOUT, 10);
+            throw `Page load took longer than ${timeout} ms (url: ${this.page.url()})`;
         }
     }
 

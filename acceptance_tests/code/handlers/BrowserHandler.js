@@ -1,13 +1,14 @@
 const puppeteer = require('puppeteer');
-const configConstants = require('../mainConstants').browser;
+require('custom-env').env('staging');
 
 async function createBrowser(showBrowser) {
-    const windowSize = configConstants.WINDOW_SIZE;
-    const windowSizeArg = `--window-size=${windowSize.width},${windowSize.height}`;
+    const width = process.env.WINDOW_WIDTH;
+    const height = process.env.WINDOW_HEIGHT;
+    const windowSizeArg = `--window-size=${width},${height}`;
     let browserConfig = {
         headless: !showBrowser,
-        executablePath: configConstants.EXECUTABLE_PATH,
-        slowMo: configConstants.SLOW_TIME_MILLISEC_TO_FOLLOW_INTERACTION,
+        executablePath: process.cwd() + process.env.CHROME_EXECUTABLE_LOCAL_PATH,
+        slowMo: parseInt(process.env.SLOW_TIME_MILLISEC_TO_FOLLOW_INTERACTION, 10),
         defaultViewport: null,
         args: ['--no-sandbox', windowSizeArg, '--ignore-certificate-errors', '--"acceptInsecureCerts"', '--ignoreHTTPSErrors=true'],
         //devtools: true
@@ -21,7 +22,8 @@ async function createBrowser(showBrowser) {
 class BrowserHandler {
 
     static async createBrowser() {
-        return createBrowser(configConstants.SHOW_BROWSER);
+        const showBrowser = (process.env.SHOW_BROWSER === 'true');
+        return createBrowser(showBrowser);
     }
 
     static async createBrowserHeadFull() {

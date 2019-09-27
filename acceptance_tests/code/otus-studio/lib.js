@@ -1,5 +1,4 @@
 const ParentLib      = require('../ParentLib');
-const utils          = require('../utils');
 const FileHandler    = require('../handlers/FileHandler');
 const PageOtusStudio = require('./classes/PageOtusStudio');
 const TemplatesPage  = require('./classes/TemplatesPage');
@@ -75,7 +74,7 @@ class OtusStudioLib {
 
     static async downloadAndReadJson(editorPage){
         await editorPage.toolbar.clickExportButton();
-        const path = utils.mainConstants.paths.DOWNLOADS_DIR_PATH + '/surveyTemplate.json';
+        const path = process.cwd() + process.env.DOWNLOADS_LOCAL_DIR_PATH + '/surveyTemplate.json';
         const content = await FileHandler.readJson(path);
         FileHandler.delete(path);
         return content;
@@ -83,7 +82,7 @@ class OtusStudioLib {
 
     static async downloadAndReadJsonAttribute(editorPage, attributeName){
         await editorPage.toolbar.clickExportButton();
-        const path = utils.mainConstants.paths.DOWNLOADS_DIR_PATH + '/surveyTemplate.json';
+        const path = process.cwd() + process.env.DOWNLOADS_LOCAL_DIR_PATH + '/surveyTemplate.json';
         const content = await FileHandler.readJsonAttribute(path, attributeName);
         FileHandler.delete(path);
         return content;

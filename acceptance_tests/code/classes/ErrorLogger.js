@@ -1,5 +1,5 @@
 const fileHandler = require('../handlers/FileHandler');
-const TEST_RESULTS_DIR_PATH = require('../mainConstants').paths.TEST_RESULTS_DIR_PATH;
+require('custom-env').env('staging');
 
 // *******************************************
 // Private functions
@@ -78,7 +78,7 @@ class ErrorLogger {
     exportTestResultLog(){
         const testPath = getTestPath(this.specArray[0]); // any spec from current suite works to get testPath
         const fileName = fileHandler.getFileName(testPath);
-        let path = `${TEST_RESULTS_DIR_PATH}/${fileName}`;
+        const path = process.cwd() + process.env.TEST_RESULTS_LOCAL_DIR_PATH + '/' + fileName;
 
         console.log('*************************************\nEnd of test suite of file', fileName);
         const numFails = this.wrongAssertionLogs.length;

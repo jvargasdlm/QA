@@ -6,7 +6,7 @@ node_modules/*
 object_structures/*
 output/*
 screenshots/*
-uml_diagrams/*.asta.lock
 # files
-login_data.json
+uml_diagrams/*.asta.lock
+data/login_data.json
 package-lock.json

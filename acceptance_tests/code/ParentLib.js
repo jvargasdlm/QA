@@ -8,7 +8,7 @@ const PageExtended   = require('./classes/PageExtended');
 class ParentLib {
     
     static async readLoginDataFromFile(platformNameToUpper){
-        const path = process.cwd() + '/login_data.json';
+        const path = process.cwd() + process.env.LOGIN_DATA_FILE_LOCAL_PATH;
         return FileHandler.readJsonAttribute(path, platformNameToUpper);
     }
 

@@ -41,7 +41,8 @@ class PrintTabPage extends PageExtended {
 
         await button.click();
 
-        await KeyboardHandler.sendTextAfterWait(this.DOWNLOADS_DIR_PATH + '/' + filenameNoExtension);
+        const path = process.cwd() + process.env.DOWNLOADS_LOCAL_DIR_PATH + '/' + filenameNoExtension;
+        await KeyboardHandler.sendTextAfterWait(path);
         await KeyboardHandler.sendEnterKey();
         await this.waitLib.forDownload();
     }

@@ -1,10 +1,8 @@
 const assert = require('assert');
-const utils = require('../../code/utils');
 const lib = require('../../code/otus-studio/lib');
 const Question = require('../../code/otus-studio/classes/Question');
 
 const FileHandler = require('../../code/handlers/FileHandler');
-const DOWNLOADS_DIR_PATH = utils.mainConstants.paths.DOWNLOADS_DIR_PATH;
 
 let browser, page, pageOtus, templatesPage;
 
@@ -73,7 +71,7 @@ describe('Otus Studio Test', () => {
   };
 
   let checkAssertionsOnJsonFile = async function(){
-      let path = DOWNLOADS_DIR_PATH + '/surveyTemplate.json';
+      let path = process.cwd() + process.env.DOWNLOADS_LOCAL_DIR_PATH + '/surveyTemplate.json';
       let requiredAttr = 'staticVariableList';
       let data = await FileHandler.readJsonAttribute(path, requiredAttr);
       //console.log(requiredAttr+':', JSON.stringify(data, null, 4));

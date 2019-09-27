@@ -13,8 +13,6 @@ function setLoginData(){
         password = process.env.DEFAULT_PASSWORD;
     }
 
-    console.log(email, password);//.
-
     const data = {
         "OTUS": {
             "email": email,
@@ -27,7 +25,7 @@ function setLoginData(){
     };
 
     const content = JSON.stringify(data,null,4);
-    FileHandler.write(process.env.LOGIN_FILE_PATH, content);
+    FileHandler.write('.' + process.env.LOGIN_DATA_FILE_LOCAL_PATH, content);
     console.log('Login data saved successfully.');
 }
 

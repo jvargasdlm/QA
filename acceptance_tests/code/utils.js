@@ -1,12 +1,13 @@
 const delay = require('delay');
-// own libs
-const mainConstants = require('./mainConstants');
-const timeoutConstants = mainConstants.timeout;
+
+// Constants
+require('custom-env').env('staging');
+const TIMEOUT_PER_TEST = parseInt(process.env.TIMEOUT_PER_TEST, 10);
 
 // *****************************************************************
 
 let timeout = {
-    setTestTimeout: function(milliseconds=timeoutConstants.PER_TEST){
+    setTestTimeout: function(milliseconds=TIMEOUT_PER_TEST){
         jest.setTimeout(milliseconds);
     }
 };
@@ -25,16 +26,16 @@ let wait = {
     },
 
     forJsonDownload: async function(){
-        await this.forMilliseconds(timeoutConstants.JSON_DOWNLOAD_TIMEOUT);
+        await this.forMilliseconds(parseInt(process.env.JSON_DOWNLOAD_TIMEOUT, 10));
     },
 
     forDownload: async function(){
-        await this.forMilliseconds(timeoutConstants.DOWNLOAD_TIMEOUT);
+        await this.forMilliseconds(parseInt(process.env.DOWNLOAD_TIMEOUT, 10));
     },
 
     load: async function() {
-        await delay(timeoutConstants.LOAD_PAGE_TIMEOUT);
+        await delay(parseInt(process.env.LOAD_PAGE_TIMEOUT, 10));
     }
 };
 
-module.exports = {mainConstants, timeout, wait};
+module.exports = {timeout, wait};

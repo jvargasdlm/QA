@@ -11,12 +11,9 @@ const OptionSelector = require('./OptionSelector');
 
 // ***********************************************
 // Constants
-const mainConstants             = require('../mainConstants');
-const LOAD_PAGE_TIMEOUT         = mainConstants.timeout.LOAD_PAGE_TIMEOUT;
-const WAIT_FOR_SELECTOR_TIMEOUT = mainConstants.timeout.WAIT_FOR_SELECTOR_TIMEOUT;
-const DOWNLOADS_DIR_PATH        = mainConstants.paths.DOWNLOADS_DIR_PATH;
-const SCREENSHOT_DIR_PATH       = mainConstants.paths.SCREENSHOT_DIR_PATH;
-const LOG_NAVIGATION_ACTIONS    = mainConstants.log.LOG_NAVIGATION_ACTIONS;
+require('custom-env').env('staging');
+const WAIT_FOR_SELECTOR_TIMEOUT = parseInt(process.env.WAIT_FOR_SELECTOR_TIMEOUT, 10);
+const LOG_NAVIGATION_ACTIONS    = (process.env.LOG_NAVIGATION_ACTIONS === 'true');
 
 const typeCodes ={
     OTUS: 0,
@@ -37,14 +34,6 @@ class PageExtended {
 
     // ----------------------------------------------------------
     // Getters
-
-    get WAIT_FOR_SELECTOR_TIMEOUT(){
-        return WAIT_FOR_SELECTOR_TIMEOUT;
-    }
-
-    get DOWNLOADS_DIR_PATH(){
-        return DOWNLOADS_DIR_PATH;
-    }
 
     get errorLogger(){
         return errorLogger;
@@ -85,7 +74,8 @@ class PageExtended {
         await this.page.close();
     }
 
-    async setDownloadPath(path=DOWNLOADS_DIR_PATH){
+    async setDownloadPath(){
+        const path = process.cwd() + process.env.DOWNLOADS_LOCAL_DIR_PATH;
         await this.page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: path});
     }
 
@@ -98,11 +88,12 @@ class PageExtended {
     }
 
     async refresh(){
-        await this.page.reload({timeout: LOAD_PAGE_TIMEOUT});
+        const timeout = parseInt(process.env.LOAD_PAGE_TIMEOUT, 10);
+        await this.page.reload({timeout: timeout});
     }
 
     async screenshot(filename){
-        const path = SCREENSHOT_DIR_PATH + '/' + filename;
+        const path = process.cwd() + process.env.SCREENSHOT_LOCAL_DIR_PATH + '/' + filename;
         await this.page.screenshot({ path: path, fullPage: true });
         if(LOG_NAVIGATION_ACTIONS){
             console.log('Screenshot taked and saved at', filename);//.
