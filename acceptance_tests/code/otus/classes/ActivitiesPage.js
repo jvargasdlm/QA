@@ -1,4 +1,5 @@
 const PageOtus = require('./PageOtus');
+const PreviewPage = require('./PreviewPage');
 const DynamicElement = require('../../classes/DynamicElement');
 
 // ***********************************************
@@ -57,11 +58,23 @@ class ActivitiesPage extends PageOtus {
 
     // ---------------------------------------------------------------
 
-    async addOnlineActivity(){
+    async countActivities(){
+        return (await this.page.$$('md-checkbox')).length - 2;
+    }
+
+    async addOnlineActivity(acronym){
         const mySelectors = selectors.bottomMenuButtons;
         await this.clickWithWait(mySelectors.ADD);
         await this.waitForSelector(mySelectors.WAIT_VISIBLE_ACTION);
         await this.clickWithWait(mySelectors.ATIVIDADE_ONLINE);
+        await this.waitLoad();
+        // select activity
+        await this.typeWithWait("input[ng-model='$ctrl.filter']", acronym);
+        await this.selectActivityCheckbox(0);
+        await this.clickWithWait("button[aria-label='Adicionar']");
+        await this.waitLoad();
+        // select default category
+        await this.clickWithWait("button[aria-label='Adicionar']");
         await this.waitLoad();
     }
 
@@ -70,21 +83,39 @@ class ActivitiesPage extends PageOtus {
         await (this.getCheckbox()).clickAfterFindInList(index);
     }
 
-    async clickOnReportButtonWithLoadState(){
-        await this.reportButton.click();
-        await this.waitForSelectorHidden('#'+this.reportButton.id);
-        const nextState = reportButtonStateIds.GENERATE;
-        let element = await this.waitForSelector('#'+nextState);
-        //console.log(`element '#${nextState}' was found?`, element!==undefined);//.
-        if(!element){
-            throw `New state of dynamic element should be '${nextState}', but this state was not found.`;
-        }
-        await this.reportButton.setId(nextState);
+    async fillActivity(activityCheckBoxIndex, answersArr){
+        await this.selectActivityCheckbox(activityCheckBoxIndex);
+        await this.clickWithWait(selectors.topMenuButtons.PREENCHER_ATIVIDADE);
+        const previewPage = new PreviewPage(this.page);
+        await previewPage.fillActivityQuestions(answersArr);
     }
 
-    async clickOnReportButtonWithGenerateState(){
+    async addOnLineActivityAndFill(acronym, answersArr){
+        await this.addOnlineActivity(acronym);
+        const nextIndex = await this.countActivities() - 1;
+        console.log('nextIndex = ', nextIndex);
+        await this.fillActivity(nextIndex, answersArr);
+    }
+
+    // -----------------------------------------------------
+    // Report button
+
+    async clickOnReportButton(){
         await this.reportButton.click();
-        // will open new tab with print page
+        await this.waitForSelectorHidden('#'+this.reportButton.id);
+    }
+
+    async clickOnReportButtonAndUpdateId(expectedNextState){
+        const currState = this.reportButton.state;
+        await this.clickOnReportButton();
+        let element = await this.waitForSelector('#'+expectedNextState);
+        //console.log(`element '#${nextState}' was found?`, element!==undefined);//.
+        if(!element){
+            const realState = Object.entries(reportButtonStateIds).filter( (state) => (state !== currState && state !== expectedNextState));
+            await this.reportButton.setId(realState);
+            throw `New state of dynamic element should be '${expectedNextState}', but this state was not found.`;
+        }
+        await this.reportButton.setId(expectedNextState);
     }
 
 }

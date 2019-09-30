@@ -35,6 +35,10 @@ class PageExtended {
     // ----------------------------------------------------------
     // Getters
 
+    get IamAOtusPage(){
+        return (this.typeCode === typeCodes.OTUS);
+    }
+
     get errorLogger(){
         return errorLogger;
     }
@@ -121,13 +125,23 @@ class PageExtended {
         await utils.wait.forMilliseconds(milliseconds);
     }
 
-    // type ---------------------------------------------------------------------
+    // type --------------------------------------------------------------
 
     async typeWithWait(selector, text){
-        //console.log(`lets type '${text}' on ${selector}`);//.
-        let element = await this.page.waitForSelector(selector, {timeout: WAIT_FOR_SELECTOR_TIMEOUT});
-        await element.type(text);
-        //console.log('\ttyped on ' + selector);//.
+        try {
+            let element = await this.page.waitForSelector(selector, {timeout: WAIT_FOR_SELECTOR_TIMEOUT});
+            await element.type(text);
+            if(LOG_NAVIGATION_ACTIONS) {
+                console.log('type on ' + selector);//.
+            }
+        }
+        catch (e) {
+            if(LOG_NAVIGATION_ACTIONS) {
+                console.log('ERROR at type on ' + selector);//.
+                await this.hasElementSelector(selector);//.
+            }
+            throw e;
+        }
     }
 
     // click -----------------------------------------------------------

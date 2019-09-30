@@ -1,11 +1,11 @@
 const {DialogParent, selectors} = require('./DialogParent');
-
+/*
 // for Otus Studio (at Otus, reverse)
-const actionButtonIndex = {
+const actionButtonIndexAtOtusStudio = {
     CANCEL: 0,
     SAVE: 1
 };
-
+*/
 const NUM_DEFAULT_ACTION_BUTTONS = 2; // entries of actionButtonIndex
 
 // ***********************************************
@@ -14,7 +14,7 @@ class Dialog extends DialogParent {
 
     constructor(pageExt){
         super(pageExt);
-        this.saveButtonId = '';
+        this.okButtonId = '';
         this.cancelButtonId = '';
         this.customizeActionButtonIds = []; // [<...>, CANCELAR, SALVAR]
     }
@@ -22,17 +22,24 @@ class Dialog extends DialogParent {
     async waitForOpen() {
         const allButtonIds = await super.waitForOpen();
         let numButtons = allButtonIds.length;
-        this.saveButtonId = allButtonIds[numButtons-1];
-        this.cancelButtonId = allButtonIds[numButtons-2];
+        //console.log(allButtonIds);//.
+
+        let okButtonIndex = numButtons-2,
+            cancelButtonIndex = numButtons-1;
+        if(!this.pageExt.IamAOtusPage){
+            cancelButtonIndex = numButtons-2;
+            okButtonIndex = numButtons-1;
+        }
+        this.okButtonId = allButtonIds[okButtonIndex];
+        this.cancelButtonId = allButtonIds[cancelButtonIndex];
 
         if(numButtons > NUM_DEFAULT_ACTION_BUTTONS){
             this.customizeActionButtonIds = allButtonIds.slice(0, numButtons-2);
         }
     }
 
-    async clickOnSaveButton(){
-        await this.waitForOpen();
-        await this.pageExt.clickWithWait(`[id='${this.saveButtonId}']`);
+    async clickOnOkButton(){
+        await this.pageExt.clickWithWait(`[id='${this.okButtonId}']`);
         try {
             await this.waitForClose();
         }
@@ -43,9 +50,18 @@ class Dialog extends DialogParent {
     }
 
     async clickOnCancelButton(){
-        await this.waitForOpen();
         await this.pageExt.clickWithWait(`[id='${this.cancelButtonId}']`);
         await this.waitForClose();
+    }
+
+    async waitForOpenAndClickOnOkButton(){
+        await this.waitForOpen();
+        await this.clickOnOkButton();
+    }
+
+    async waitForOpenAndClickOnCancelButton(){
+        await this.waitForOpen();
+        await this.clickOnCancelButton();
     }
 
     async clickOnCustomizedActionButton(buttonLabel) {

@@ -77,14 +77,15 @@ class ErrorLogger {
 
     exportTestResultLog(){
         const testPath = getTestPath(this.specArray[0]); // any spec from current suite works to get testPath
+        const testLocalPath = testPath.replace(process.cwd(), '.');
         const fileName = fileHandler.getFileName(testPath);
-        const path = process.cwd() + process.env.TEST_RESULTS_LOCAL_DIR_PATH + '/' + fileName;
+        let path = process.cwd() + process.env.TEST_RESULTS_LOCAL_DIR_PATH + '/' + fileName;
 
         console.log('*************************************\nEnd of test suite of file', fileName);
         const numFails = this.wrongAssertionLogs.length;
 
         try {
-            let content = 'Test file: ' + testPath + '\n\n';
+            let content = 'Test file: ' + testLocalPath + '\n\n';
 
             if(numFails === 0){
                 content += 'All tests passed.';
@@ -99,7 +100,7 @@ class ErrorLogger {
             fileHandler.write(path, content);
         }
         catch (err) {
-            console.error(`Error at write test result (numFails = ${numFails}) at test path ${testPath}\n`, err);
+            console.error(`Error at write test result (numFails = ${numFails}) at test path ${testLocalPath}\n`, err);
         }
         finally {
             this.reset();

@@ -147,7 +147,7 @@ class Question extends PageElement {
 
     async delete(){
         let dialog = await this.openOption(selectors.menu.DELETE_OPTION);
-        await dialog.clickOnSaveButton();
+        await dialog.waitForOpenAndClickOnOkButton();
     }
 
     // ------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ class Question extends PageElement {
             moveCriteriaIndex.INICIO,
             selectors.moveQuestionDialog.CRITERIA_OPTION_ATTRIBUTE);
         await optionSelector.waitCloseForFirstTime();
-        await dialog.clickOnSaveButton();
+        await dialog.waitForOpenAndClickOnOkButton();
 
         const myNewNumber = 1;
         let questionOfMyNewSupposedPosition = await Question.getInstanceAndInit(this.pageExt, myNewNumber);
@@ -185,7 +185,7 @@ class Question extends PageElement {
             newPrevNeighborQuestionNumber-1,
             selectors.moveQuestionDialog.QUESTION_POSITION_OPTION_ATTRIBUTE);
         await optionSelector.waitClose();
-        await dialog.clickOnSaveButton();
+        await dialog.waitForOpenAndClickOnOkButton();
     }
 
     async moveToAfterAndReset(newPrevNeighborQuestionNumber){

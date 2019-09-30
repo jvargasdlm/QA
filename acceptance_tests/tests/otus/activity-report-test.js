@@ -3,7 +3,7 @@ const lib = require('../../code/otus/lib');
 let browser, suiteArray=[], errorLogger;        // for all tests
 let pageOtus, selectors;                        // only for otus tests
 let activitiesPage, reportButtonStateIds;
-const useOtus607=true;//.
+const useOtus607=false;//.
 
 beforeAll(async () => {
     [browser, pageOtus, errorLogger, selectors] = await lib.doBeforeAll(suiteArray);
@@ -13,7 +13,7 @@ beforeAll(async () => {
     });
 
     if(!useOtus607) {//.
-        await openParticipantActivities('5078934');
+        await openParticipantActivities('5001007');
     }//.
 });
 
@@ -33,9 +33,9 @@ afterAll(async () => {
 
 // *****************************************************************
 // Specific modules for this suite test
-const ActivitiesPage = require('../../code/otus/classes/ActivitiesPage');
-const PrintTabPage   = require('../../code/otus/classes/PrintTabPage');
-const ReportPage     = require('../../code/otus/classes/ReportPage');
+const ActivitiesPage         = require('../../code/otus/classes/ActivitiesPage');
+const ActivityQuestionAnswer = require('../../code/otus/classes/ActivityQuestionAnswer');
+const ReportPage             = require('../../code/otus/classes/ReportPage');
 
 // *****************************************************************
 // Auxiliar functions
@@ -47,21 +47,23 @@ async function openParticipantActivities(recruitmentNumber){
     reportButtonStateIds = activitiesPage.reportButton.allStateIds;
 }
 
-async function savePdfReport(pdfFilenameNoExtension){
-    //await pageOtus.clickWithWait(openPrintWindowButtonSelector); //"button[ng-click='$ctrl.generateReport(report)']"
-    await pageOtus.waitForMilliseconds(1000);
-    const printTabPage = new PrintTabPage(pageOtus.page);
-    await printTabPage.savePdf(pdfFilenameNoExtension);
-    //await pageOtus.waitLoad();
-}
-
 async function extractDataFromReportPage(){
     const targets = await browser.targets();
     let lastTarget = targets[targets.length-1];
     let newPage = await lastTarget.page();
     const reportPage = new ReportPage(newPage);
-    await reportPage.extractInfo();
+    const dataObj = await reportPage.extractInfo();
     await reportPage.close();
+    return dataObj;
+}
+
+async function dialogGenerateButtonIsDisabled(buttonId){
+    let disabledAttrValue = await activitiesPage.page.evaluate((buttonId) => {
+        let element = document.body.querySelector('#'+buttonId);
+        return element.getAttribute('disabled');
+    }, buttonId);
+    console.log('disabledAttrValue = ', disabledAttrValue);//.
+    return (disabledAttrValue === 'disabled');
 }
 
 // *****************************************************************
@@ -90,23 +92,39 @@ Então o sistema não deve mostrar o botão para gerar o relatório
 
 suiteArray = [
 
-    describe('Temp Test', () => {
+    xdescribe('Temp Test', () => {
 
-        test('Open window print', async() => {
+        xtest('Open window print', async() => {
             await pageOtus.openParticipantFromHomePage('5078934');
             await pageOtus.clickAfterFindInList("button[ng-click='report.expandAndCollapse()']", 7);
             await pageOtus.clickWithWait("button[ng-click='$ctrl.generateReport(report)']");
             await pageOtus.waitForMilliseconds(2000);
             await extractDataFromReportPage();
         });
+
+        xtest('Add and fill activity', async() => {
+            const types = ActivityQuestionAnswer.dataTypes;
+            const answersArr = [
+                new ActivityQuestionAnswer(types.text, '20'),
+                new ActivityQuestionAnswer(types.date, '30/09/2019'),
+                new ActivityQuestionAnswer(types.singleOption, 'PUNHO'),
+                new ActivityQuestionAnswer(types.date, '02/11/2019'),
+                new ActivityQuestionAnswer(types.time, '19:05'),
+                new ActivityQuestionAnswer(types.date, '15/11/2019'),
+                new ActivityQuestionAnswer(types.time, '20:00')
+            ];
+            await activitiesPage.addOnLineActivityAndFill('ACTA', answersArr);
+            //await activitiesPage.fillActivity(1, answersArr);
+        });
+        
     }),
 
     xdescribe('Activities Report Generation - Scenario #3: Not exactly selecting 1 activity', () => {
 
         async function checkReportButtonIsHidden(firstActivityCheckboxIndex, secondActivityCheckboxIndex){
             await activitiesPage.selectActivityCheckbox(firstActivityCheckboxIndex);
-            await activitiesPage.selectActivityCheckbox(secondActivityCheckboxIndex);
             await activitiesPage.initReportButton();
+            await activitiesPage.selectActivityCheckbox(secondActivityCheckboxIndex);
             const isHidden = await activitiesPage.reportButton.isHidden();
             try {
                 expect(isHidden).toBeTrue();
@@ -128,16 +146,17 @@ suiteArray = [
 
     xdescribe('Activities Report Generation - Scenario #1: A set of variables meet the previously defined values', () => {
 
-        async function generateReportAndSavePdf(activityCheckboxIndex, pdfFilenameNoExtension){
+        async function generateReportAndGetData(activityCheckboxIndex){
             await activitiesPage.selectActivityCheckbox(activityCheckboxIndex);
             await activitiesPage.initReportButton();
-            await activitiesPage.clickOnReportButtonWithLoadState();
-            await activitiesPage.clickOnReportButtonWithGenerateState();
-            await savePdfReport(pdfFilenameNoExtension);
+            await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.GENERATE); // load state
+            await activitiesPage.clickOnReportButton();
+            const dataObj = await extractDataFromReportPage();
+            console.log(JSON.stringify(dataObj, null, 4));//.
         }
 
         test('1.1 Set of variables ONLY from the activity', async() => {
-            await generateReportAndSavePdf(0, 'testCase_1-1');
+            await generateReportAndGetData(0);
         });
 
         xtest('1.2 Set of variables ONLY from other activities', async() => {
@@ -150,17 +169,63 @@ suiteArray = [
 
     }),
 
-    xdescribe('Activities Report Generation - Scenario #2: A set of variables DO NOT meet the previously defined values', () => {
+    xdescribe('Activities Report Generation - Scenario #1.5: A set of variables PARTIALLY meets previously set values', () => {
+
+        async function generateReportAndGetData(activityCheckboxIndex, activityData){
+            await activitiesPage.selectActivityCheckbox(activityCheckboxIndex);
+            await activitiesPage.initReportButton();
+            await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.PENDING_INFO); // load state
+            await activitiesPage.clickOnReportButton();
+            // open dialog
+            let dialog = activitiesPage.getDialog();
+            await dialog.waitForOpen();
+            const generateButtonIsDisable = await dialogGenerateButtonIsDisabled(dialog.okButtonId);
+            await dialog.clickOnOkButton();
+            expect(generateButtonIsDisable).toBeFalse();
+
+            const dataObj = await extractDataFromReportPage();
+            console.log(JSON.stringify(dataObj, null, 4));//.
+            //.
+        }
+
+        test('1.1 Set of variables ONLY from the activity', async() => {
+            await generateReportAndGetData(0);
+        });
+
+        xtest('1.2 Set of variables ONLY from other activities', async() => {
+
+        });
+
+        xtest('1.3 Set of variables from the activity AND other activities', async() => {
+
+        });
+
+    }),
+
+    describe('Activities Report Generation - Scenario #2: A set of variables DOES NOT meet previously set values', () => {
+
+        async function clickReportButtonAndWaitDialogForClose(activityCheckboxIndex){
+            await activitiesPage.selectActivityCheckbox(activityCheckboxIndex);
+            await activitiesPage.initReportButton();
+            await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.PENDING_INFO); // load state
+            await activitiesPage.clickOnReportButton(); // pending state
+            // open dialog
+            let dialog = activitiesPage.getDialog();
+            await dialog.waitForOpen();
+            const generateButtonIsDisable = await dialogGenerateButtonIsDisabled(dialog.okButtonId);
+            await dialog.clickOnCancelButton();
+            expect(generateButtonIsDisable).toBeTrue();
+        }
 
         test('2.1 Set of variables ONLY from the activity', async() => {
+            await clickReportButtonAndWaitDialogForClose(0);
+        });
+
+        xtest('2.2 Set of variables ONLY from other activities', async() => {
 
         });
 
-        test('2.2 Set of variables ONLY from other activities', async() => {
-
-        });
-
-        test('2.3 Set of variables from the activity AND other activities', async() => {
+        xtest('2.3 Set of variables from the activity AND other activities', async() => {
 
         });
 

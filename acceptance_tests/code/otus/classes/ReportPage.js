@@ -13,10 +13,12 @@ class ReportPage extends PageOtus {
     }
 
     async extractInfo(){
-        const participantInfo = await this.extractParticipantInfo();
-        const values = await this.extractValues();
-        console.log(participantInfo);
-        console.log(values);
+        //const participantInfo = await this.extractParticipantInfo();
+        //const values = await this.extractValues();
+        return {
+            participantInfo: await this.extractParticipantInfo(),
+            values: await this.extractValues()
+        }
     }
 
     async extractParticipantInfo(){

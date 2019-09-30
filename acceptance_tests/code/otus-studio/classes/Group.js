@@ -59,13 +59,13 @@ class Group extends PageElement {
         const firstQuestion = this.questions[0];
         await firstQuestion.clickOnGroupItemButton();
         const dialog = new Dialog(this.pageExt);
-        await dialog.clickOnSaveButton();
+        await dialog.waitForOpenAndClickOnOkButton();
         await firstQuestion.initGroupItem();
     }
 
     async cancelEdition(){
         const dialog = new Dialog(this.pageExt);
-        await dialog.clickOnCancelButton();
+        await dialog.waitForOpenAndClickOnCancelButton();
     }
 
     async create(firstQuestion, lastQuestion) {
