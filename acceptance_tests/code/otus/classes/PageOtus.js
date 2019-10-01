@@ -115,6 +115,13 @@ class PageOtus extends PageExtended {
         await this.waitLoad();
     }
 
+    async goToParticipantHomePage(){
+        await this.clickOnMainMenuButton();
+        const button = (await this.page.$$(selectors.sidenav.HOME_BUTTON))[1];
+        await button.click();
+        await this.waitLoad();
+    }
+
     async openParticipantActivitiesMenu(){
         await this.clickOnMainMenuButton();
         await this.clickWithWait(selectors.sidenav.ATIVIDADES_BUTTON);

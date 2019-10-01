@@ -3,18 +3,10 @@ const lib = require('../../code/otus/lib');
 let browser, suiteArray=[], errorLogger;        // for all tests
 let pageOtus, selectors;                        // only for otus tests
 let activitiesPage, reportButtonStateIds;
-const useOtus607=false;//.
 
 beforeAll(async () => {
     [browser, pageOtus, errorLogger, selectors] = await lib.doBeforeAll(suiteArray);
-
-    browser.on('targetcreated', async(target) => {
-        console.log(`Created target type (${target.type()}) url=(${target.url()})\n`);//, target._targetInfo);
-    });
-
-    if(!useOtus607) {//.
-        await openParticipantActivities('5001007');
-    }//.
+    await openParticipantActivities('5001007');
 });
 
 beforeEach(async () => {
@@ -52,8 +44,9 @@ async function extractDataFromReportPage(){
     let lastTarget = targets[targets.length-1];
     let newPage = await lastTarget.page();
     const reportPage = new ReportPage(newPage);
-    const dataObj = await reportPage.extractInfo();
+    const dataObj = await reportPage.extractInfoFromActivityReport();
     await reportPage.close();
+    console.log(JSON.stringify(dataObj, null, 4));//.
     return dataObj;
 }
 
@@ -62,7 +55,6 @@ async function dialogGenerateButtonIsDisabled(buttonId){
         let element = document.body.querySelector('#'+buttonId);
         return element.getAttribute('disabled');
     }, buttonId);
-    console.log('disabledAttrValue = ', disabledAttrValue);//.
     return (disabledAttrValue === 'disabled');
 }
 
@@ -90,16 +82,35 @@ E a quantidade de atividades selecionadas (checkbox) é diferente a 1
 Então o sistema não deve mostrar o botão para gerar o relatório
  */
 
+/*
+Existe pendência?
+    1. nenhuma
+    2. parcial
+        2.1 da própria atividade
+        2.2 de outra(s) atividade(s)
+        2.3 ambos
+    3. total
+        3.1 da própria atividade
+        3.2 de outra(s) atividade(s)
+        3.3 ambos
+*/
+
 suiteArray = [
 
-    xdescribe('Temp Test', () => {
+    describe('Temp Test', () => {
 
-        xtest('Open window print', async() => {
-            await pageOtus.openParticipantFromHomePage('5078934');
-            await pageOtus.clickAfterFindInList("button[ng-click='report.expandAndCollapse()']", 7);
+        test('Open another report page', async() => {
+            await pageOtus.goToParticipantHomePage();
+            await pageOtus.clickAfterFindInList("button[ng-click='report.expandAndCollapse()']", 0);
             await pageOtus.clickWithWait("button[ng-click='$ctrl.generateReport(report)']");
-            await pageOtus.waitForMilliseconds(2000);
-            await extractDataFromReportPage();
+            // extract report info
+            const targets = await browser.targets();
+            let lastTarget = targets[targets.length-1];
+            let newPage = await lastTarget.page();
+            const reportPage = new ReportPage(newPage);
+            const dataObj = await reportPage.extractInfoFromExamReport();
+            await reportPage.close();
+            console.log(JSON.stringify(dataObj, null, 4));//.
         });
 
         xtest('Add and fill activity', async() => {
@@ -116,7 +127,7 @@ suiteArray = [
             await activitiesPage.addOnLineActivityAndFill('ACTA', answersArr);
             //await activitiesPage.fillActivity(1, answersArr);
         });
-        
+
     }),
 
     xdescribe('Activities Report Generation - Scenario #3: Not exactly selecting 1 activity', () => {
@@ -144,7 +155,7 @@ suiteArray = [
 
     }),
 
-    xdescribe('Activities Report Generation - Scenario #1: A set of variables meet the previously defined values', () => {
+    xdescribe('Activities Report Generation - Scenario #1: A set of variables meets the previously defined values', () => {
 
         async function generateReportAndGetData(activityCheckboxIndex){
             await activitiesPage.selectActivityCheckbox(activityCheckboxIndex);
@@ -152,11 +163,10 @@ suiteArray = [
             await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.GENERATE); // load state
             await activitiesPage.clickOnReportButton();
             const dataObj = await extractDataFromReportPage();
-            console.log(JSON.stringify(dataObj, null, 4));//.
         }
 
         test('1.1 Set of variables ONLY from the activity', async() => {
-            await generateReportAndGetData(0);
+            await generateReportAndGetData(1);
         });
 
         xtest('1.2 Set of variables ONLY from other activities', async() => {
@@ -202,7 +212,7 @@ suiteArray = [
 
     }),
 
-    describe('Activities Report Generation - Scenario #2: A set of variables DOES NOT meet previously set values', () => {
+    xdescribe('Activities Report Generation - Scenario #2: A set of variables DOES NOT meet previously set values', () => {
 
         async function clickReportButtonAndWaitDialogForClose(activityCheckboxIndex){
             await activitiesPage.selectActivityCheckbox(activityCheckboxIndex);
