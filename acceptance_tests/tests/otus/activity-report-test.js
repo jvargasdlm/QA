@@ -25,9 +25,9 @@ afterAll(async () => {
 
 // *****************************************************************
 // Specific modules for this suite test
-const ActivitiesPage         = require('../../code/otus/classes/ActivitiesPage');
-const ActivityQuestionAnswer = require('../../code/otus/classes/ActivityQuestionAnswer');
-const ReportPage             = require('../../code/otus/classes/ReportPage');
+const ActivitiesPage                = require('../../code/otus/classes/ActivitiesPage');
+const ActivityQuestionAnswer        = require('../../code/otus/classes/ActivityQuestionAnswer');
+const {ReportPage, reportItemTypes} = require('../../code/otus/classes/ReportPage');
 
 // *****************************************************************
 // Auxiliar functions
@@ -43,8 +43,8 @@ async function extractDataFromReportPage(){
     const targets = await browser.targets();
     let lastTarget = targets[targets.length-1];
     let newPage = await lastTarget.page();
-    const reportPage = new ReportPage(newPage);
-    const dataObj = await reportPage.extractInfoFromActivityReport();
+    const reportPage = new ReportPage(newPage, reportItemTypes.activity);
+    const dataObj = await reportPage.extractInfo();
     await reportPage.close();
     console.log(JSON.stringify(dataObj, null, 4));//.
     return dataObj;
@@ -107,8 +107,8 @@ suiteArray = [
             const targets = await browser.targets();
             let lastTarget = targets[targets.length-1];
             let newPage = await lastTarget.page();
-            const reportPage = new ReportPage(newPage);
-            const dataObj = await reportPage.extractInfoFromExamReport();
+            const reportPage = new ReportPage(newPage, reportItemTypes.exam);
+            const dataObj = await reportPage.extractInfo();
             await reportPage.close();
             console.log(JSON.stringify(dataObj, null, 4));//.
         });

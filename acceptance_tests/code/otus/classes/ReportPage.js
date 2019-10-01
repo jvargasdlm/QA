@@ -8,16 +8,21 @@ const selectors = {
 
 class ReportPage extends PageOtus {
 
-    constructor(page){
+    constructor(page, reportItemType){
         super(page);
+        this.reportItemType = reportItemType;
     }
 
-    async extractInfoFromExamReport(){
-        return extractInfoToReportItem(await extractInfo(this.page), ExamReportItem);
-    }
-
-    async extractInfoFromActivityReport(){
-        return extractInfoToReportItem(await extractInfo(this.page), ActivityReportItem);
+    async extractInfo(){
+        let extractedInfo = {
+            participantInfo: await extractParticipantInfo(this.page),
+            items: await extractItems(this.page)
+        };
+        const ReportItemClass = this.reportItemType;
+        for (let i = 0; i < extractedInfo.items.length; i++) {
+            extractedInfo.items[i] = new ReportItemClass(extractedInfo.items[i]);
+        }
+        return extractedInfo;
     }
 }
 
@@ -50,20 +55,6 @@ async function extractItems(page){
     }, selectors.ITEMS);
 }
 
-async function extractInfo(page){
-    return {
-        participantInfo: await extractParticipantInfo(page),
-        items: await extractItems(page)
-    }
-}
-
-async function extractInfoToReportItem(extractedInfo, ReportItemClass){
-    for (let i = 0; i < extractedInfo.items.length; i++) {
-        extractedInfo.items[i] = new ReportItemClass(extractedInfo.items[i]);
-    }
-    return extractedInfo;
-}
-
 // ---------------------------------------------------------------
 
 class ExamReportItem {
@@ -86,5 +77,10 @@ class ActivityReportItem {
     }
 }
 
+const reportItemTypes = {
+    exam: ExamReportItem,
+    activity: ActivityReportItem
+};
+
 // **************************************************************
-module.exports = ReportPage;
+module.exports = {ReportPage, reportItemTypes};
