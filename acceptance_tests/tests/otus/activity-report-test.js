@@ -25,15 +25,16 @@ afterAll(async () => {
 
 // *****************************************************************
 // Specific modules for this suite test
-const ActivitiesPage                = require('../../code/otus/classes/ActivitiesPage');
-const ActivityQuestionAnswer        = require('../../code/otus/classes/ActivityQuestionAnswer');
-const {ReportPage, reportItemTypes} = require('../../code/otus/classes/ReportPage');
+const ActivitiesPage          = require('../../code/otus/classes/ActivitiesPage');
+const ActivityQuestionAnswer  = require('../../code/otus/classes/ActivityQuestionAnswer');
+const ActivityReportPage      = require('../../code/otus/classes/ActivityReportPage');
+const ExamReportPage          = require('../../code/otus/classes/ExamReportPage');//.
 
 // *****************************************************************
 // Auxiliar functions
 
-async function openParticipantActivities(recruitmentNumber){
-    await pageOtus.openParticipantFromHomePage(recruitmentNumber);
+async function openParticipantActivities(recruitmentNumberOrName){
+    await pageOtus.openParticipantFromHomePage(recruitmentNumberOrName);
     await pageOtus.openParticipantActivitiesMenu();
     activitiesPage = new ActivitiesPage(pageOtus.page);
     reportButtonStateIds = activitiesPage.reportButton.allStateIds;
@@ -43,7 +44,7 @@ async function extractDataFromReportPage(){
     const targets = await browser.targets();
     let lastTarget = targets[targets.length-1];
     let newPage = await lastTarget.page();
-    const reportPage = new ReportPage(newPage, reportItemTypes.activity);
+    const reportPage = new ActivityReportPage(newPage);
     const dataObj = await reportPage.extractInfo();
     await reportPage.close();
     console.log(JSON.stringify(dataObj, null, 4));//.
@@ -99,7 +100,7 @@ suiteArray = [
 
     describe('Temp Test', () => {
 
-        test('Open another report page', async() => {
+        test('Open exam report page', async() => {
             await pageOtus.goToParticipantHomePage();
             await pageOtus.clickAfterFindInList("button[ng-click='report.expandAndCollapse()']", 0);
             await pageOtus.clickWithWait("button[ng-click='$ctrl.generateReport(report)']");
@@ -107,17 +108,17 @@ suiteArray = [
             const targets = await browser.targets();
             let lastTarget = targets[targets.length-1];
             let newPage = await lastTarget.page();
-            const reportPage = new ReportPage(newPage, reportItemTypes.exam);
+            const reportPage = new ExamReportPage(newPage);
             const dataObj = await reportPage.extractInfo();
             await reportPage.close();
             console.log(JSON.stringify(dataObj, null, 4));//.
         });
 
-        xtest('Add and fill activity', async() => {
+        xtest('Add and fill activity ACTA', async() => {
             const types = ActivityQuestionAnswer.dataTypes;
             const answersArr = [
                 new ActivityQuestionAnswer(types.text, '20'),
-                new ActivityQuestionAnswer(types.date, '30/09/2019'),
+                new ActivityQuestionAnswer(types.date, '24/12/2019'),
                 new ActivityQuestionAnswer(types.singleOption, 'PUNHO'),
                 new ActivityQuestionAnswer(types.date, '02/11/2019'),
                 new ActivityQuestionAnswer(types.time, '19:05'),
@@ -126,6 +127,27 @@ suiteArray = [
             ];
             await activitiesPage.addOnLineActivityAndFill('ACTA', answersArr);
             //await activitiesPage.fillActivity(1, answersArr);
+        });
+
+        xtest('Add and fill activity ELEA', async() => {
+            const types = ActivityQuestionAnswer.dataTypes;
+            const answersArr = [
+                new ActivityQuestionAnswer(types.singleOption, 'Hospital'),
+                // Q1.1
+                new ActivityQuestionAnswer(types.number, '2270544'),
+                new ActivityQuestionAnswer(types.text, 'HOSPITAL SAO VICENTE DE PAULO'),
+                new ActivityQuestionAnswer(types.singleOption, 'Localizado e acesso autorizado'),
+
+                new ActivityQuestionAnswer(types.singleOption, 'Não se aplica nesta investigação'), //1.2
+                new ActivityQuestionAnswer(types.singleOption, 'Não'), //1.3
+                new ActivityQuestionAnswer(types.singleOption, 'Não'), //1.4
+                new ActivityQuestionAnswer(types.singleOption, 'Não. Inferior a 24h e NÃO é procedimento cardiovascular de interesse.'), //1.5
+                new ActivityQuestionAnswer(types.singleOption, 'Não'), //1.6
+                new ActivityQuestionAnswer(types.singleOption, 'Sim'), //12
+                new ActivityQuestionAnswer(types.singleOption, 'Não') //13
+            ];
+            await activitiesPage.addOnLineActivityAndFill('ELEA', answersArr);
+            //await activitiesPage.fillActivity('ELEA', answersArr);
         });
 
     }),
@@ -165,16 +187,8 @@ suiteArray = [
             const dataObj = await extractDataFromReportPage();
         }
 
-        test('1.1 Set of variables ONLY from the activity', async() => {
-            await generateReportAndGetData(1);
-        });
-
-        xtest('1.2 Set of variables ONLY from other activities', async() => {
-
-        });
-
-        xtest('1.3 Set of variables from the activity AND other activities', async() => {
-
+        test('1. Set of variables ONLY from the activity', async() => {
+            await generateReportAndGetData(2);
         });
 
     }),

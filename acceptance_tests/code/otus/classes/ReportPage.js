@@ -8,26 +8,25 @@ const selectors = {
 
 class ReportPage extends PageOtus {
 
-    constructor(page, reportItemType){
+    constructor(page){
         super(page);
-        this.reportItemType = reportItemType;
+    }
+
+    static get selectors(){
+        return selectors;
     }
 
     async extractInfo(){
-        let extractedInfo = {
+        return {
             participantInfo: await extractParticipantInfo(this.page),
-            items: await extractItems(this.page)
+            items: await this.extractItems()
         };
-        const ReportItemClass = this.reportItemType;
-        for (let i = 0; i < extractedInfo.items.length; i++) {
-            extractedInfo.items[i] = new ReportItemClass(extractedInfo.items[i]);
-        }
-        return extractedInfo;
     }
+
 }
 
 // **************************************************************
-// Private functions and classes
+// Private functions
 
 async function extractParticipantInfo(page){
     return await page.evaluate((selectors) => {
@@ -42,45 +41,6 @@ async function extractParticipantInfo(page){
     }, selectors);
 }
 
-async function extractItems(page){
-    return await page.evaluate((valuesSelector) => {
-        let result = [];
-        const elements = Array.from(document.body.querySelectorAll(valuesSelector));
-        for (let i = 0; i < elements.length; i++) {
-            let elementParts = Array.from(elements[i].querySelectorAll('p'));
-            let innerTextArr = elementParts.map( (elem) => elem.innerText);
-            result.push(innerTextArr);
-        }
-        return result;
-    }, selectors.ITEMS);
-}
-
-// ---------------------------------------------------------------
-
-class ExamReportItem {
-
-    constructor(innerTextArr){
-        this.title = innerTextArr[0];
-        let [subtitle, val] = innerTextArr[1].split(':');
-        let [empty, value, unit] = val.split(' ');
-        this.subtitle = subtitle;
-        this.value = value;
-        this.unit = unit;
-    }
-}
-
-class ActivityReportItem {
-
-    constructor(innerTextArr) {
-        this.questionText = '';
-        this.answer = '';
-    }
-}
-
-const reportItemTypes = {
-    exam: ExamReportItem,
-    activity: ActivityReportItem
-};
-
 // **************************************************************
-module.exports = {ReportPage, reportItemTypes};
+
+module.exports = ReportPage;

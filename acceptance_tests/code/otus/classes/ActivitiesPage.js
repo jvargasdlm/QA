@@ -17,9 +17,11 @@ const selectors = {
         EXCLUIR: "button[aria-label='Excluir']",
         DETALHES: "button[aria-label='Detalhes']"
     },
+    searchFilter: "input[ng-model='$ctrl.filter']",
     bottomMenuButtons: {
         //MANAGER_COMMANDER: "otus-activity-manager-commander",
         ADD: "md-fab-trigger[aria-label='Adicionar atividade']",
+        ACTION_BUTTONS: "md-fab-actions",
         WAIT_VISIBLE_ACTION: "md-fab-actions[aria-hidden='false']",
         ATIVIDADE_ONLINE: "button[aria-label='Atividade online']",
         ATIVIDADE_EM_PAPEL: "button[aria-label='Atividade em papel']"
@@ -62,15 +64,22 @@ class ActivitiesPage extends PageOtus {
         return (await this.page.$$('md-checkbox')).length - 2;
     }
 
+    async searchAndSelectActivity(acronym){
+        await this.typeWithWait(selectors.searchFilter, acronym);
+        await this.waitForMilliseconds(500); // wait for update list
+        await this.selectActivityCheckbox(0);
+    }
+
     async addOnlineActivity(acronym){
         const mySelectors = selectors.bottomMenuButtons;
         await this.clickWithWait(mySelectors.ADD);
+        await this.setHiddenAttributeValue(selectors.bottomMenuButtons.ACTION_BUTTONS, false); // force
+        await this.waitForMilliseconds(500); // without this wait, action buttons don't open
         await this.waitForSelector(mySelectors.WAIT_VISIBLE_ACTION);
         await this.clickWithWait(mySelectors.ATIVIDADE_ONLINE);
         await this.waitLoad();
         // select activity
-        await this.typeWithWait("input[ng-model='$ctrl.filter']", acronym);
-        await this.selectActivityCheckbox(0);
+        await this.searchAndSelectActivity(acronym);
         await this.clickWithWait("button[aria-label='Adicionar']");
         await this.waitLoad();
         // select default category
@@ -83,8 +92,8 @@ class ActivitiesPage extends PageOtus {
         await (this.getCheckbox()).clickAfterFindInList(index);
     }
 
-    async fillActivity(activityCheckBoxIndex, answersArr){
-        await this.selectActivityCheckbox(activityCheckBoxIndex);
+    async fillActivity(acronym, answersArr){
+        await this.searchAndSelectActivity(acronym);
         await this.clickWithWait(selectors.topMenuButtons.PREENCHER_ATIVIDADE);
         const previewPage = new PreviewPage(this.page);
         await previewPage.fillActivityQuestions(answersArr);
@@ -92,9 +101,7 @@ class ActivitiesPage extends PageOtus {
 
     async addOnLineActivityAndFill(acronym, answersArr){
         await this.addOnlineActivity(acronym);
-        const nextIndex = await this.countActivities() - 1;
-        console.log('nextIndex = ', nextIndex);
-        await this.fillActivity(nextIndex, answersArr);
+        await this.fillActivity(acronym, answersArr);
     }
 
     // -----------------------------------------------------

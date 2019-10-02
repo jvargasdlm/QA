@@ -1,8 +1,10 @@
 const dataTypes = {
+    number: 'number',
     text: 'text',
     date: 'date',
     time: 'time',
-    singleOption: 'singleOption'
+    singleOption: 'singleOption',
+    multipleOption: 'multipleOption'
 };
 
 class ActivityQuestionAnswer {
