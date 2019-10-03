@@ -52,6 +52,10 @@ class ErrorLogger {
         return fileHandler.getFileName(getTestPath(this.specArray[0]));
     }
 
+    hasSpec(){
+        return (this.specArray.length > 0);
+    }
+
     reset(){
         this.specArray = [];
         this.specIndex = 0;
@@ -61,6 +65,9 @@ class ErrorLogger {
     resetAndSetSpecArray(suiteArray){
         this.reset();
         setSpecArray(suiteArray, this);
+        if(this.hasSpec()){
+            console.log('Suite array with no tests to run (empty or all skipped).');
+        }
     }
 
     advanceToNextSpec(){
@@ -76,6 +83,9 @@ class ErrorLogger {
     }
 
     exportTestResultLog(){
+        if(!this.hasSpec()){
+            return;
+        }
         const testPath = getTestPath(this.specArray[0]); // any spec from current suite works to get testPath
         const testLocalPath = testPath.replace(process.cwd(), '.');
         const fileName = fileHandler.getFileName(testPath);
