@@ -41,13 +41,22 @@ async function openParticipantActivities(recruitmentNumberOrName){
 }
 
 async function extractDataFromReportPage(){
-    const targets = await browser.targets();
+    let targets = await browser.targets();
     let lastTarget = targets[targets.length-1];
     let newPage = await lastTarget.page();
     const reportPage = new ActivityReportPage(newPage);
+
+    //.
+    const reportPageIsReady = false;
+    if(!reportPageIsReady){
+        await reportPage._replaceContent(['Tem diabetes', 'Está com o pé na cova']);
+    }
+    //.
+
     const dataObj = await reportPage.extractInfo();
-    await reportPage.close();
     console.log(JSON.stringify(dataObj, null, 4));//.
+    await reportPage.closeAsNewTab();
+    await activitiesPage.waitLoad();
     return dataObj;
 }
 
@@ -57,6 +66,52 @@ async function dialogGenerateButtonIsDisabled(buttonId){
         return element.getAttribute('disabled');
     }, buttonId);
     return (disabledAttrValue === 'disabled');
+}
+
+function assertSentences(acronym, foundSentences, mustHaveSentences, canNotHaveSentences){
+    let fail = false;
+
+    for(let sentence of mustHaveSentences){
+        try{
+            expect(foundSentences.includes(sentence)).toBeTrue();
+        }
+        catch (e) {
+            fail = true;
+            console.log(`The report ${acronym} should have the sentence '${sentence}'`);
+        }
+    }
+
+    for(let sentence of canNotHaveSentences){
+        try{
+            expect(foundSentences.includes(sentence)).toBeFalse();
+        }
+        catch (e) {
+            fail = true;
+            console.log(`The report ${acronym} should NOT have the sentence '${sentence}'`);
+        }
+    }
+
+    expect(fail).toBeFalse();
+}
+
+//.
+async function createAndFillACTA(create=false){
+    const types = ActivityQuestionAnswer.dataTypes;
+    const answersArr = [
+        new ActivityQuestionAnswer(types.text, '1'),
+        new ActivityQuestionAnswer(types.date, '24/12/2019'),
+        new ActivityQuestionAnswer(types.singleOption, 'PUNHO'),
+        new ActivityQuestionAnswer(types.date, '02/11/2019'),
+        new ActivityQuestionAnswer(types.time, '19:05'),
+        new ActivityQuestionAnswer(types.date, '15/11/2019'),
+        new ActivityQuestionAnswer(types.time, '20:00')
+    ];
+    if(create){
+        await activitiesPage.addOnLineActivityAndFill('ACTA', answersArr);
+    }
+    else{
+        await activitiesPage.fillActivity('ACTA', answersArr);
+    }
 }
 
 // *****************************************************************
@@ -98,9 +153,9 @@ Existe pendência?
 
 suiteArray = [
 
-    describe('Temp Test', () => {
+    xdescribe('Temp Test', () => {
 
-        test('Open exam report page', async() => {
+        xtest('Open exam report page', async() => {
             await pageOtus.goToParticipantHomePage();
             await pageOtus.clickAfterFindInList("button[ng-click='report.expandAndCollapse()']", 0);
             await pageOtus.clickWithWait("button[ng-click='$ctrl.generateReport(report)']");
@@ -112,21 +167,6 @@ suiteArray = [
             const dataObj = await reportPage.extractInfo();
             await reportPage.close();
             console.log(JSON.stringify(dataObj, null, 4));//.
-        });
-
-        xtest('Add and fill activity ACTA', async() => {
-            const types = ActivityQuestionAnswer.dataTypes;
-            const answersArr = [
-                new ActivityQuestionAnswer(types.text, '20'),
-                new ActivityQuestionAnswer(types.date, '24/12/2019'),
-                new ActivityQuestionAnswer(types.singleOption, 'PUNHO'),
-                new ActivityQuestionAnswer(types.date, '02/11/2019'),
-                new ActivityQuestionAnswer(types.time, '19:05'),
-                new ActivityQuestionAnswer(types.date, '15/11/2019'),
-                new ActivityQuestionAnswer(types.time, '20:00')
-            ];
-            await activitiesPage.addOnLineActivityAndFill('ACTA', answersArr);
-            //await activitiesPage.fillActivity(1, answersArr);
         });
 
         xtest('Add and fill activity ELEA', async() => {
@@ -177,18 +217,40 @@ suiteArray = [
 
     }),
 
-    xdescribe('Activities Report Generation - Scenario #1: A set of variables meets the previously defined values', () => {
+    describe('Activities Report Generation - Scenario #1: A set of variables meets the previously defined values', () => {
 
-        async function generateReportAndGetData(activityCheckboxIndex){
-            await activitiesPage.selectActivityCheckbox(activityCheckboxIndex);
+        async function generateReportAndGetData(acronym, activityCheckboxIndex=0){
+            await activitiesPage.searchAndSelectActivity(acronym, activityCheckboxIndex);
             await activitiesPage.initReportButton();
             await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.GENERATE); // load state
             await activitiesPage.clickOnReportButton();
-            const dataObj = await extractDataFromReportPage();
+            return await extractDataFromReportPage();
         }
 
-        test('1. Set of variables ONLY from the activity', async() => {
+        async function readFinalizedActivityAndGenerateReportToCompareData(acronym, activityCheckboxIndex=0){
+            const answers = await activitiesPage.readFinalizedActivity(acronym, activityCheckboxIndex);
+            console.log(JSON.stringify(answers, null, 4));//.
+            await activitiesPage.goBack();
+            await activitiesPage.waitLoad();
+            const reportDataObj = await generateReportAndGetData(acronym, activityCheckboxIndex);
+            return [answers, reportDataObj];
+        }
+
+        xtest('1. Set of variables ONLY from the activity', async() => {
             await generateReportAndGetData(2);
+        });
+
+        xtest('Temp test CSJ', async() => {
+            await readFinalizedActivityAndGenerateReportToCompareData('CSJ');
+        });
+
+        test('Temp test ACTA', async() => {
+            //await createAndFillACTA();
+            const acronym = 'ACTA';
+            const [answers, reportDataObj] = await readFinalizedActivityAndGenerateReportToCompareData(acronym);
+            assertSentences(acronym, reportDataObj.items,
+                ['Tem diabetes', 'Tireóide ok'],
+                ['Vai morrer', 'Está com o pé na cova']);
         });
 
     }),

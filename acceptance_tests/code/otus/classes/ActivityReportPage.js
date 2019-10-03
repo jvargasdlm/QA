@@ -8,7 +8,17 @@ class ActivityReportPage extends ReportPage {
 
     // TODO
     async extractItems(){
+        this.enableConsoleLog();
+        return await this.page.evaluate((valuesSelector) => {
+            const element = document.body.querySelector(valuesSelector);
+            return element.innerText.split('\n');
+        }, ReportPage.selectors.ITEMS);
+    }
 
+    async _replaceContent(sentencesArr){
+        await this.page.evaluate((itemSelector, sentencesArr) => {
+            document.body.querySelector(itemSelector).innerText = sentencesArr.join('\n');
+        }, ReportPage.selectors.ITEMS, sentencesArr);
     }
 }
 
