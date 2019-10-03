@@ -28,7 +28,7 @@
  
  * ```tests/``` : directory with the test files, organized by the platform directory (which contains a template.js file as an example)
  
- * ```.env.staging```: custom env file, with constants and arguments (show browser, otus login data)
+ * ```.env.staging```: custom env file, with constants that can be setted by parameter (like show browser, otus login data)
  
  * ```init_script.js``` to get and write the login data file, at same directory
  
@@ -51,9 +51,10 @@ If you need reset your login data, run ``` make set_login_data EMAIL=<your email
 
 For run all tests (defined in jest.config): 
 
- * ```make run```to use defult headless option
+ * ```make run``` to use defult headless option
  * ```make show``` to run as headfull (show browser)
-
+ 
+ You can run in custom mode by passing any parameters defined in the file ```.env.staging```. See the ```show``` rule in Makefile to see how do it.
 
 ### Results
 
