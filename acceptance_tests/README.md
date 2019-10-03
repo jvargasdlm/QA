@@ -54,7 +54,7 @@ For run all tests (defined in jest.config):
  * ```make run``` to use defult headless option
  * ```make show``` to run as headfull (show browser)
  
- You can run in custom mode by passing any parameters defined in the file ```.env.staging```. See the ```show``` rule in Makefile to see how do it.
+ You can run in custom mode by passing any parameters defined in the file ```.env.staging```. See the ```show``` rule in ```Makefile``` to see how do it.
 
 ### Results
 
