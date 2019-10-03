@@ -23,6 +23,10 @@ class FileHandler {
         //   name: 'file' }
     }
 
+    static read(path){
+        return fs.readFileSync(path);
+    }
+
     static write(path, content){
         fileSystem.writeFile(path, content, function(err) {
             if(err) {

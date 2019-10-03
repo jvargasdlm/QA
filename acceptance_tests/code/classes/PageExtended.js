@@ -78,6 +78,11 @@ class PageExtended {
         await this.page.close();
     }
 
+    async closeAsNewTab(){
+        await this.page.goto('about:blank');
+        await this.page.close();
+    }
+
     async setDownloadPath(){
         const path = process.cwd() + process.env.DOWNLOADS_LOCAL_DIR_PATH;
         await this.page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: path});
@@ -106,14 +111,19 @@ class PageExtended {
 
     // wait for selector functions ----------------------------------------------
 
-    async waitForSelector(selector){
+    async waitForSelector(selector, timeout=WAIT_FOR_SELECTOR_TIMEOUT){
         try {
-            return await this.page.waitForSelector(selector, {timeout: WAIT_FOR_SELECTOR_TIMEOUT});
+            return await this.page.waitForSelector(selector, {timeout: timeout});
         }
         catch (e) {
-            await this.hasElementSelector(selector);
+            await this.hasElementSelector(selector);//.
             throw e;
         }
+    }
+
+    async waitForSelectorVisible(selector){
+        //await this.pageHasElementSelector(selector);//.
+        return await this.page.waitForSelector(selector, {hidden: false, timeout: WAIT_FOR_SELECTOR_TIMEOUT});
     }
 
     async waitForSelectorHidden(selector){
@@ -295,6 +305,14 @@ class PageExtended {
         let path = './downloads/'+filenameNoExtension+'.html';
         let content = await this.page.evaluate(() => {
             return document.body.innerHTML;
+        });
+        fileHandler.write(path, content);
+    }
+
+    async saveText(filenameNoExtension){
+        let path = './downloads/'+filenameNoExtension+'.txt';
+        let content = await this.page.evaluate(() => {
+            return document.body.innerText;
         });
         fileHandler.write(path, content);
     }
