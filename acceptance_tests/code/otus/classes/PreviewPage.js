@@ -2,6 +2,11 @@ const PageOtus = require('./PageOtus');
 const ActivityQuestionAnswer = require('./ActivityQuestionAnswer');
 
 const selectors = {
+    backCover: {
+        VISIBLE: "otus-survey-back-cover[aria-hidden='false']",
+        START_BUTTON: "button[aria-label='Iniciar']",
+        FINISH_BUTTON: "button[aria-label='Finalizar']"
+    },
     commanderButtons: {
         PREVIOUS_QUESTION: '#previousQuestion',
         CANCEL: '#cancelActivity',
@@ -29,7 +34,7 @@ class PreviewPage extends PageOtus {
     }
 
     async fillActivityQuestions(answersArr){
-        await this.clickWithWait("button[aria-label='Iniciar']");
+        await this.clickWithWait(selectors.backCover.START_BUTTON);
         const inputSelectors = selectors.inputDataType;
         const types = ActivityQuestionAnswer.dataTypes;
 
@@ -51,8 +56,15 @@ class PreviewPage extends PageOtus {
             await this.clickWithWait(selectors.commanderButtons.NEXT_QUESTION);
         }
 
+        try {
+            await this.waitForSelector(selectors.backCover.VISIBLE, 1000);
+        }
+        catch (e) { // has a "thank you" question
+            await this.clickWithWait(selectors.commanderButtons.NEXT_QUESTION);
+        }
+
         // finalize
-        await this.clickWithWait("button[aria-label='Finalizar']");
+        await this.clickWithWait(selectors.backCover.FINISH_BUTTON);
         await this.waitLoad();
     }
 }
