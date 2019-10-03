@@ -1,5 +1,6 @@
 const PageOtus = require('./PageOtus');
 const PreviewPage = require('./PreviewPage');
+const ActivityViewPage = require('./ActivityViewPage');
 const DynamicElement = require('../../classes/DynamicElement');
 
 // ***********************************************
@@ -64,10 +65,32 @@ class ActivitiesPage extends PageOtus {
         return (await this.page.$$('md-checkbox')).length - 2;
     }
 
-    async searchAndSelectActivity(acronym){
+    async selectActivityCheckbox(activityCheckBoxIndex, useFilter=false){
+        let index = activityCheckBoxIndex + 2; // shift 'Todos' and 'Nome' checkboxes
+        if(useFilter){
+            index++; // shift Filter checkbox
+        }
+        await (this.getCheckbox()).clickAfterFindInList(index);
+    }
+
+    async searchAndSelectActivity(acronym, activityCheckboxIndex=0){
         await this.typeWithWait(selectors.searchFilter, acronym);
         await this.waitForMilliseconds(500); // wait for update list
-        await this.selectActivityCheckbox(0);
+        await this.selectActivityCheckbox(activityCheckboxIndex, true);
+    }
+
+    async readFinalizedActivity(acronym, activityCheckboxIndex=0){
+        await this.searchAndSelectActivity(acronym, activityCheckboxIndex);
+        await this.clickWithWait(selectors.topMenuButtons.VISUALIZAR_ATIVIDADE);
+        await this.waitForMilliseconds(500);
+        return await (new ActivityViewPage(this.page)).extractAnswers();
+    }
+
+    async fillActivity(acronym, answersArr, activityCheckboxIndex=0){
+        await this.searchAndSelectActivity(acronym, activityCheckboxIndex);
+        await this.clickWithWait(selectors.topMenuButtons.PREENCHER_ATIVIDADE);
+        const previewPage = new PreviewPage(this.page);
+        await previewPage.fillActivityQuestions(answersArr);
     }
 
     async addOnlineActivity(acronym){
@@ -85,18 +108,6 @@ class ActivitiesPage extends PageOtus {
         // select default category
         await this.clickWithWait("button[aria-label='Adicionar']");
         await this.waitLoad();
-    }
-
-    async selectActivityCheckbox(activityCheckBoxIndex){
-        const index = activityCheckBoxIndex + 2; // add 'Todos' and 'Nome' checkboxes
-        await (this.getCheckbox()).clickAfterFindInList(index);
-    }
-
-    async fillActivity(acronym, answersArr){
-        await this.searchAndSelectActivity(acronym);
-        await this.clickWithWait(selectors.topMenuButtons.PREENCHER_ATIVIDADE);
-        const previewPage = new PreviewPage(this.page);
-        await previewPage.fillActivityQuestions(answersArr);
     }
 
     async addOnLineActivityAndFill(acronym, answersArr){
