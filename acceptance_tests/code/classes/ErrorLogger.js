@@ -75,10 +75,13 @@ class ErrorLogger {
     }
 
     addWrongAssertionLogFromCurrSpec(message){
+        console.error(message);
+        if(!this.hasSpec()){
+            return;
+        }
         const specFullName = getFullNameSplited(this.specArray[this.specIndex]);
         const log = `${specFullName}:\n ${message}`;
         this.wrongAssertionLogs.push(log);
-        console.error(message);
         throw log;
     }
 
