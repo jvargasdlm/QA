@@ -65,7 +65,7 @@ class ErrorLogger {
     resetAndSetSpecArray(suiteArray){
         this.reset();
         setSpecArray(suiteArray, this);
-        if(this.hasSpec()){
+        if(!this.hasSpec()){
             console.log('Suite array with no tests to run (empty or all skipped).');
         }
     }
