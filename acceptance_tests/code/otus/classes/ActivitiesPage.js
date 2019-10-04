@@ -66,11 +66,16 @@ class ActivitiesPage extends PageOtus {
     }
 
     async selectActivityCheckbox(activityCheckBoxIndex, useFilter=false){
-        let index = activityCheckBoxIndex + 2; // shift 'Todos' and 'Nome' checkboxes
-        if(useFilter){
-            index++; // shift Filter checkbox
+        try{
+            let index = activityCheckBoxIndex + 2; // shift 'Todos' and 'Nome' checkboxes
+            if(useFilter){
+                index++; // shift Filter checkbox
+            }
+            await (this.getCheckbox()).clickAfterFindInList(index);
         }
-        await (this.getCheckbox()).clickAfterFindInList(index);
+        catch (e) {
+            this.errorLogger.addWrongAssertionLogFromCurrSpec(`Activity with index=${activityCheckBoxIndex} was not found.`);
+        }
     }
 
     async searchAndSelectActivity(acronym, activityCheckboxIndex=0){
