@@ -19,7 +19,7 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-    //await deleteAllActivitiesCreatedForTests();
+    await deleteAllActivitiesCreatedForTests();
     await errorLogger.exportTestResultLog();
     await browser.close();
 });
@@ -45,9 +45,9 @@ async function openParticipantActivitiesAndCreateTestActivities(){
     activitiesPage = new ActivitiesPage(pageOtus.page);
     reportButtonStateIds = activitiesPage.reportButton.allStateIds;
     // create activities
-    /*for(let acronym of acronymsArr){
+    for(let acronym of acronymsArr){
         await activitiesPage.addOnlineActivity(acronym);
-    }*/
+    }
 }
 
 async function deleteAllActivitiesCreatedForTests(){
