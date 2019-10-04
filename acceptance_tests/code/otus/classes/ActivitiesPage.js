@@ -79,20 +79,6 @@ class ActivitiesPage extends PageOtus {
         await this.selectActivityCheckbox(activityCheckboxIndex, true);
     }
 
-    async readFinalizedActivity(acronym, activityCheckboxIndex=0){
-        await this.searchAndSelectActivity(acronym, activityCheckboxIndex);
-        await this.clickWithWait(selectors.topMenuButtons.VISUALIZAR_ATIVIDADE);
-        await this.waitForMilliseconds(500);
-        return await (new ActivityViewPage(this.page)).extractAnswers();
-    }
-
-    async fillActivity(acronym, answersArr, activityCheckboxIndex=0){
-        await this.searchAndSelectActivity(acronym, activityCheckboxIndex);
-        await this.clickWithWait(selectors.topMenuButtons.PREENCHER_ATIVIDADE);
-        const previewPage = new PreviewPage(this.page);
-        await previewPage.fillActivityQuestions(answersArr);
-    }
-
     async addOnlineActivity(acronym){
         const mySelectors = selectors.bottomMenuButtons;
         await this.clickWithWait(mySelectors.ADD);
@@ -115,10 +101,37 @@ class ActivitiesPage extends PageOtus {
         await this.fillActivity(acronym, answersArr);
     }
 
+    async deleteActivity(acronym, activityCheckboxIndex=0){
+        await this.searchAndSelectActivity(acronym, activityCheckboxIndex);
+        await this.clickWithWait(selectors.topMenuButtons.EXCLUIR);
+        await (this.getDialog()).waitForOpenAndClickOnOkButton();
+    }
+
+    async fillActivity(acronym, answersArr, activityCheckboxIndex=0){
+        await this.searchAndSelectActivity(acronym, activityCheckboxIndex);
+        await this.clickWithWait(selectors.topMenuButtons.PREENCHER_ATIVIDADE);
+        const previewPage = new PreviewPage(this.page);
+        await previewPage.fillActivityQuestions(answersArr);
+    }
+
+    async readFinalizedActivity(acronym, activityCheckboxIndex=0){
+        await this.searchAndSelectActivity(acronym, activityCheckboxIndex);
+        await this.clickWithWait(selectors.topMenuButtons.VISUALIZAR_ATIVIDADE);
+        await this.waitForMilliseconds(500);
+        let answers = await (new ActivityViewPage(this.page)).extractAnswers();
+        await this.goBack();
+        await this.waitLoad();
+        return answers;
+    }
+
     // -----------------------------------------------------
     // Report button
 
     async clickOnReportButton(){
+        await this.reportButton.click();
+    }
+
+    async clickOnReportButtonAndWaitToBeHidden(){
         await this.reportButton.click();
         await this.waitForSelectorHidden('#'+this.reportButton.id);
     }
