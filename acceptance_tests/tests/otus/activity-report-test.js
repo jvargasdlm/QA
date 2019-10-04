@@ -6,7 +6,7 @@ let activitiesPage, reportButtonStateIds;
 
 beforeAll(async () => {
     [browser, pageOtus, errorLogger, selectors] = await lib.doBeforeAll(suiteArray);
-    await openParticipantActivities('5001007');
+    await openParticipantActivitiesAndCreateTestActivities();
 });
 
 beforeEach(async () => {
@@ -19,6 +19,7 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
+    //await deleteAllActivitiesCreatedForTests();
     await errorLogger.exportTestResultLog();
     await browser.close();
 });
@@ -30,14 +31,29 @@ const ActivityQuestionAnswer  = require('../../code/otus/classes/ActivityQuestio
 const ActivityReportPage      = require('../../code/otus/classes/ActivityReportPage');
 const ExamReportPage          = require('../../code/otus/classes/ExamReportPage');//.
 
+// Constants
+const recruitmentNumberOrName = '5001007';
+const acronymsArr = ['ACTA', 'ACTC'];
+const answerDataTypes = ActivityQuestionAnswer.dataTypes;
+
 // *****************************************************************
 // Auxiliar functions
 
-async function openParticipantActivities(recruitmentNumberOrName){
+async function openParticipantActivitiesAndCreateTestActivities(){
     await pageOtus.openParticipantFromHomePage(recruitmentNumberOrName);
     await pageOtus.openParticipantActivitiesMenu();
     activitiesPage = new ActivitiesPage(pageOtus.page);
     reportButtonStateIds = activitiesPage.reportButton.allStateIds;
+    // create activities
+    /*for(let acronym of acronymsArr){
+        await activitiesPage.addOnlineActivity(acronym);
+    }*/
+}
+
+async function deleteAllActivitiesCreatedForTests(){
+    for(let acronym of acronymsArr){
+        await activitiesPage.deleteActivity(acronym);
+    }
 }
 
 async function extractDataFromReportPage(){
@@ -68,6 +84,14 @@ async function dialogGenerateButtonIsDisabled(buttonId){
     return (disabledAttrValue === 'disabled');
 }
 
+async function generateReportAndGetData(acronym, activityCheckboxIndex=0){
+    await activitiesPage.searchAndSelectActivity(acronym, activityCheckboxIndex);
+    await activitiesPage.initReportButton();
+    //await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.GENERATE); // load state
+    await activitiesPage.clickOnReportButton();
+    //return await extractDataFromReportPage();
+}
+
 function assertSentences(acronym, foundSentences, mustHaveSentences, canNotHaveSentences){
     let fail = false;
 
@@ -94,26 +118,6 @@ function assertSentences(acronym, foundSentences, mustHaveSentences, canNotHaveS
     expect(fail).toBeFalse();
 }
 
-//.
-async function createAndFillACTA(create=false){
-    const types = ActivityQuestionAnswer.dataTypes;
-    const answersArr = [
-        new ActivityQuestionAnswer(types.text, '1'),
-        new ActivityQuestionAnswer(types.date, '24/12/2019'),
-        new ActivityQuestionAnswer(types.singleOption, 'PUNHO'),
-        new ActivityQuestionAnswer(types.date, '02/11/2019'),
-        new ActivityQuestionAnswer(types.time, '19:05'),
-        new ActivityQuestionAnswer(types.date, '15/11/2019'),
-        new ActivityQuestionAnswer(types.time, '20:00')
-    ];
-    if(create){
-        await activitiesPage.addOnLineActivityAndFill('ACTA', answersArr);
-    }
-    else{
-        await activitiesPage.fillActivity('ACTA', answersArr);
-    }
-}
-
 // *****************************************************************
 // Tests
 
@@ -136,9 +140,7 @@ E exibir o relatório de pendências num quadro Dialog
 Quando quiser gerar um relatório para fechamento de atividade
 E a quantidade de atividades selecionadas (checkbox) é diferente a 1
 Então o sistema não deve mostrar o botão para gerar o relatório
- */
 
-/*
 Existe pendência?
     1. nenhuma
     2. parcial
@@ -149,11 +151,11 @@ Existe pendência?
         3.1 da própria atividade
         3.2 de outra(s) atividade(s)
         3.3 ambos
-*/
+ */
 
 suiteArray = [
 
-    xdescribe('Temp Test', () => {
+    describe('Temp Test', () => {
 
         xtest('Open exam report page', async() => {
             await pageOtus.goToParticipantHomePage();
@@ -167,27 +169,6 @@ suiteArray = [
             const dataObj = await reportPage.extractInfo();
             await reportPage.close();
             console.log(JSON.stringify(dataObj, null, 4));//.
-        });
-
-        xtest('Add and fill activity ELEA', async() => {
-            const types = ActivityQuestionAnswer.dataTypes;
-            const answersArr = [
-                new ActivityQuestionAnswer(types.singleOption, 'Hospital'),
-                // Q1.1
-                new ActivityQuestionAnswer(types.number, '2270544'),
-                new ActivityQuestionAnswer(types.text, 'HOSPITAL SAO VICENTE DE PAULO'),
-                new ActivityQuestionAnswer(types.singleOption, 'Localizado e acesso autorizado'),
-
-                new ActivityQuestionAnswer(types.singleOption, 'Não se aplica nesta investigação'), //1.2
-                new ActivityQuestionAnswer(types.singleOption, 'Não'), //1.3
-                new ActivityQuestionAnswer(types.singleOption, 'Não'), //1.4
-                new ActivityQuestionAnswer(types.singleOption, 'Não. Inferior a 24h e NÃO é procedimento cardiovascular de interesse.'), //1.5
-                new ActivityQuestionAnswer(types.singleOption, 'Não'), //1.6
-                new ActivityQuestionAnswer(types.singleOption, 'Sim'), //12
-                new ActivityQuestionAnswer(types.singleOption, 'Não') //13
-            ];
-            await activitiesPage.addOnLineActivityAndFill('ELEA', answersArr);
-            //await activitiesPage.fillActivity('ELEA', answersArr);
         });
 
     }),
@@ -217,65 +198,41 @@ suiteArray = [
 
     }),
 
-    describe('Activities Report Generation - Scenario #1: A set of variables meets the previously defined values', () => {
-
-        async function generateReportAndGetData(acronym, activityCheckboxIndex=0){
-            await activitiesPage.searchAndSelectActivity(acronym, activityCheckboxIndex);
-            await activitiesPage.initReportButton();
-            await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.GENERATE); // load state
-            await activitiesPage.clickOnReportButton();
-            return await extractDataFromReportPage();
-        }
-
-        async function readFinalizedActivityAndGenerateReportToCompareData(acronym, activityCheckboxIndex=0){
-            const answers = await activitiesPage.readFinalizedActivity(acronym, activityCheckboxIndex);
-            console.log(JSON.stringify(answers, null, 4));//.
-            await activitiesPage.goBack();
-            await activitiesPage.waitLoad();
+    xdescribe('Activities Report Generation - Scenario #1: A set of variables meets the previously defined values', () => {
+        
+        async function createAndFillActivityGenerateReportAndGetData(acronym, answersArr, mustSatisfyConditions, canNotSatisfyConditions, activityCheckboxIndex=0){
+            await activitiesPage.addOnLineActivityAndFill(acronym, answersArr);
+            //await activitiesPage.fillActivity(acronym, answersArr);
             const reportDataObj = await generateReportAndGetData(acronym, activityCheckboxIndex);
-            return [answers, reportDataObj];
+            assertSentences(acronym, reportDataObj.items, mustSatisfyConditions, canNotSatisfyConditions);
         }
 
         xtest('1. Set of variables ONLY from the activity', async() => {
-            await generateReportAndGetData(2);
-        });
 
-        xtest('Temp test CSJ', async() => {
-            await readFinalizedActivityAndGenerateReportToCompareData('CSJ');
         });
-
-        test('Temp test ACTA', async() => {
-            //await createAndFillACTA();
+        
+        test('Test ACTA', async() => {
             const acronym = 'ACTA';
-            const [answers, reportDataObj] = await readFinalizedActivityAndGenerateReportToCompareData(acronym);
-            assertSentences(acronym, reportDataObj.items,
-                ['Tem diabetes', 'Tireóide ok'],
-                ['Vai morrer', 'Está com o pé na cova']);
+            const answersArr = [
+                new ActivityQuestionAnswer(answerDataTypes.text, '1'),
+                new ActivityQuestionAnswer(answerDataTypes.date, '24/12/2019'),
+                new ActivityQuestionAnswer(answerDataTypes.singleOption, 'PUNHO'),
+                new ActivityQuestionAnswer(answerDataTypes.date, '02/11/2019'),
+                new ActivityQuestionAnswer(answerDataTypes.time, '19:05'),
+                new ActivityQuestionAnswer(answerDataTypes.date, '15/11/2019'),
+                new ActivityQuestionAnswer(answerDataTypes.time, '20:00')
+            ];
+            const mustSatisfyConditions = ['Tem diabetes', 'Tireóide ok'];
+            const canNotSatisfyConditions = ['Vai morrer', 'Está com o pé na cova'];
+            await createAndFillActivityGenerateReportAndGetData(acronym, answersArr, mustSatisfyConditions, canNotSatisfyConditions);
         });
 
     }),
 
     xdescribe('Activities Report Generation - Scenario #1.5: A set of variables PARTIALLY meets previously set values', () => {
 
-        async function generateReportAndGetData(activityCheckboxIndex, activityData){
-            await activitiesPage.selectActivityCheckbox(activityCheckboxIndex);
-            await activitiesPage.initReportButton();
-            await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.PENDING_INFO); // load state
-            await activitiesPage.clickOnReportButton();
-            // open dialog
-            let dialog = activitiesPage.getDialog();
-            await dialog.waitForOpen();
-            const generateButtonIsDisable = await dialogGenerateButtonIsDisabled(dialog.okButtonId);
-            await dialog.clickOnOkButton();
-            expect(generateButtonIsDisable).toBeFalse();
-
-            const dataObj = await extractDataFromReportPage();
-            console.log(JSON.stringify(dataObj, null, 4));//.
-            //.
-        }
-
         test('1.1 Set of variables ONLY from the activity', async() => {
-            await generateReportAndGetData(0);
+            
         });
 
         xtest('1.2 Set of variables ONLY from other activities', async() => {
