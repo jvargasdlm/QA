@@ -7,7 +7,6 @@ const Template       = require('./classes/Template');
 // *****************************************************************
 // Constants and variables
 
-const MAIN_PAGE = 'http://localhost:3000/otus-studio/app/index.html#/login';
 const DATA_OTUS_STUDIO_DIR_PATH = '/data/otus-studio/';
 
 let selectors =  {
@@ -16,14 +15,14 @@ let selectors =  {
     }
 };
 
+let logged = false;
+
 // *****************************************************************
 // Auxiliar Functions
 
-let logged = false;
-
 async function enterAsVisitingBeforeAll(pageOtusStudio){
     if(!logged){
-        await pageOtusStudio.gotoUrl(MAIN_PAGE);
+        await pageOtusStudio.gotoUrl(process.env.OTUS_STUDIO_MAIN_PAGE);
         await pageOtusStudio.clickWithWait(selectors.button.VISITANTE);
         logged = true;
     }

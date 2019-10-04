@@ -3,8 +3,7 @@ const PageElement = require('../../classes/PageElement');
 
 // ***********************************************
 
-const MAIN_PAGE = 'http://localhost:3000/otus/app';
-const HOME_PAGE = MAIN_PAGE + '/#/dashboard';
+const HOME_PAGE = process.env.OTUS_MAIN_PAGE + '/#/dashboard';
 
 let selectors = {
     //LOADING_PAGE: "div[class='pg-loading-screen pg-loading pg-loaded']",
@@ -81,7 +80,7 @@ class PageOtus extends PageExtended {
     }
 
     async login(email, password){
-        await this.gotoUrl(MAIN_PAGE); // need?
+        await this.gotoUrl(process.env.OTUS_MAIN_PAGE); // need?
         const buttonSelector = selectors.login.SUBMIT_BUTTON;
         await this.waitForSelector(buttonSelector);
         await this.page.type(selectors.login.EMAIL_INPUT, email);

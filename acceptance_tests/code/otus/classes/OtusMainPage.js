@@ -2,9 +2,6 @@ const PageOtus = require('./PageOtus');
 
 // ***********************************************
 
-const MAIN_PAGE = 'http://localhost:3000/otus/app';
-const HOME_PAGE = MAIN_PAGE + '/#/dashboard';
-
 let selectors = {
     button: {
         // laboratorio
@@ -28,15 +25,6 @@ class OtusMainPage extends PageOtus {
 
     constructor(page){
         super(page);
-    }
-
-    async goToHomePage(){
-        await this.gotoUrl(HOME_PAGE);
-    }
-
-    async goToHomePageAndWaitLoad(){
-        await this.gotoUrl(HOME_PAGE);
-        await this.waitLoad();
     }
 
     getSelectors(){
