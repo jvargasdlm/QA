@@ -187,7 +187,7 @@ class Group extends PageElement {
             }
         }
         catch (msg) {
-            this.pageExt.errorLogger.addWrongAssertionLogFromCurrSpec('Group assertion with template json object failed:\n' + msg);
+            this.pageExt.errorLogger.addFailMessageFromCurrSpec('Group assertion with template json object failed:\n' + msg);
         }
     }
 
@@ -243,7 +243,7 @@ class Group extends PageElement {
        }
        catch (e) {
            console.error(jsonObject);
-           this.pageExt.errorLogger.addWrongAssertionLogFromCurrSpec('Group assertion with template json object failed:\n' + e.message);
+           this.pageExt.errorLogger.addFailMessageFromCurrSpec('Group assertion with template json object failed:\n' + e.message);
        }
     }
 
@@ -254,7 +254,7 @@ class Group extends PageElement {
         }
         catch (e) {
             console.error(jsonObjectArr);
-            this.pageExt.errorLogger.addWrongAssertionLogFromCurrSpec('Group assertion with template json object failed: should be empty\n' + e.message);
+            this.pageExt.errorLogger.addFailMessageFromCurrSpec('Group assertion with template json object failed: should be empty\n' + e.message);
         }
     }
 

@@ -237,7 +237,7 @@ class Question extends PageElement {
         }
         catch (e) {
             const message = `at question ${this.templateId} number - expected '${expectedNumber}', received '${this.number}'`;
-            this.pageExt.errorLogger.addWrongAssertionLogFromCurrSpec(message);
+            this.pageExt.errorLogger.addFailMessageFromCurrSpec(message);
         }
     }
 
@@ -247,7 +247,7 @@ class Question extends PageElement {
         }
         catch (e) {
             const message = `at question ${this.number} templateId - expected '${expectedTemplateId}', received '${this.templateId}'`;
-            this.pageExt.errorLogger.addWrongAssertionLogFromCurrSpec(message);
+            this.pageExt.errorLogger.addFailMessageFromCurrSpec(message);
         }
     }
 
@@ -258,7 +258,7 @@ class Question extends PageElement {
         }
         catch (e) {
             const message = `at question ${this.number} state - expected '${expectedState}', received '${state}'`;
-            this.pageExt.errorLogger.addWrongAssertionLogFromCurrSpec(message);
+            this.pageExt.errorLogger.addFailMessageFromCurrSpec(message);
         }
     }
 
