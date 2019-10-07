@@ -14,9 +14,14 @@ function getTestPath(spec){
 }
 
 function getFullNameSplited(spec, separator='\n'){
-    const specName = spec.description;
-    const suiteName = spec.getFullName().replace(' '+specName, '');
-    return `${suiteName}${separator}${specName}`;
+    try{
+        const specName = spec.description;
+        const suiteName = spec.getFullName().replace(' '+specName, '');
+        return `${suiteName}${separator}${specName}`;
+    }
+    catch (e) {
+        return '(empty suite)';
+    }
 }
 
 function setSpecArray(suiteArray, errorLogger){
@@ -74,11 +79,13 @@ class ErrorLogger {
         this.specIndex++;
     }
 
-    addWrongAssertionLogFromCurrSpec(message){
+    addFailMessagesFromCurrSpec(messagesArray){
+        const message = messagesArray.join('\n ');
+        this.addFailMessageFromCurrSpec(message);
+    }
+
+    addFailMessageFromCurrSpec(message){
         console.error(message);
-        if(!this.hasSpec()){
-            return;
-        }
         const specFullName = getFullNameSplited(this.specArray[this.specIndex]);
         const log = `${specFullName}:\n ${message}`;
         this.wrongAssertionLogs.push(log);
