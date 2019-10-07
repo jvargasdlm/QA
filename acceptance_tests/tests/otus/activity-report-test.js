@@ -15,6 +15,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
     errorLogger.advanceToNextSpec();
+    await activitiesPage.refreshAndWaitLoad();
     await pageOtus.waitForMilliseconds(5000);//.
 });
 
@@ -33,7 +34,7 @@ const ExamReportPage          = require('../../code/otus/classes/ExamReportPage'
 
 // Constants
 const recruitmentNumberOrName = '5001007';
-const acronymsArr = ['ACTA', 'ACTC'];
+const acronymsArr = ['ACTA'];//, 'ANTC'];
 const answerDataTypes = ActivityQuestionAnswer.dataTypes;
 
 // *****************************************************************
@@ -94,6 +95,7 @@ async function generateReportAndGetData(acronym, activityCheckboxIndex=0){
 
 function assertSentences(acronym, foundSentences, mustHaveSentences, canNotHaveSentences){
     let fail = false;
+    let failMessages = [];
 
     for(let sentence of mustHaveSentences){
         try{
@@ -101,7 +103,7 @@ function assertSentences(acronym, foundSentences, mustHaveSentences, canNotHaveS
         }
         catch (e) {
             fail = true;
-            console.log(`The report ${acronym} should have the sentence '${sentence}'`);
+            failMessages.push(`The report ${acronym} should have the sentence '${sentence}'`);
         }
     }
 
@@ -111,11 +113,16 @@ function assertSentences(acronym, foundSentences, mustHaveSentences, canNotHaveS
         }
         catch (e) {
             fail = true;
-            console.log(`The report ${acronym} should NOT have the sentence '${sentence}'`);
+            failMessages.push(`The report ${acronym} should NOT have the sentence '${sentence}'`);
         }
     }
 
-    expect(fail).toBeFalse();
+    try {
+        expect(fail).toBeFalse();
+    }
+    catch (e) {
+        errorLogger.addFailMessagesFromCurrSpec(failMessages);
+    }
 }
 
 // *****************************************************************
@@ -155,7 +162,7 @@ Existe pendência?
 
 suiteArray = [
 
-    describe('Temp Test', () => {
+    xdescribe('Temp Test', () => {
 
         xtest('Open exam report page', async() => {
             await pageOtus.goToParticipantHomePage();
@@ -177,14 +184,14 @@ suiteArray = [
 
         async function checkReportButtonIsHidden(firstActivityCheckboxIndex, secondActivityCheckboxIndex){
             await activitiesPage.selectActivityCheckbox(firstActivityCheckboxIndex);
-            await activitiesPage.initReportButton();
+            await activitiesPage.init();
             await activitiesPage.selectActivityCheckbox(secondActivityCheckboxIndex);
             const isHidden = await activitiesPage.reportButton.isHidden();
             try {
                 expect(isHidden).toBeTrue();
             }
             catch (e) {
-                errorLogger.addWrongAssertionLogFromCurrSpec(`Report button should be hidden, but does not.`);
+                errorLogger.addFailMessageFromCurrSpec(`Report button should be hidden, but does not.`);
             }
         }
 
@@ -198,11 +205,10 @@ suiteArray = [
 
     }),
 
-    xdescribe('Activities Report Generation - Scenario #1: A set of variables meets the previously defined values', () => {
-        
+    describe('Activities Report Generation - Scenario #1: A set of variables meets the previously defined values', () => {
+
         async function createAndFillActivityGenerateReportAndGetData(acronym, answersArr, mustSatisfyConditions, canNotSatisfyConditions, activityCheckboxIndex=0){
-            await activitiesPage.addOnLineActivityAndFill(acronym, answersArr);
-            //await activitiesPage.fillActivity(acronym, answersArr);
+            await activitiesPage.fillActivity(acronym, answersArr);
             const reportDataObj = await generateReportAndGetData(acronym, activityCheckboxIndex);
             assertSentences(acronym, reportDataObj.items, mustSatisfyConditions, canNotSatisfyConditions);
         }
@@ -210,7 +216,7 @@ suiteArray = [
         xtest('1. Set of variables ONLY from the activity', async() => {
 
         });
-        
+
         test('Test ACTA', async() => {
             const acronym = 'ACTA';
             const answersArr = [
@@ -232,7 +238,7 @@ suiteArray = [
     xdescribe('Activities Report Generation - Scenario #1.5: A set of variables PARTIALLY meets previously set values', () => {
 
         test('1.1 Set of variables ONLY from the activity', async() => {
-            
+
         });
 
         xtest('1.2 Set of variables ONLY from other activities', async() => {
@@ -249,7 +255,7 @@ suiteArray = [
 
         async function clickReportButtonAndWaitDialogForClose(activityCheckboxIndex){
             await activitiesPage.selectActivityCheckbox(activityCheckboxIndex);
-            await activitiesPage.initReportButton();
+            await activitiesPage.init();
             await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.PENDING_INFO); // load state
             await activitiesPage.clickOnReportButton(); // pending state
             // open dialog
