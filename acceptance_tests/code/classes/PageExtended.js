@@ -7,6 +7,7 @@ const Calendar       = require('./Calendar');
 const Checkbox       = require('./Checkbox');
 const Dialog         = require('./Dialog');
 const DialogWarning  = require('./DialogWarning');
+const InputField     = require('./InputField');
 const OptionSelector = require('./OptionSelector');
 
 // ***********************************************
@@ -65,6 +66,10 @@ class PageExtended {
 
     getCheckbox(){
         return new Checkbox(this);
+    }
+
+    getNewInputField(){
+        return new InputField(this);
     }
 
     getOptionSelector(){
@@ -152,6 +157,12 @@ class PageExtended {
             }
             throw e;
         }
+    }
+
+    async clearInput(selector){
+        await this.page.evaluate(function(selector) {
+            document.querySelector(selector).value = ''
+        }, selector);
     }
 
     // click -----------------------------------------------------------
