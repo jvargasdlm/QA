@@ -79,13 +79,18 @@ class PageOtus extends PageExtended {
         }
     }
 
-    async login(email, password){
-        await this.gotoUrl(process.env.OTUS_MAIN_PAGE); // need?
-        const buttonSelector = selectors.login.SUBMIT_BUTTON;
-        await this.waitForSelector(buttonSelector);
-        await this.page.type(selectors.login.EMAIL_INPUT, email);
-        await this.page.type(selectors.login.PASSWORD_INPUT, password);
-        await this.page.click(buttonSelector);
+    async refreshAndWaitLoad(){
+        await super.refresh();
+        await this.waitLoad();
+    }
+
+    async gotoUrlAndWaitLoad(url){
+        await super.goto(url);
+        await this.waitLoad();
+    }
+
+    async goBackAndWaitLoad(){
+        await super.goBack();
         await this.waitLoad();
     }
 
@@ -95,6 +100,16 @@ class PageOtus extends PageExtended {
 
     async goToHomePageAndWaitLoad(){
         await this.gotoUrl(HOME_PAGE);
+        await this.waitLoad();
+    }
+
+    async login(email, password){
+        await this.gotoUrl(process.env.OTUS_MAIN_PAGE); // need?
+        const buttonSelector = selectors.login.SUBMIT_BUTTON;
+        await this.waitForSelector(buttonSelector);
+        await this.page.type(selectors.login.EMAIL_INPUT, email);
+        await this.page.type(selectors.login.PASSWORD_INPUT, password);
+        await this.page.click(buttonSelector);
         await this.waitLoad();
     }
 
@@ -130,8 +145,6 @@ class PageOtus extends PageExtended {
     async openParticipantLaboratoryMenu(){
 
     }
-
-
 
 }
 
