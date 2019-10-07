@@ -6,15 +6,26 @@ class InputField extends PageElement {
         super(pageExt, 'input');
     }
 
-    async type(text){
-
+    async init(selector){
+        this.selector = selector;
+        this.elementHandle = await this.pageExt.page.$(selector);
     }
 
-    async getTextContent(){
+    async initFromList(selector, index){
+        this.elementHandle = (await this.pageExt.page.$$(selector))[index];
+    }
 
+    async type(text){
+        await this.pageExt.typeWithWait(this.selector, text);
     }
 
     async cleanText(){
+        await this.pageExt.page.evaluate(function(selector) {
+            document.querySelector(selector).value = ''
+        }, this.selector);
+    }
+
+    async getTextContent(){
 
     }
 
