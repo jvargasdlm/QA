@@ -18,9 +18,10 @@ class PageElement {
     
     constructor(pageExt, tagName, elementHandle=undefined){
         this.pageExt = pageExt;
+        this.tagName = tagName;
         this.elementHandle = elementHandle;
         this.id = undefined;
-        this.tagName = tagName;
+        this.selector = undefined;
     }
 
     static async getAttribute(elementHandle, attributeName){

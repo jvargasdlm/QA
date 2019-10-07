@@ -6,6 +6,7 @@ const DynamicElement = require('../../classes/DynamicElement');
 // ***********************************************
 
 const selectors = {
+    SEARCH_FILTER_INPUT: "input[ng-model='$ctrl.filter']",
     topMenuButtons: {
         //TOOLBAR_MANAGER: 'otus-activity-manager-toolbar',
         reportButtons:{
@@ -16,9 +17,10 @@ const selectors = {
         PREENCHER_ATIVIDADE: "button[aria-label='Preencher Atividade']",
         VISUALIZAR_ATIVIDADE: "button[aria-label='Visualizar Atividade']",
         EXCLUIR: "button[aria-label='Excluir']",
-        DETALHES: "button[aria-label='Detalhes']"
+        DETALHES: "button[aria-label='Detalhes']",
+        // while adding activity
+        ADD_ACTIVITY: "button[aria-label='Adicionar']"
     },
-    searchFilter: "input[ng-model='$ctrl.filter']",
     bottomMenuButtons: {
         //MANAGER_COMMANDER: "otus-activity-manager-commander",
         ADD: "md-fab-trigger[aria-label='Adicionar atividade']",
@@ -65,6 +67,12 @@ class ActivitiesPage extends PageOtus {
         return (await this.page.$$('md-checkbox')).length - 2;
     }
 
+    async searchAndSelectActivity(acronym, activityCheckboxIndex=0){
+        await this.typeWithWait(selectors.SEARCH_FILTER_INPUT, acronym);
+        await this.waitForMilliseconds(500); // wait for update list
+        await this.selectActivityCheckbox(activityCheckboxIndex, true);
+    }
+
     async selectActivityCheckbox(activityCheckBoxIndex, useFilter=false){
         try{
             let index = activityCheckBoxIndex + 2; // shift 'Todos' and 'Nome' checkboxes
@@ -74,14 +82,8 @@ class ActivitiesPage extends PageOtus {
             await (this.getCheckbox()).clickAfterFindInList(index);
         }
         catch (e) {
-            this.errorLogger.addWrongAssertionLogFromCurrSpec(`Activity with index=${activityCheckBoxIndex} was not found.`);
+            this.errorLogger.addFailMessageFromCurrSpec(`Activity with index=${activityCheckBoxIndex} was not found.`);
         }
-    }
-
-    async searchAndSelectActivity(acronym, activityCheckboxIndex=0){
-        await this.typeWithWait(selectors.searchFilter, acronym);
-        await this.waitForMilliseconds(500); // wait for update list
-        await this.selectActivityCheckbox(activityCheckboxIndex, true);
     }
 
     async addOnlineActivity(acronym){
@@ -94,10 +96,10 @@ class ActivitiesPage extends PageOtus {
         await this.waitLoad();
         // select activity
         await this.searchAndSelectActivity(acronym);
-        await this.clickWithWait("button[aria-label='Adicionar']");
+        await this.clickWithWait(selectors.topMenuButtons.ADD_ACTIVITY);
         await this.waitLoad();
         // select default category
-        await this.clickWithWait("button[aria-label='Adicionar']");
+        await this.clickWithWait(selectors.topMenuButtons.ADD_ACTIVITY);
         await this.waitLoad();
     }
 
@@ -110,6 +112,7 @@ class ActivitiesPage extends PageOtus {
         await this.searchAndSelectActivity(acronym, activityCheckboxIndex);
         await this.clickWithWait(selectors.topMenuButtons.EXCLUIR);
         await (this.getDialog()).waitForOpenAndClickOnOkButton();
+        await this.refreshAndWaitLoad();
     }
 
     async fillActivity(acronym, answersArr, activityCheckboxIndex=0){
@@ -124,8 +127,7 @@ class ActivitiesPage extends PageOtus {
         await this.clickWithWait(selectors.topMenuButtons.VISUALIZAR_ATIVIDADE);
         await this.waitForMilliseconds(500);
         let answers = await (new ActivityViewPage(this.page)).extractAnswers();
-        await this.goBack();
-        await this.waitLoad();
+        await this.goBackAndWaitLoad();
         return answers;
     }
 
