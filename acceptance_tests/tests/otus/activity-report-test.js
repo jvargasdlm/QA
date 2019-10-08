@@ -259,7 +259,7 @@ suiteArray = [
             await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.PENDING_INFO); // load state
             await activitiesPage.clickOnReportButton(); // pending state
             // open dialog
-            let dialog = activitiesPage.getDialog();
+            let dialog = activitiesPage.getNewDialog();
             await dialog.waitForOpen();
             const generateButtonIsDisable = await dialogGenerateButtonIsDisabled(dialog.okButtonId);
             await dialog.clickOnCancelButton();

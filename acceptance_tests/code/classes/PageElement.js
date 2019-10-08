@@ -5,8 +5,7 @@ Ao inves de enviar selector para waitForSelector, enviar o PageEelement, que con
 // ***********************************************
 // Private Functions
 
-async function getAttribute(elementHandle, attributeName){
-    //console.log(`PageElement.getAttribute: element = \n`, elementHandle._remoteObject);//.
+async function _getAttribute(elementHandle, attributeName){
     let objectHandle = await elementHandle.getProperty(attributeName);
     let remoteObject = objectHandle._remoteObject; //_remoteObject: { type: 'string', value: 'QSP2' },
     return remoteObject.value;
@@ -25,11 +24,11 @@ class PageElement {
     }
 
     static async getAttribute(elementHandle, attributeName){
-        return await getAttribute(elementHandle, attributeName);
+        return await _getAttribute(elementHandle, attributeName);
     }
 
     async getAttribute(attributeName){
-        return await getAttribute(this.elementHandle, attributeName);
+        return await _getAttribute(this.elementHandle, attributeName);
     }
 
     async isHidden(){

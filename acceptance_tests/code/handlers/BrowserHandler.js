@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 require('custom-env').env('staging');
 
-async function createBrowser(showBrowser) {
+async function _createBrowser(showBrowser) {
     const width = process.env.WINDOW_WIDTH;
     const height = process.env.WINDOW_HEIGHT;
     const windowSizeArg = `--window-size=${width},${height}`;
@@ -23,11 +23,11 @@ class BrowserHandler {
 
     static async createBrowser() {
         const showBrowser = (process.env.SHOW_BROWSER === 'true');
-        return createBrowser(showBrowser);
+        return _createBrowser(showBrowser);
     }
 
     static async createBrowserHeadFull() {
-        return createBrowser(true);
+        return _createBrowser(true);
     }
 
     static async openNewTab(browser, url) {

@@ -15,16 +15,16 @@ let selectors =  {
     }
 };
 
-let logged = false;
+let _logged = false;
 
 // *****************************************************************
 // Auxiliar Functions
 
 async function enterAsVisitingBeforeAll(pageOtusStudio){
-    if(!logged){
+    if(!_logged){
         await pageOtusStudio.gotoUrl(process.env.OTUS_STUDIO_MAIN_PAGE);
         await pageOtusStudio.clickWithWait(selectors.button.VISITANTE);
-        logged = true;
+        _logged = true;
     }
 }
 

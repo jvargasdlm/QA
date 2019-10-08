@@ -10,7 +10,6 @@ const stateItemGroup = {
     INVALIDATE: 'invalidateGroup',
     SAVED_EDITOR: 'savedGroupEditor', // first saved group question
     SAVED_ITEM: 'savedGroupItem',    // middle saved group question
-    //LAST_SAVED_GROUP_ITEM: 'lastSavedGroupItem'
 };
 
 const selectors = {
@@ -20,11 +19,7 @@ const selectors = {
 // ***********************************************
 // Private Functions
 
-function getIdSelector(stateItemGroup, questionTemplateId){
-    return `[id='${stateItemGroup}_${questionTemplateId}']`;
-}
-
-function extractStateFromId(id) {
+function _extractStateFromId(id) {
     let parts = id.split('_');
     if(parts.length < 2){
         return 'undefinedInGroupItemId';
@@ -46,7 +41,7 @@ class GroupItem extends DynamicElement { // could be a button or checkbox
 
     async updateAndGetState() {
         this.id = await this.extractIdFromElemHandle(); // this.getAttribute('id');
-        this.state = extractStateFromId(this.id);
+        this.state = _extractStateFromId(this.id);
         return this.state;
     }
 

@@ -18,7 +18,7 @@ class ReportPage extends PageOtus {
 
     async extractInfo(){
         return {
-            participantInfo: await extractParticipantInfo(this.page),
+            participantInfo: await _extractParticipantInfo(this.page),
             items: await this.extractItems()
         };
     }
@@ -28,7 +28,7 @@ class ReportPage extends PageOtus {
 // **************************************************************
 // Private functions
 
-async function extractParticipantInfo(page){
+async function _extractParticipantInfo(page){
     return await page.evaluate((selectors) => {
         let result = {};
         const infoNode = document.body.querySelector(selectors.PARTICIPANT_INFO);

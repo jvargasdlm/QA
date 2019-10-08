@@ -4,16 +4,16 @@ require('custom-env').env('staging');
 // *******************************************
 // Private functions
 
-function wasExecuted (spec) {
+function _wasExecuted (spec) {
     let pendingReason = spec.result.pendingReason;
     return (pendingReason!==undefined && pendingReason==='');
 }
 
-function getTestPath(spec){
+function _getTestPath(spec){
     return spec.result.testPath;
 }
 
-function getFullNameSplited(spec, separator='\n'){
+function _getFullNameSplited(spec, separator='\n'){
     try{
         const specName = spec.description;
         const suiteName = spec.getFullName().replace(' '+specName, '');
@@ -24,15 +24,15 @@ function getFullNameSplited(spec, separator='\n'){
     }
 }
 
-function setSpecArray(suiteArray, errorLogger){
+function _setSpecArray(suiteArray, errorLogger){
     let filteredSuiteArray = suiteArray.filter((suite) => {return !suite.markedPending;});
     for(let suite of filteredSuiteArray){
         for (let child of suite.children){
             if(child.children){  // is a suite
-                let resultArray = setSpecArray(child);
+                let resultArray = _setSpecArray(child);
                 errorLogger.specArray = errorLogger.specArray.concat(resultArray);
             }
-            else if(wasExecuted(child)){ // is a spec
+            else if(_wasExecuted(child)){ // is a spec
                 errorLogger.specArray.push(child);
             }
         }
@@ -54,7 +54,7 @@ class ErrorLogger {
     }
 
     get currSpecFileName(){
-        return fileHandler.getFileName(getTestPath(this.specArray[0]));
+        return fileHandler.getFileName(_getTestPath(this.specArray[0]));
     }
 
     hasSpec(){
@@ -69,7 +69,7 @@ class ErrorLogger {
 
     resetAndSetSpecArray(suiteArray){
         this.reset();
-        setSpecArray(suiteArray, this);
+        _setSpecArray(suiteArray, this);
         if(!this.hasSpec()){
             console.log('Suite array with no tests to run (empty or all skipped).');
         }
@@ -86,7 +86,7 @@ class ErrorLogger {
 
     addFailMessageFromCurrSpec(message){
         console.error(message);
-        const specFullName = getFullNameSplited(this.specArray[this.specIndex]);
+        const specFullName = _getFullNameSplited(this.specArray[this.specIndex]);
         const log = `${specFullName}:\n ${message}`;
         this.wrongAssertionLogs.push(log);
         throw log;
@@ -96,7 +96,7 @@ class ErrorLogger {
         if(!this.hasSpec()){
             return;
         }
-        const testPath = getTestPath(this.specArray[0]); // any spec from current suite works to get testPath
+        const testPath = _getTestPath(this.specArray[0]); // any spec from current suite works to get testPath
         const testLocalPath = testPath.replace(process.cwd(), '.');
         const fileName = fileHandler.getFileName(testPath);
         let path = process.cwd() + process.env.TEST_RESULTS_LOCAL_DIR_PATH + '/' + fileName;

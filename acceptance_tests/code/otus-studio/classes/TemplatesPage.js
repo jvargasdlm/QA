@@ -25,11 +25,11 @@ const selectors = {
 // *********************************************************
 // Private Functions
 
-function addOptionsSelector(beHidden) {
+function _addOptionsSelector(beHidden) {
     return `md-fab-actions[aria-hidden='${beHidden}']`;
 }
 
-async function initEditorPage(page){
+async function _initEditorPage(page){
     let editorPage = new EditorPage(page);
     await editorPage.init();
     return editorPage;
@@ -54,7 +54,7 @@ class TemplatesPage extends PageOtusStudio {
     async openTemplate(templateAcronym){
         await this.clickOn(templateAcronym);
         await this.clickWithWait(selectors.button.ABRIR_EDITOR);
-        return await initEditorPage(this.page);
+        return await _initEditorPage(this.page);
     }
 
     async clickOnAddTemplateAndWaitOptions(){
@@ -62,7 +62,7 @@ class TemplatesPage extends PageOtusStudio {
         await this.clickWithWait(selectors.button.ADD); // '+' button
         await utils.wait.forMilliseconds(5000);//.
 
-        let selector = addOptionsSelector(false); // options must be visible
+        let selector = _addOptionsSelector(false); // options must be visible
         await this.waitForSelector(selector);
     }
 
@@ -80,7 +80,7 @@ class TemplatesPage extends PageOtusStudio {
         await this.page.type('input[ng-model="newSurveyForm.acronym"]', acronym);
         await this.clickWithWait(`button[ng-disabled='newSurveyForm.$invalid']`); // "CRIAR FORMULARIO" button
         await dialog.waitForClose();
-        return await initEditorPage(this.page);
+        return await _initEditorPage(this.page);
     }
 
     async uploadHeadFull(path){

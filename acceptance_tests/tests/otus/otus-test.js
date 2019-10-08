@@ -57,7 +57,7 @@ describe('otus test', () => {
       await pageOtus.clickWithWait(bottomMenuSelectors.ATIVIDADE_ONLINE);
       await pageOtus.waitLoad();
 
-      let checkbox = pageOtus.getCheckbox();
+      let checkbox = pageOtus.getNewCheckbox();
       await checkbox.clickAfterFindInList(0);
       await checkbox.clickAfterFindInList(1);
       await checkbox.clickAfterFindInList(2);
@@ -73,15 +73,15 @@ describe('otus test', () => {
 
       await pageOtus.typeWithWait('#name', 'Teste da Silva');
 
-      let optionSelector = pageOtus.getOptionSelector();
+      let optionSelector = pageOtus.getNewOptionSelector();
       await optionSelector.selectOption('sex', 'F');
       await optionSelector.selectOption('center', 'RS');
 
-      let calendar = pageOtus.getCalendar();
+      let calendar = pageOtus.getNewCalendar();
       await calendar.openAndSelectDate('Data de Nascimento', -3, -4, 25);
 
       await pageOtus.clickOnButtonByAttribute('ng-click', '$ctrl.saveParticipant()');
-      await pageOtus.getDialog().clickOnCustomizedActionButton("OK");
+      await pageOtus.getNewDialog().clickOnCustomizedActionButton("OK");
 
       // confirm dialog
       await pageOtus.getDialogWarning().clickOnOkButton();
@@ -94,7 +94,7 @@ describe('otus test', () => {
 
       let labels = ['MG', 'SP', 'RS', 'RJ', 'ES', 'BA'];
 
-      let checkbox = pageOtus.getCheckbox();
+      let checkbox = pageOtus.getNewCheckbox();
 
       for (let i = 0; i < labels.length; i++) {
           await checkbox.clickByLabel(labels[i]);
@@ -113,14 +113,14 @@ describe('otus test', () => {
       await pageOtus.clickWithWait(selectors.button.ATIVIDADES_CENTRO);
       await pageOtus.waitLoad();
 
-      let optionSelector = pageOtus.getOptionSelector();
+      let optionSelector = pageOtus.getNewOptionSelector();
       await optionSelector.selectOption('select_5', 'MED3'); // 'Sigla'
       // await pageOtus.waitLoad();
 
-      let calendar = pageOtus.getCalendar();
+      let calendar = pageOtus.getNewCalendar();
       await calendar.openAndSelectPeriod('Período Inicial', 0, -2);
 
-      let checkbox = pageOtus.getCheckbox();
+      let checkbox = pageOtus.getNewCheckbox();
       await checkbox.clickByLabel('MG');
       await checkbox.clickByLabel('RS');
   });

@@ -79,7 +79,7 @@ class ActivitiesPage extends PageOtus {
             if(useFilter){
                 index++; // shift Filter checkbox
             }
-            await (this.getCheckbox()).clickAfterFindInList(index);
+            await (this.getNewCheckbox()).clickAfterFindInList(index);
         }
         catch (e) {
             this.errorLogger.addFailMessageFromCurrSpec(`Activity with index=${activityCheckBoxIndex} was not found.`);
@@ -111,7 +111,7 @@ class ActivitiesPage extends PageOtus {
     async deleteActivity(acronym, activityCheckboxIndex=0){
         await this.searchAndSelectActivity(acronym, activityCheckboxIndex);
         await this.clickWithWait(selectors.topMenuButtons.EXCLUIR);
-        await (this.getDialog()).waitForOpenAndClickOnOkButton();
+        await (this.getNewDialog()).waitForOpenAndClickOnOkButton();
         await this.refreshAndWaitLoad();
     }
 

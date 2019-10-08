@@ -24,7 +24,7 @@ const typeCodes ={
 
 // ***********************************************
 
-let errorLogger = new ErrorLogger();
+let _errorLogger = new ErrorLogger();
 
 class PageExtended {
     
@@ -41,7 +41,7 @@ class PageExtended {
     }
 
     get errorLogger(){
-        return errorLogger;
+        return _errorLogger;
     }
 
     get waitLib(){
@@ -52,11 +52,11 @@ class PageExtended {
         return typeCodes;
     }
 
-    getCalendar(){
+    getNewCalendar(){
         return new Calendar(this);
     }
 
-    getDialog(){
+    getNewDialog(){
         return new Dialog(this);
     }
 
@@ -64,7 +64,7 @@ class PageExtended {
         return new DialogWarning(this);
     }
 
-    getCheckbox(){
+    getNewCheckbox(){
         return new Checkbox(this);
     }
 
@@ -72,7 +72,7 @@ class PageExtended {
         return new InputField(this);
     }
 
-    getOptionSelector(){
+    getNewOptionSelector(){
         return new OptionSelector(this);
     }
 

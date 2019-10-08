@@ -8,11 +8,11 @@ class Calendar extends PageElement {
 
     async open(inputAriaLabelValue){
         await this.pageExt.clickWithWait(`input[aria-label='${inputAriaLabelValue}']`);
-        await (this.pageExt.getDialog()).waitForOpen();
+        await (this.pageExt.getNewDialog()).waitForOpen();
     }
 
     async waitForClose(){
-        await (this.pageExt.getDialog()).waitForClose();
+        await (this.pageExt.getNewDialog()).waitForClose();
     }
 
     async chooseToday(){

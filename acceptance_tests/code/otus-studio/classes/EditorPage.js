@@ -17,7 +17,7 @@ const selectors = {
 // ************************************************************
 // Private Functions
 
-async function clickOnTab(editorPage, tabIndex, newActivePageTab) {
+async function _clickOnTab(editorPage, tabIndex, newActivePageTab) {
     if(editorPage.activeTab == tabIndex){
         console.log('click on active tab!');
         return;
@@ -53,11 +53,11 @@ class EditorPage extends PageOtusStudio {
     }
 
     async clickOnEdition(){
-        await clickOnTab(this, enumIndexes.EDITION);
+        await _clickOnTab(this, enumIndexes.EDITION);
     }
 
     async clickOnNavigation(){
-        await clickOnTab(this, enumIndexes.NAVIGATION);
+        await _clickOnTab(this, enumIndexes.NAVIGATION);
     }
 
     async clickOnResource(){

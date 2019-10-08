@@ -4,7 +4,7 @@ const PageOtus  = require('./classes/PageOtus');
 // *****************************************************************
 // Constants and variables
 
-let logged = false;
+let _logged = false;
 
 // *****************************************************************
 
@@ -13,10 +13,10 @@ class OtusLib {
     static async doBeforeAll(suiteArray) {
         let [browser, page] = await ParentLib.doBeforeAll(suiteArray);
         let pageOtus = new PageOtus(page);
-        if (!logged) {
+        if (!_logged) {
             const loginData = await ParentLib.readLoginDataFromFile("OTUS");
             await pageOtus.login(loginData.email, loginData.password);
-            logged = true;
+            _logged = true;
         }
         return [browser, pageOtus, pageOtus.errorLogger, pageOtus.getSelectors()];
     }
