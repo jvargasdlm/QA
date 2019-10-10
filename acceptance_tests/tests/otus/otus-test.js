@@ -84,7 +84,7 @@ describe('otus test', () => {
       await pageOtus.getNewDialog().clickOnCustomizedActionButton("OK");
 
       // confirm dialog
-      await pageOtus.getDialogWarning().clickOnOkButton();
+      await pageOtus.getNewDialogWarning().clickOnOkButton();
   });
 
   test('test checkbox', async() => {

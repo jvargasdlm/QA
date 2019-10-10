@@ -2,7 +2,6 @@ const utils         = require('../utils');
 const fileHandler   = require('../handlers/FileHandler');
 const ErrorLogger   = require('./ErrorLogger');
 // Page elements
-const PageElement    = require('./PageElement');
 const Calendar       = require('./Calendar');
 const Checkbox       = require('./Checkbox');
 const Dialog         = require('./Dialog');
@@ -36,7 +35,7 @@ class PageExtended {
     // ----------------------------------------------------------
     // Getters
 
-    get IamAOtusPage(){
+    get amIAOtusPage(){
         return (this.typeCode === typeCodes.OTUS);
     }
 
@@ -60,7 +59,7 @@ class PageExtended {
         return new Dialog(this);
     }
 
-    getDialogWarning(){
+    getNewDialogWarning(){
         return new DialogWarning(this);
     }
 
@@ -76,8 +75,9 @@ class PageExtended {
         return new OptionSelector(this);
     }
 
-    // ----------------------------------------------------------
-    // page main functions
+    /* ********************************************************************
+     * Page main functions
+     */
 
     async close(){
         await this.page.close();
@@ -114,8 +114,9 @@ class PageExtended {
         }
     }
 
-    // wait for selector functions ----------------------------------------------
-
+    /* ********************************************************************
+     * Wait functions
+     */
     async waitForSelector(selector, timeout=WAIT_FOR_SELECTOR_TIMEOUT){
         try {
             return await this.page.waitForSelector(selector, {timeout: timeout});
@@ -136,11 +137,21 @@ class PageExtended {
         return await this.page.waitForSelector(selector, {hidden: true, timeout: WAIT_FOR_SELECTOR_TIMEOUT});
     }
 
+    async waitForHiddenAttributeValue(selector, boolValue){
+        await this.waitForSelector(selector + `[aria-hidden='${boolValue}']`);
+    }
+
+    async waitForExpandedAttributeValue(selector, boolValue){
+        await this.waitForSelector(selector + `[aria-expanded='${boolValue}']`);
+    }
+
     async waitForMilliseconds(milliseconds){
         await utils.wait.forMilliseconds(milliseconds);
     }
 
-    // type --------------------------------------------------------------
+    /* ********************************************************************
+     * Type text
+     */
 
     async typeWithWait(selector, text){
         try {
@@ -165,7 +176,9 @@ class PageExtended {
         }, selector);
     }
 
-    // click -----------------------------------------------------------
+    /* ********************************************************************
+     * Clicks
+     */
 
     async clickWithWait(selector){
         try {
@@ -188,29 +201,61 @@ class PageExtended {
         await this.clickWithWait(`button[${uniqueAttrName}='${uniqueAttrValue}']`);
     }
 
-    // -------------------------------------------------------------------------------------
+    /* ********************************************************************
+     * Query selector
+     */
 
     async findChildren(parentSelector, childrenTag){
-        await PageElement.findChildren(this.page, parentSelector, childrenTag);
+        return await this.page.evaluate((_parentSelector, _childrenTag) => {
+            let parentNode = document.body.querySelector(_parentSelector);
+            let tempIdArray = [];
+            const childTagName = _childrenTag;
+
+            function pushId(currentNode) {
+                const isNodeEmpty = (Object.entries(currentNode).length === 0);
+                if (!isNodeEmpty && currentNode.tagName.toLowerCase() === childTagName) {
+                    let id = currentNode.getAttribute('id');
+                    if(!id){
+                        //let elemText = currentNode.querySelector('span');
+                        id = currentNode.innerText.replace('\n', ' ');
+                        currentNode.setAttribute('id', id);
+                    }
+                    tempIdArray.push(id);
+                }
+            }
+
+            function walkTheDOM(node, func) {
+                func(node);
+                node = node.firstChild;
+                while (node) {
+                    walkTheDOM(node, func);
+                    node = node.nextSibling;
+                }
+            }
+
+            walkTheDOM(parentNode, pushId);
+            return tempIdArray;
+
+        }, parentSelector, childrenTag);
     }
 
-    // -------------------------------------------------------------------------------------
-    // find in list
-
-    async getElementFromListByInnerText(selector, requiredInnerText){
+    async getInnerText(selector){
         await this.waitForSelector(selector);
-        let elemList = await this.page.$$(selector);
-        //console.log('getElementFromListByAttribute', selector, ': num elems =', elemList.length);//.
-        let i=0;
-        while(i < elemList.length){
-            let text = elemList[i].innerText;
-            console.log(i, 'text =', text);//.
-            if(text === requiredInnerText){
-                return elemList[i];
-            }
-            i++;
+        try {
+            return await this.page.evaluate((selector) => {
+                let element = document.querySelector(selector);
+                return element.innerText;
+            }, selector);
         }
-    };
+        catch (e) {
+            console.log('getInnerText: selector =', selector);
+            await this.hasElementSelector(selector);
+        }
+    }
+
+    /* ********************************************************************
+     * Find in list
+     */
 
     async getElementFromList(selector, index){
         await this.waitForSelector(selector);
@@ -219,25 +264,7 @@ class PageExtended {
         return elemList[index];
     }
 
-    async getInnerTextFromList(selector, index){
-        //console.log('PageExtended.getInnerTextFromList 1: selector =', selector);//.
-        //await this.waitForSelector(selector);
-        //console.log('PageExtended.getInnerTextFromList 2: selector ok');//.
-        try {
-            let result =  await this.page.evaluate((selector, index) => {
-                let arr = Array.from(document.querySelectorAll(selector));
-                return arr[index].innerText;
-            }, selector, index);
-            console.log('PageExtended.getInnerTextFromList: result =', result);//.
-            return result;
-        }
-        catch (e) {
-            console.log('getInnerText: selector =', selector);
-            await this.hasElementSelector(selector);
-        }
-    }
-
-    async getElementFromListByAttribute(selector, index){
+    async _getElementFromListByAttribute(selector, index){
         await this.waitForSelector(selector);
         let elemList = await (this.page).$$(selector);
         let element = elemList[index];
@@ -245,9 +272,9 @@ class PageExtended {
             throw `element '${selector}' index=${index} not found (list contains ${elemList.length} elements)`;
         }
         return element;
-    };
+    }
 
-    async getLastElementOfList(selector){
+    async _getLastElementOfList(selector){
         await this.waitForSelector(selector);
         let elemList = await this.page.$$(selector);
         let element =  elemList[elemList.length-1];
@@ -255,30 +282,21 @@ class PageExtended {
             throw `last element of list '${selector}' not found (list contains ${elemList.length} elements)`;
         }
         return element;
-    };
+    }
 
     async clickOnElementOfList(selector, index){
-        const element = await this.getElementFromListByAttribute(selector, index);
+        const element = await this._getElementFromListByAttribute(selector, index);
         await element.click();
-    };
+    }
 
     async clickOnLastElementOfList(selector){
-        const element = await this.getLastElementOfList(selector);
+        const element = await this._getLastElementOfList(selector);
         await element.click();
     }
 
     async clickAfterFindInList(selector, index){
         const element = await this.getElementFromList(selector, index);
         await element.click();
-    }
-
-    //
-    async waitForHiddenAttributeValue(selector, boolValue){
-        await this.waitForSelector(selector + `[aria-hidden='${boolValue}']`);
-    }
-
-    async waitForExpandedAttributeValue(selector, boolValue){
-        await this.waitForSelector(selector + `[aria-expanded='${boolValue}']`);
     }
 
     async setHiddenAttributeValue(selector, boolValue){
@@ -290,7 +308,9 @@ class PageExtended {
         }, boolValue);
     }
 
-    // Debug ------------------------------------------------------------------------
+    /* ********************************************************************
+     * Debug
+     */
 
     enableConsoleLog(){
         this.page.on('console', consoleObj => console.log(consoleObj.text()));

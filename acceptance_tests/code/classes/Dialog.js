@@ -26,7 +26,7 @@ class Dialog extends DialogParent {
 
         let okButtonIndex = numButtons-2,
             cancelButtonIndex = numButtons-1;
-        if(!this.pageExt.IamAOtusPage){
+        if(!this.pageExt.amIAOtusPage){
             cancelButtonIndex = numButtons-2;
             okButtonIndex = numButtons-1;
         }
