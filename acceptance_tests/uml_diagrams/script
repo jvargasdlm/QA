@@ -1,0 +1,210 @@
+var importEditor = new JavaImporter(com.change_vision.jude.api.inf.editor);
+var importModel = new JavaImporter(com.change_vision.jude.api.inf.model);
+
+getPackage();
+
+function getPackage(packageName){
+    with(importModel) {
+        var project = astah.getProject();
+        var namedElements = project.getOwnedElements();
+        for (var i in namedElements) {
+            var namedElement = namedElements[i];
+            if (namedElement instanceof IPackage) {
+                if(namedElement.getName() == packageName){
+                    print('found package');
+                    return namedElement;
+                }
+            }
+        }
+    }
+}
+
+function getClass(className){
+    with(importModel) {
+        var classes = astah.findElements(IClass.class);
+        //print('Class # = ' + classes.length);
+        for(var i in classes) {
+            var clazz = classes[i];
+            //print(clazz.getName() + ', ' + clazz.getOwner().getName());
+            if(clazz.getName() == className){
+                print('found class');//.
+                return clazz;
+            }
+        }
+    }
+}
+ 
+function createPackage(packageName){
+    with(importModel, importEditor) {
+        TransactionManager.beginTransaction();
+        var basicModelEditor = astah.getModelEditorFactory().getBasicModelEditor();
+        var project = astah.getProject();
+        var newPackage = basicModelEditor.createPackage(project, packageName);
+        TransactionManager.endTransaction();
+        return newPackage;
+    }
+}
+
+
+function createClass(className, packageName){
+   with(importModel, importEditor) {
+       try{
+            TransactionManager.beginTransaction();
+            var basicModelEditor = astah.getModelEditorFactory().getBasicModelEditor();
+            var _package = getPackage(packageName);
+            var clazz = basicModelEditor.createClass(_package, className);
+           
+            // Add an association between classes
+           //basicModelEditor.createAssociation(clazz, classB, "association name", "classA end", "classB end");
+    
+            TransactionManager.endTransaction();
+            print('fim');
+       }
+       catch(e){
+           print("Error at create class " + className +": " + e.getMessage());
+           TransactionManager.abortTransaction();
+           return null;
+       }
+    }
+}
+
+function getAttributeObject(name, typeOrClass){
+    return  {
+        name: name, 
+        type: (typeOrClass? typeOrClass : "void"), 
+        visibility: "public" //default in javascript
+        };
+}
+
+function addAttributesToClass(className, attributesArray){
+    with(importModel, importEditor) {
+        TransactionManager.beginTransaction();
+        var basicModelEditor = astah.getModelEditorFactory().getBasicModelEditor();
+        var clazz = getClass(className);
+
+        for(var i in attributesArray){
+            var attr = attributesArray[i];
+            try{
+                var attribute = basicModelEditor.createAttribute(clazz, attr.name, attr.type);
+                attribute.setVisibility(attr.visibility);
+            }
+            catch(e){
+                print("Error at add attribute " + attr.name  +" in class " + className +": " + e.getMessage());
+            }
+        }
+        
+        //basicModelEditor.createOperation(clazz, "operation0", "void");
+        
+        // Create a class in the specified package
+       //var classB = basicModelEditor.createClass(_package, "ClassB");
+       
+        // Add an association between classes
+       //basicModelEditor.createAssociation(clazz, classB, "association name", "classA end", "classB end");
+
+        TransactionManager.endTransaction();
+        print('fim');
+    }
+}
+
+function getNewMethodInfoObj(methodName, argNamesArray, returnType){
+    return {
+        methodName: methodName,
+        argNamesArray: (argNamesArray? argNamesArray : ""),
+        returnType: (returnType? returnType : "void")
+    }
+}
+
+function addMethodToClass(className, methodInfoObj){
+     //basicModelEditor.createOperation(clazz, "operation0", "void");
+}
+
+function addGeneralization(subClassName, superClassName){
+    with(importModel, importEditor) {
+        try{
+            TransactionManager.beginTransaction();
+            var basicModelEditor = astah.getModelEditorFactory().getBasicModelEditor();
+            var subClass = getClass(subClassName);
+            var superClass = getClass(superClassName);
+            basicModelEditor.createGeneralization(subClass, superClass, "");
+            TransactionManager.endTransaction();
+            print('fim addGeneralization');
+        }
+        catch(e){
+            print(e.getMessage());
+            throw e;
+        }
+    }
+}
+
+// ********************************************
+// Execution
+
+/*
+var attributesArray = [
+    getAttributeObject("aaa"),
+    getAttributeObject("bb")
+];
+createClass("ClassA", "Class");
+addAttributesToClass("ClassA", attributesArray);*/
+createClass("ClassB", "Class");
+addGeneralization("ClassA", "ClassB");
+
+ // ***********************************
+ 
+function run() {
+    var project = astah.getProject();
+    printPackageInfo(project);
+}
+ 
+function printPackageInfo(iPackage) {
+    print("Package name: " + iPackage.getName());
+    print("Package definition: " + iPackage.getDefinition());
+ 
+    with(importModel) {
+        // Display packages and classes
+        var namedElements = iPackage.getOwnedElements();
+        for (var i in namedElements) {
+            var namedElement = namedElements[i];
+            if (namedElement instanceof IPackage) {
+                printPackageInfo(namedElement);
+            } else if (namedElement instanceof IClass) {
+                //printClassInfo(namedElement);
+            }
+        }
+    }
+}
+ 
+function printClassInfo(iClass) {
+    print("Class name: " + iClass.getName());
+    print("Class definition: " + iClass.getDefinition());
+ 
+    // Display all attributes
+    var iAttributes = iClass.getAttributes();
+    for (var i in iAttributes) {
+        printAttributeInfo(iAttributes[i]);
+    }
+ 
+    // Display all operations
+    var iOperations = iClass.getOperations();
+    for (var i in iOperations) {
+        printOperationInfo(iOperations[i]);
+    }
+ 
+    // Display inner class information
+    var classes = iClass.getNestedClasses();
+    for (var i in classes) {
+        printClassInfo(classes[i]);
+    }
+}
+ 
+function printOperationInfo(iOperation) {
+    print("Operation name: " + iOperation.getName());
+    print("Operation returnType: " + iOperation.getReturnTypeExpression());
+    print("Operation definition: " + iOperation.getDefinition());
+}
+ 
+function printAttributeInfo(iAttribute) {
+    print("Attribute name: " + iAttribute.getName());
+    print("Attribute type: " + iAttribute.getTypeExpression());
+    print("Attribute definition: " + iAttribute.getDefinition());
+}
