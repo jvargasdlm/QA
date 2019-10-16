@@ -24,7 +24,7 @@ class FileHandler {
     }
 
     static read(path){
-        return fs.readFileSync(path);
+        return fs.readFileSync(path, "utf8");
     }
 
     static write(path, content){
