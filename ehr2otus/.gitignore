@@ -1,4 +1,5 @@
 # directories
+.idea/*
 node_modules/*
 output/*
 # files
