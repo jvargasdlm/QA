@@ -1,0 +1,6 @@
+# directories
+node_modules/*
+output/*
+# files
+ELEA.xml
+package-lock.json
