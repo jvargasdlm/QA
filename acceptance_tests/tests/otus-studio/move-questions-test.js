@@ -69,7 +69,7 @@ describe('Move Question', () => {
 
         await editionTabPage.moveQuestionToBegin(2);
         questionTemplateIdOrder = [2, 1, 4, 5, 3, 6, 7, 8, 9, 10];
-        await checkQuestionsOrder('q2 to begin');
+        await checkQuestionsOrder('q2 to BEGIN');
 
         await editionTabPage.moveQuestionToAfter(8,4);
         questionTemplateIdOrder = [2, 1, 4, 5, 8, 3, 6, 7, 9, 10];
