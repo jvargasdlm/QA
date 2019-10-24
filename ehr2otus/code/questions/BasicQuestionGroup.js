@@ -2,8 +2,8 @@ const EhrQuestion = require('./EhrQuestion');
 
 class BasicQuestionGroup extends EhrQuestion{
 
-    constructor(jsonObject, pageId){
-        super(jsonObject, pageId);
+    constructor(ehrQuestionObj, pageId){
+        super(ehrQuestionObj, pageId);
     }
 
     toOtusStudioObj(ehrQuestionObj){

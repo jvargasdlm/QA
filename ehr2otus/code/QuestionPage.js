@@ -13,6 +13,18 @@ const Rule = require('./Rule');
 
 let visibleWhenCounter = 0;//.
 
+let basicQuestionGroupIndex = 0;
+
+function incrementBasicQuestionGroupIndex(){
+    basicQuestionGroupIndex++;
+}
+
+function decrementBasicQuestionGroupIndex(){
+    if(--basicQuestionGroupIndex < 0){
+        basicQuestionGroupIndex = 0;
+    }
+}
+
 class QuestionPage {
 
     constructor(){
@@ -53,6 +65,9 @@ class QuestionPage {
 
         for (let [key, questionObjArr] of questionObjsArr) {
             if(key === "basicQuestionGroup"){
+                incrementBasicQuestionGroupIndex();//<<
+                // add new BasicQuestionGroup to this.basicQuestionGroups
+                
                 for (let questionObj of questionObjArr) {
                     let subQuestionObjsArr = Object.entries(questionObj).filter(([key,value]) => key.includes('Question'));
                     this._readQuestions(subQuestionObjsArr);
@@ -67,6 +82,7 @@ class QuestionPage {
                         globalVars.dictQuestionNameId[question.name] = question.id;
                     //}
                 }
+                decrementBasicQuestionGroupIndex();//<<
             }
         }
     }
