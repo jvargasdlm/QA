@@ -66,26 +66,30 @@ function xml2json(ehrXmlFilePath, resultObj) {
     }
 }
 
+function writeOutputJsonFile(filename, content){
+    const outputDirPath = process.cwd() + "/output/";
+    const path = outputDirPath + filename;
+    FileHandler.write(path, JSON.stringify(content, null, 4));
+}
+
 function makeConversionEhr2OtusTemplate(){
-    const dirPath = process.cwd() + "/";
-    const xmlFilePath = dirPath + "ELEA.xml"; //. maybe by custom env variable?
-    const outputDirPath = dirPath + "output/";
+    const xmlFilePath = process.cwd() + "/ELEA.xml"; //. maybe by custom env variable?
     try {
         let content = {};
         xml2json(xmlFilePath, content);
         content = content.result;
-        FileHandler.write(outputDirPath + "ELEA.json", JSON.stringify(content, null, 4));
+        writeOutputJsonFile("ELEA.json", content);
 
         const ehr = new EhrQuestionnaire();
         ehr.readFromJsonObj(content);
-        //FileHandler.write(dirPath + "ELEA-enxuto.json", JSON.stringify(ehr, null, 4));
+        writeOutputJsonFile("ELEA-enxuto.json", ehr);
 
         const oid = "eleaOtusSUQ6W3VuZGVmaW5lZF1zdXJ2ZXlVVUlEOltiYmFjYzM1MC1lNDdjLTExZTktOGVmNy02MTUwOTJlYjNkOTFdcmVwb3NpdG9yeVVVSUQ6WyBOb3QgZG9uZSB5ZXQgXQ==";
         let template = createEmptyOtusSutioTemplateObj("ELEA", "ELEA", oid);
         ehr.toOtusStudioTemplate(template);
-        FileHandler.write(outputDirPath + "ELEA-otus-result.json", JSON.stringify(template, null, 4));
+        writeOutputJsonFile("ELEA-otus-result.json", template);
 
-        //FileHandler.write(outputDirPath + "dictQuestionNameId.json", JSON.stringify(globalVars.dictQuestionNameId, null, 4));
+        //writeOutputJsonFile("dictQuestionNameId.json", globalVars.dictQuestionNameId);
     }
     catch (e) {
         console.log(e);

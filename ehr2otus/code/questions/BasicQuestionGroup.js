@@ -1,15 +1,14 @@
-const EhrQuestion = require('./EhrQuestion');
+class BasicQuestionGroup {
 
-class BasicQuestionGroup extends EhrQuestion{
-
-    constructor(ehrQuestionObj, pageId){
-        super(ehrQuestionObj, pageId);
+    constructor(){
+        this.name = undefined;
+        this.id = undefined;
+        this.questionIdArr = [];
     }
 
-    toOtusStudioObj(ehrQuestionObj){
-
+    addQuestionId(questionId){
+        this.questionIdArr.push(questionId);
     }
-
 }
 
 module.exports = BasicQuestionGroup;

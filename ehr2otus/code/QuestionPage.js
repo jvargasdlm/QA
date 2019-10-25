@@ -1,7 +1,6 @@
 const globalVars = require('./globalVars');
 const NavigationHandler = require('./NavigationHandler');
 
-const EhrQuestion = require('./questions/EhrQuestion');
 const AutoCompleteQuestion = require('./questions/AutoCompleteQuestion');
 const BasicQuestionGroup = require('./questions/BasicQuestionGroup');
 const BooleanQuestion = require('./questions/BooleanQuestion');
@@ -13,17 +12,32 @@ const Rule = require('./Rule');
 
 let visibleWhenCounter = 0;//.
 
-let basicQuestionGroupIndex = 0;
-
-function incrementBasicQuestionGroupIndex(){
-    basicQuestionGroupIndex++;
-}
-
-function decrementBasicQuestionGroupIndex(){
-    if(--basicQuestionGroupIndex < 0){
-        basicQuestionGroupIndex = 0;
+let _basicQuestionGroupStack = {
+    stack: [],
+    size: 0,
+    reset: function () {
+        this.stack = [];
+        this.size = 0
+    },
+    push: function (basicQuestionGroup) {
+        this.stack.push(basicQuestionGroup);
+        this.size++;
+    },
+    pop: function () {
+        this.stack.pop();
+        if(this.size > 0) {
+            this.size--;
+        }
+    },
+    getTop: function () {
+        return this.stack[this.size-1];
+    },
+    addQuestionId: function (questionId) {
+        if(this.size > 0){
+            this.getTop().addQuestionId(questionId);
+        }
     }
-}
+};
 
 class QuestionPage {
 
@@ -31,8 +45,8 @@ class QuestionPage {
         this.id = '';
         this.nextPageId = '';
         this.questions = [];
-        this.basicQuestionGroups = [];
         this.rules = [];
+        this.basicQuestionGroups = [];
     }
 
     getFirstQuestion(){
@@ -49,8 +63,13 @@ class QuestionPage {
         
         let questionObjsArr = Object.entries(ehrQuestionPageObj).filter(([key,value]) => key.includes('Question'));
         this._readQuestions(questionObjsArr);
+        _basicQuestionGroupStack.reset();
 
         this._readRules(ehrQuestionPageObj);
+
+        if(this.basicQuestionGroups.length > 0){
+            console.log("\n", this.id, this.basicQuestionGroups);
+        }
     }
 
     _readQuestions(questionObjsArr){
@@ -62,28 +81,38 @@ class QuestionPage {
             "singleSelectionQuestion": SingleSelectionQuestion,
             "textQuestion": TextQuestion
         };
+        try {
+            for (let [key, questionObjArr] of questionObjsArr) {
+                if (key === "basicQuestionGroup") {
+                    for (let questionObj of questionObjArr) {
+                        let basicQuestionGroup = new BasicQuestionGroup();
+                        this.basicQuestionGroups.push(basicQuestionGroup);
 
-        for (let [key, questionObjArr] of questionObjsArr) {
-            if(key === "basicQuestionGroup"){
-                incrementBasicQuestionGroupIndex();//<<
-                // add new BasicQuestionGroup to this.basicQuestionGroups
-                
-                for (let questionObj of questionObjArr) {
-                    let subQuestionObjsArr = Object.entries(questionObj).filter(([key,value]) => key.includes('Question'));
-                    this._readQuestions(subQuestionObjsArr);
+                        _basicQuestionGroupStack.push(basicQuestionGroup);
+
+                        basicQuestionGroup.id = questionObj.id;
+                        basicQuestionGroup.name = questionObj.name;
+                        let subQuestionObjsArr = Object.entries(questionObj).filter(([key, value]) => key.includes('Question'));
+                        this._readQuestions(subQuestionObjsArr);
+
+                        _basicQuestionGroupStack.pop();
+                    }
                 }
-            }
-            else {
-                for (let questionObj of questionObjArr) {
-                    let questionClazz = questionFuncDict[key];
-                    //if (questionClazz) {//.
+                else {
+                    for (let questionObj of questionObjArr) {
+                        let questionClazz = questionFuncDict[key];
                         let question = new questionClazz(questionObj, this.id);
                         this.questions.push(question);
                         globalVars.dictQuestionNameId[question.name] = question.id;
-                    //}
+                        if (_basicQuestionGroupStack.size > 0) {
+                            _basicQuestionGroupStack.addQuestionId(question.id);
+                        }
+                    }
                 }
-                decrementBasicQuestionGroupIndex();//<<
             }
+        }
+        catch (e) {
+            console.log(e);
         }
     }
 
@@ -100,14 +129,14 @@ class QuestionPage {
     toOtusStudioTemplate(otusStudioTemplate){
         for(let question of this.questions){
             otusStudioTemplate["itemContainer"].push(question.toOtusStudioObj());
-            if(question.visibleWhen){
+            /*if(question.visibleWhen){
                 console.log(JSON.stringify({
                     question: question.id,
                     hiddenQuestionName: question.hiddenQuestion,
                     hiddenQuestionId: globalVars.dictQuestionNameId[question.hiddenQuestion],
                     visibleWhen: question.visibleWhen
                 }, null, 4));
-            }
+            }*/
         }
         this._getOtusNavigationObj(otusStudioTemplate["navigationList"]);
         otusStudioTemplate["surveyItemGroupList"].push(this._getOtusGroupListObj());
