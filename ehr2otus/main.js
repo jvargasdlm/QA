@@ -82,7 +82,7 @@ function makeConversionEhr2OtusTemplate(){
 
         const ehr = new EhrQuestionnaire();
         ehr.readFromJsonObj(content);
-        writeOutputJsonFile("ELEA-enxuto.json", ehr);
+        //writeOutputJsonFile("ELEA-enxuto.json", ehr);
 
         const oid = "eleaOtusSUQ6W3VuZGVmaW5lZF1zdXJ2ZXlVVUlEOltiYmFjYzM1MC1lNDdjLTExZTktOGVmNy02MTUwOTJlYjNkOTFdcmVwb3NpdG9yeVVVSUQ6WyBOb3QgZG9uZSB5ZXQgXQ==";
         let template = createEmptyOtusSutioTemplateObj("ELEA", "ELEA", oid);

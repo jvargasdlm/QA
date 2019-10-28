@@ -1,3 +1,24 @@
+let choiceGroups = {
+    choiceObj: {},
+    set: function(choiceArr){
+        this.choiceObj = choiceArr;
+    },
+    findChoiceLabel: function (value){
+        const isNumValue = !isNaN(parseInt(value));
+        const isBoolValue = (value === 'true' || value === 'false');
+        if(isNumValue || isBoolValue){
+            return value;
+        }
+        for(let [id, choices] of Object.entries(this.choiceObj)) {
+            for (let choice of choices) {
+                if(choice.name === value){
+                    return choice.label;
+                }
+            }
+        }
+    }
+};
+
 module.exports = {
     // constants
     DEFAULT_NODES: {
@@ -8,7 +29,7 @@ module.exports = {
     END_PAGE_ID: "END_PAGE",
     // variables
     metaDataGroups: {},
-    choiceGroups: {},
+    choiceGroups: choiceGroups,
     dictQuestionNameId: {},
     ehrQuestionnaire: undefined
 };

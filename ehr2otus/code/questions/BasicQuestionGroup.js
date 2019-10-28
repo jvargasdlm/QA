@@ -9,6 +9,10 @@ class BasicQuestionGroup {
     addQuestionId(questionId){
         this.questionIdArr.push(questionId);
     }
+
+    getFirstQuestionId(){
+        return this.questionIdArr[0];
+    }
 }
 
 module.exports = BasicQuestionGroup;

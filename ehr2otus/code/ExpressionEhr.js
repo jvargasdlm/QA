@@ -10,28 +10,11 @@ class ExpressionEhr {
         this.isMetadata = (ehrExpressionObj.questionName.includes("Metadata"));
     }
 
-    parseValue(){
-        if(!this.isMetadata){
-            const isNumValue = !isNaN(parseInt(this.value));
-            const isBoolValue = (this.value === 'true' || this.value === 'false');
-            if(isNumValue || isBoolValue){
-                return;
-            }
-
-            for(let [id, choices] of Object.entries(globalVars.choiceGroups)) {
-                for (let choice of choices) {
-                    if(choice.name === this.value){
-                        this.value = choice.label;
-                        return;
-                    }
-                }
-            }
-        }
-    }
-
     toOtusStudioObj(){
         //console.log("antes", this.value);//.
-        this.parseValue();
+        if(!this.isMetadata) {
+            this.value = globalVars.choiceGroups.findChoiceLabel(this.value);
+        }
         //console.log("antes", this.value);//.
 
         const operatorDict = {

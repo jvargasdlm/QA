@@ -67,7 +67,7 @@ class EhrQuestionnaire {
             let id = choiceObj["id"];
             this.choiceGroups[id] = choiceObj["choice"];
         }
-        globalVars.choiceGroups = this.choiceGroups;
+        globalVars.choiceGroups.set(this.choiceGroups);
 
         const ehrQuestionPages = ehrTemplate.questionPage.filter((questionPage) => questionPage.id !== this.endPage.id);
 

@@ -1,4 +1,5 @@
 const EhrQuestion = require('./EhrQuestion');
+const choiceGroups = require('../globalVars').choiceGroups;
 
 class SingleSelectionQuestion extends EhrQuestion {
 
@@ -11,7 +12,7 @@ class SingleSelectionQuestion extends EhrQuestion {
     
     toOtusStudioObj(){
         let questionObj = this.getOtusStudioQuestionHeader( "SingleSelectionQuestion", "Integer");
-        const choiceGroupObjArr = EhrQuestion.globalVars.choiceGroups[this.choiceGroupId];
+        const choiceGroupObjArr = choiceGroups.choiceObj[this.choiceGroupId];
         let options = [];
         for(let choiceObj of choiceGroupObjArr){
             let numericValue = choiceObj["value"];

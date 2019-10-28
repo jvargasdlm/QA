@@ -39,6 +39,8 @@ let _basicQuestionGroupStack = {
     }
 };
 
+let _visibleWhenControll = {};
+
 class QuestionPage {
 
     constructor(){
@@ -129,14 +131,19 @@ class QuestionPage {
     toOtusStudioTemplate(otusStudioTemplate){
         for(let question of this.questions){
             otusStudioTemplate["itemContainer"].push(question.toOtusStudioObj());
-            /*if(question.visibleWhen){
+            if(question.visibleWhen){
+                let hiddenQuestionId = globalVars.dictQuestionNameId[question.hiddenQuestion];
+                if(!hiddenQuestionId){ // its a basic question group
+                    let basicQuestionGroup = this.basicQuestionGroups.filter((x) => x.name === question.hiddenQuestion)[0];
+                    hiddenQuestionId = basicQuestionGroup.getFirstQuestionId();
+                }
                 console.log(JSON.stringify({
                     question: question.id,
                     hiddenQuestionName: question.hiddenQuestion,
-                    hiddenQuestionId: globalVars.dictQuestionNameId[question.hiddenQuestion],
-                    visibleWhen: question.visibleWhen
+                    hiddenQuestionId: hiddenQuestionId,
+                    visibleWhen: globalVars.choiceGroups.findChoiceLabel(question.visibleWhen)
                 }, null, 4));
-            }*/
+            }
         }
         this._getOtusNavigationObj(otusStudioTemplate["navigationList"]);
         otusStudioTemplate["surveyItemGroupList"].push(this._getOtusGroupListObj());
