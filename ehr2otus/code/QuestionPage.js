@@ -8,9 +8,11 @@ const DateQuestion = require('./questions/DateQuestion');
 const NumericQuestion = require('./questions/NumericQuestion');
 const SingleSelectionQuestion = require('./questions/SingleSelectionQuestion');
 const TextQuestion = require('./questions/TextQuestion');
+
+const HiddenQuestionGroup = require("./HiddenQuestionGroup");
 const Rule = require('./Rule');
 
-let visibleWhenCounter = 0;//.
+const FileHandler = require('./FileHandler');//.
 
 let _basicQuestionGroupStack = {
     stack: [],
@@ -39,7 +41,27 @@ let _basicQuestionGroupStack = {
     }
 };
 
-let _visibleWhenControll = {};
+const OTUS_QUESTIONS_LIST = globalVars.OTUS_TEMPLATE_ATTRIBUTES.QUESTIONS;
+const OTUS_NAVIGATION_LIST = globalVars.OTUS_TEMPLATE_ATTRIBUTES.NAVIGATION_LIST;
+const OTUS_GROUP_LIST = globalVars.OTUS_TEMPLATE_ATTRIBUTES.GROUPS_LIST;
+
+// Debug
+const pageId = "PAGE_168";
+let thisPageId = "";
+const pagesWithHiddenQuestions = [
+    "PAGE_001", //_ 'ELEA1' ]
+    "PAGE_002", //_ 'ELEA1c' ]
+    "PAGE_003", //_ 'ELEA1e', 'ELEA1f' ]
+    "PAGE_006", //_ 'ELEA2c' ]
+    "PAGE_046", //_ 'ELEA2d1' ]
+    "PAGE_086", //_ 'ELEA2d2' ]
+    "PAGE_126", //_ 'ELEA2d3' ]
+    "PAGE_168", //_ 'ELEA9c' ]
+    "PAGE_169", //_ 'ELEA11' ]
+    "PAGE_171", //_ 'ELEA14l', 'ELEA16' ]
+    "PAGE_187" //_ 'ELEA15b' ]
+];
+//.
 
 class QuestionPage {
 
@@ -48,7 +70,9 @@ class QuestionPage {
         this.nextPageId = '';
         this.questions = [];
         this.rules = [];
+        this.splitedQuestions = [];
         this.basicQuestionGroups = [];
+        this.hiddenQuestions = [];
     }
 
     getFirstQuestion(){
@@ -68,12 +92,36 @@ class QuestionPage {
         _basicQuestionGroupStack.reset();
 
         this._readRules(ehrQuestionPageObj);
-
-        if(this.basicQuestionGroups.length > 0){
-            console.log("\n", this.id, this.basicQuestionGroups);
-        }
     }
 
+    /*
+     * 'Private' methods
+     */
+
+    _getSliceQuestionIds(startIndex, endIndex){
+        return this.questions.slice(startIndex, endIndex).map(q => q.id);
+    }
+
+    _indexOfQuestionId(questionId){
+        return _indexOfQuestionIdInArr(questionId, this.questions);
+    }
+
+    _getQuestionsWithHiddenQuestion(){
+        return this.questions.filter((q) => q.hiddenQuestion !== undefined);
+    }
+
+    _getBasicQuestionGroupThatIncludes(questionId){
+        return this.basicQuestionGroups.filter((b) => b.hasQuestion(questionId))[0];
+    }
+
+    _getNextQuestionId(questionIndex){
+        try{
+            return this.questions[questionIndex+1].id;
+        }
+        catch (e) { // this is the last question => search at next page
+            return _getQuestionIdDefaultRouteToNextPage(this.nextPageId);
+        }
+    }
     _readQuestions(questionObjsArr){
         const questionFuncDict = {
             "autocompleteQuestion": AutoCompleteQuestion,
@@ -91,7 +139,7 @@ class QuestionPage {
                         this.basicQuestionGroups.push(basicQuestionGroup);
 
                         _basicQuestionGroupStack.push(basicQuestionGroup);
-
+                        globalVars.dictQuestionNameId[questionObj.name] = questionObj.id;
                         basicQuestionGroup.id = questionObj.id;
                         basicQuestionGroup.name = questionObj.name;
                         let subQuestionObjsArr = Object.entries(questionObj).filter(([key, value]) => key.includes('Question'));
@@ -128,75 +176,222 @@ class QuestionPage {
         }
     }
 
+    /*
+     * Conversion To Otus
+     */
+
     toOtusStudioTemplate(otusStudioTemplate){
+        thisPageId = this.id;//.
+        this._reorganizeQuestionsThatHiddenQuestion();
+
         for(let question of this.questions){
-            otusStudioTemplate["itemContainer"].push(question.toOtusStudioObj());
-            if(question.visibleWhen){
-                let hiddenQuestionId = globalVars.dictQuestionNameId[question.hiddenQuestion];
-                if(!hiddenQuestionId){ // its a basic question group
-                    let basicQuestionGroup = this.basicQuestionGroups.filter((x) => x.name === question.hiddenQuestion)[0];
-                    hiddenQuestionId = basicQuestionGroup.getFirstQuestionId();
-                }
-                console.log(JSON.stringify({
-                    question: question.id,
-                    hiddenQuestionName: question.hiddenQuestion,
-                    hiddenQuestionId: hiddenQuestionId,
-                    visibleWhen: globalVars.choiceGroups.findChoiceLabel(question.visibleWhen)
-                }, null, 4));
+            otusStudioTemplate[OTUS_QUESTIONS_LIST].push(question.toOtusStudioObj());
+        }
+
+        if(this.splitedQuestions.length){
+            this._setNavigationAndGroupListUsingSplitedQuestions(otusStudioTemplate);
+        }
+        else {
+            this._addNavigationToOtusTemplate(this.questions, otusStudioTemplate[OTUS_NAVIGATION_LIST]);
+
+            if (this.questions.length > 1) {
+                otusStudioTemplate[OTUS_GROUP_LIST].push(this._getOtusGroupListObj());
             }
         }
-        this._getOtusNavigationObj(otusStudioTemplate["navigationList"]);
-        otusStudioTemplate["surveyItemGroupList"].push(this._getOtusGroupListObj());
     }
 
-    _getOtusNavigationObj(navigationList){
+    _reorganizeQuestionsThatHiddenQuestion(){
+        for(let question of this.questions){
+            question.replaceHiddenQuestionInfo(this.basicQuestionGroups);
+        }
+        let questionsWithHidden = this._getQuestionsWithHiddenQuestion();
 
-        function _navigationItemListForQuestion(question, inNavigation, routes) {
-            return NavigationHandler.getNavigationListQuestionElementObj(question.id, question.index, inNavigation, routes)
+        let hidderQuestionIndexes = [];
+        let hiddenQuestionIndexes = [];
+        let lastBasicQuestionGroupIndexes = [];
+
+        for(let question of questionsWithHidden) {
+            let index = this._indexOfQuestionId(question.id);
+            let hiddenIndex = this._indexOfQuestionId(question.hiddenQuestion.id);
+            let basicQuestionGroup = this._getBasicQuestionGroupThatIncludes(question.hiddenQuestion.id);
+            let lastQuestionId = (basicQuestionGroup?
+                basicQuestionGroup.getLastQuestionId() :
+                question.hiddenQuestion.id);
+
+            if (index > hiddenIndex) { // swap questions and indexes
+                [this.questions[index], this.questions[hiddenIndex]] = [this.questions[hiddenIndex], this.questions[index]];
+                [index, hiddenIndex] = [hiddenIndex, index];
+            }
+            else if(hiddenIndex > index+1 && hiddenIndex < this.questions.length) {
+                this._moveQuestion(question, question.hiddenQuestion.id, lastQuestionId);
+                index = this._indexOfQuestionId(question.id);
+                hiddenIndex = this._indexOfQuestionId(question.hiddenQuestion.id);
+            }
+            hidderQuestionIndexes.push(index);
+            hiddenQuestionIndexes.push(hiddenIndex);
+            lastBasicQuestionGroupIndexes.push(this._indexOfQuestionId(lastQuestionId));
         }
 
-        const firstQuestion = this.getFirstQuestion();
+        let splitedQuestions = this.splitedQuestions;
+        const numQuestions = this.questions.length;
+
+        if(hiddenQuestionIndexes.includes(numQuestions-1)){
+            const lastHiddenQuestionIndex = hiddenQuestionIndexes[hiddenQuestionIndexes.length-1];
+            const lastHiddenQuestion = this.questions[lastHiddenQuestionIndex].id;
+            for(let rule of this.rules){
+                const expressions = rule.extractExpressionsWithQuestionId(lastHiddenQuestion);
+                if(expressions.length > 0){
+                    rule.setOrigin(lastHiddenQuestion);
+                }
+            }
+        }
+
+        let questionIndex = 0;
+        for (let i = 0; i < hiddenQuestionIndexes.length; i++) {
+            const startIndex = hiddenQuestionIndexes[i];
+            const endIndex = lastBasicQuestionGroupIndexes[i];
+
+            const sliceStart = this.questions.slice(questionIndex, startIndex)
+                                             .map(q => q.extractIdIndexObj());
+            splitedQuestions.push(sliceStart);
+            questionIndex = endIndex+1;
+
+            const questionThatHideAnother = this.questions[hidderQuestionIndexes[i]];
+            const sliceHidden = this.questions.slice(startIndex, endIndex + 1)
+                                              .map(q => q.extractIdIndexObj());
+            const nextQuestionId = this._getNextQuestionId(endIndex);
+            const hiddenGroup = new HiddenQuestionGroup(sliceHidden, questionThatHideAnother, nextQuestionId);
+            splitedQuestions.push(hiddenGroup);
+        }
+
+        if(questionIndex <= numQuestions-1){
+            const sliceEnd = this.questions.slice(questionIndex, numQuestions)
+                                              .map(q => q.extractIdIndexObj());
+            splitedQuestions.push(sliceEnd);
+        }
+    }
+
+    _moveQuestion(newPrevQuestion, firstQuestionId, lastQuestionId){
+        const prevIndex = this._indexOfQuestionId(newPrevQuestion.id);
+        const firstIndex = this._indexOfQuestionId(firstQuestionId);
+        const lastIndex = (lastQuestionId? this._indexOfQuestionId(lastQuestionId) : firstIndex);
+
+        const sliceStart = this.questions.slice(0, prevIndex+1);
+        const sliceMiddle = this.questions.slice(prevIndex+1, firstIndex);
+        const sliceHiddenToMove = this.questions.slice(firstIndex, lastIndex+1);
+        const sliceEnd = this.questions.slice(lastIndex+1, this.questions.length-1);
+
+        this.questions = sliceStart.concat(sliceHiddenToMove, sliceMiddle, sliceEnd);
+    }
+
+    _addNavigationToOtusTemplate(questions, navigationList){
+        const firstQuestion = questions[0];
         let inNavigation = this._inNavigationArrForFirstQuestion();
 
-        if(this.questions.length === 1){
-            let nextQuestionId = this._getQuestionIdDefaultRouteToNextPage(this.nextPageId);
+        if(questions.length === 1){
+            let nextQuestionId = _getQuestionIdDefaultRouteToNextPage(this.nextPageId);
             let routes =  [
                 NavigationHandler.getDefaultRouteObj(firstQuestion.id, nextQuestionId)
             ];
-            this._pushNonDefaultRoutesOtusObj(routes);
+            this._pushNonDefaultRoutesOtusObj(questions, routes);
             navigationList.push(_navigationItemListForQuestion(firstQuestion, inNavigation, routes));
             return;
         }
 
         // First Question: with only 1 route to 2th question
         let routes =  [
-            NavigationHandler.getDefaultRouteObj(firstQuestion.id, this.questions[1].id)
+            NavigationHandler.getDefaultRouteObj(firstQuestion.id, questions[1].id)
         ];
         navigationList.push(_navigationItemListForQuestion(firstQuestion, inNavigation, routes));
 
         // Middle Questions
-        let i = 1;
-        for (i = 1; i < this.questions.length-1; i++) {
-            inNavigation = [
-                NavigationHandler.getInNavigationObj(this.questions[i-1].id, this.questions[i-1].index)
-            ];
-            let routes =  [
-                NavigationHandler.getDefaultRouteObj(this.questions[i].id, this.questions[i+1].id)
-            ];
-            navigationList.push(_navigationItemListForQuestion(this.questions[i], inNavigation, routes));
-        }
+        let endIndex = questions.length-2;
+        _addNavigationAtSequence(navigationList, questions, 1, endIndex);
 
         // Last Question
-        const lastQuestion = this.getLastQuestion();
+        const lastQuestion = questions[endIndex+1];
         inNavigation = [
-            NavigationHandler.getInNavigationObj(this.questions[i-1].id, this.questions[i-1].index)
+            NavigationHandler.getInNavigationObj(questions[endIndex].id, questions[endIndex].index)
         ];
-        let nextQuestionId = this._getQuestionIdDefaultRouteToNextPage(this.nextPageId);
+        let nextQuestionId = _getQuestionIdDefaultRouteToNextPage(this.nextPageId);
         routes =  [
             NavigationHandler.getDefaultRouteObj(lastQuestion.id, nextQuestionId)
         ];
-        this._pushNonDefaultRoutesOtusObj(routes);
+        this._pushNonDefaultRoutesOtusObj(questions, routes);
         navigationList.push(_navigationItemListForQuestion(lastQuestion, inNavigation, routes));
+    }
+
+    _setNavigationAndGroupListUsingSplitedQuestions(otusStudioTemplate){
+        let navigationList = otusStudioTemplate[OTUS_NAVIGATION_LIST];
+        let groupList = otusStudioTemplate[OTUS_GROUP_LIST];
+        const questionGroupsForDefaultRoute = this.splitedQuestions.filter(obj => !(obj instanceof HiddenQuestionGroup));
+        const questionGroupsForHide = this.splitedQuestions.filter(obj => (obj instanceof HiddenQuestionGroup));
+
+        let result = [];
+        for (let i = 0; i < questionGroupsForDefaultRoute.length; i++) {
+            let group = questionGroupsForDefaultRoute[i];
+            result = result.concat(group);
+            if (group.length > 1) {
+                groupList.push(
+                    _getOtusGroupListObjForGroup(group.map(q => q.id))
+                );
+            }
+        }
+
+        this._addNavigationToOtusTemplate(result, navigationList);
+
+        let hiddenQuestionsDict = {};
+        for (let i = 0; i < questionGroupsForHide.length; i++) {
+            let questionHiddenGroup = questionGroupsForHide[i];
+            let rule = new Rule(this.id);
+            rule.targetPageId = this.id;
+            let lastQuestionGroup = questionGroupsForDefaultRoute[i];
+            let lastQuestion = lastQuestionGroup[lastQuestionGroup.length - 1];
+            rule.setOriginAndTargetQuestionIds(lastQuestion.id, questionHiddenGroup.hiddenQuestions[0].id);
+            let answer = questionHiddenGroup.hiddenBy.answer;
+            for (let value of answer.split(',')) {
+                rule.addEqualExpression(questionHiddenGroup.hiddenBy.id, value);
+            }
+            hiddenQuestionsDict[questionHiddenGroup.hiddenBy.id] = rule;
+
+            let hiddenGroupSize = questionHiddenGroup.hiddenQuestions.length;
+            if (hiddenGroupSize === 1) {
+                const uniqueHiddenQuestion = questionHiddenGroup.hiddenQuestions[0];
+                const nextRegularGroupFirstQuestionId = (uniqueHiddenQuestion.id === this.getLastQuestion().id ?
+                    questionHiddenGroup.next :
+                    questionGroupsForDefaultRoute[i + 1][0].id);
+                _addNavigationDefaulRouteForQuestion(navigationList, uniqueHiddenQuestion, nextRegularGroupFirstQuestionId, null);
+            }
+            else {
+                groupList.push(
+                    _getOtusGroupListObjForGroup(questionHiddenGroup.hiddenQuestions.map(q => q.id))
+                );
+
+                const firstHiddenQuestion = questionHiddenGroup.hiddenQuestions[0];
+                const nextHiddenQuestion = questionHiddenGroup.hiddenQuestions[1];
+                _addNavigationDefaulRouteForQuestion(navigationList, firstHiddenQuestion, nextHiddenQuestion.id, null);
+
+                _addNavigationAtSequence(navigationList, questionHiddenGroup.hiddenQuestions, 1, hiddenGroupSize - 2);
+
+                const lastHiddenQuestion = questionHiddenGroup.hiddenQuestions[hiddenGroupSize - 1];
+                const prevLastHiddenQuestion = questionHiddenGroup.hiddenQuestions[hiddenGroupSize - 2];
+                const nextRegularGroupFirstQuestionId = (lastHiddenQuestion.id === this.getLastQuestion().id ?
+                    questionHiddenGroup.next :
+                    questionGroupsForDefaultRoute[i + 1][0].id);
+                _addNavigationDefaulRouteForQuestion(navigationList, lastHiddenQuestion, nextRegularGroupFirstQuestionId, prevLastHiddenQuestion);
+            }
+        }
+
+        for (let [id, rule] of Object.entries(hiddenQuestionsDict)) {
+            let i = 0, navigationElem = undefined;
+            while (!navigationElem && i < navigationList.length) {
+                if (navigationList[i].origin === id) {
+                    navigationElem = navigationList[i];
+                }
+                i++;
+            }
+            navigationElem.routes.push(rule.toOtusStudioObj());
+        }
     }
 
     _inNavigationArrForFirstQuestion(){
@@ -214,55 +409,98 @@ class QuestionPage {
         }
     }
 
-    _getQuestionIdDefaultRouteToNextPage(nextPageId){
-        try {
-            return globalVars.ehrQuestionnaire.getFirstQuestionIdFromQuestionPage(nextPageId);
-        }
-        catch (e) {
-            if(e !== globalVars.END_PAGE_ID){
-                throw e;
-            }
-            return globalVars.DEFAULT_NODES.END.id;
-        }
-    }
-
-    _pushNonDefaultRoutesOtusObj(routes){
-        const lastQuestion = this.getLastQuestion();
+    _pushNonDefaultRoutesOtusObj(questions, routes){
+        const lastQuestion = questions[questions.length-1];
         for (let rule of this.rules) {
-            let targetQuestionId = this._getQuestionIdDefaultRouteToNextPage(rule.targetPageId);
+            let targetQuestionId = _getQuestionIdDefaultRouteToNextPage(rule.targetPageId);
             rule.setOriginAndTargetQuestionIds(lastQuestion.id, targetQuestionId);
             routes.push(rule.toOtusStudioObj());
         }
     }
 
-    _getOtusGroupListObj(){
-        const first = this.getFirstQuestion().id;
-        const last = this.getLastQuestion().id;
-
-        let members = [{
-            "id": first,
-            "position": "start"
-        }];
-
-        for (let i = 1; i < this.questions.length; i++) {
-            members.push({
-                "id": this.questions[i].id,
-                "position": "middle"
-            })
-        }
-
-        members.push({
-            "id": last,
-            "position": "end"
-        });
-
-        return {
-            "objectType": "SurveyItemGroup",
-            "start": first,
-            "end": last,
-            "members": members
-        }
+    _getOtusGroupListObj() {
+        return _getOtusGroupListObjForGroup(this.questions.map((q) => q.id));//<<
     }
 }
 
 module.exports = QuestionPage;
+
+/*
+ * Private static functions
+ */
+
+function _indexOfQuestionIdInArr(questionId, questionArr){
+    let i=0;
+    let found = false;
+    while(!found && i <  questionArr.length){
+        found = questionArr[i++].id === questionId;
+    }
+    if(found){
+        return i-1;
+    }
+    return -1;
+}
+
+function  _getQuestionIdDefaultRouteToNextPage(nextPageId){
+    try {
+        return globalVars.ehrQuestionnaire.getFirstQuestionIdFromQuestionPage(nextPageId);
+    }
+    catch (e) {
+        if(e !== globalVars.END_PAGE_ID){
+            throw e;
+        }
+        return globalVars.DEFAULT_NODES.END.id;
+    }
+}
+
+function _navigationItemListForQuestion(question, inNavigation, routes) {
+    return NavigationHandler.getNavigationListQuestionElementObj(question.id, question.index, inNavigation, routes);
+}
+
+function _addNavigationDefaulRouteForQuestion(navigationList, originQuestion, destinationQuestionId, prevQuestion){
+    let inNavigation = [];
+    if(prevQuestion) {
+        inNavigation = [
+            NavigationHandler.getInNavigationObj(prevQuestion.id, prevQuestion.index)
+        ];
+    }
+    let routes =  [
+        NavigationHandler.getDefaultRouteObj(originQuestion.id, destinationQuestionId)
+    ];
+    navigationList.push(_navigationItemListForQuestion(originQuestion, inNavigation, routes));
+}
+
+function _addNavigationAtSequence(navigationList, questions, startIndex, endIndex){
+    for (let i = startIndex; i <= endIndex; i++) {
+        _addNavigationDefaulRouteForQuestion(navigationList, questions[i], questions[i+1].id, questions[i-1]);
+    }
+}
+
+function _getOtusGroupListObjForGroup(groupQuestionIds){
+    const first = groupQuestionIds[0];
+    const last = groupQuestionIds.pop();
+
+    let members = [{
+        "id": first,
+        "position": "start"
+    }];
+
+    for (let i = 1; i < groupQuestionIds.length; i++) {
+        members.push({
+            "id": groupQuestionIds[i],
+            "position": "middle"
+        })
+    }
+
+    members.push({
+        "id": last,
+        "position": "end"
+    });
+
+    return {
+        "objectType": "SurveyItemGroup",
+        "start": first,
+        "end": last,
+        "members": members
+    }
+}

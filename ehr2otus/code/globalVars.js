@@ -3,15 +3,18 @@ let choiceGroups = {
     set: function(choiceArr){
         this.choiceObj = choiceArr;
     },
-    findChoiceLabel: function (value){
-        const isNumValue = !isNaN(parseInt(value));
-        const isBoolValue = (value === 'true' || value === 'false');
-        if(isNumValue || isBoolValue){
-            return value;
+    findChoiceLabelInSpecificChoiceGroup: function(choiceGroupId, choiceName){
+        const choiceGroup = this.choiceObj[choiceGroupId];
+        for (let choice of choiceGroup) {
+            if(choice.name === choiceName){
+                return choice.label;
+            }
         }
-        for(let [id, choices] of Object.entries(this.choiceObj)) {
-            for (let choice of choices) {
-                if(choice.name === value){
+    },
+    findChoiceLabelInAllChoiceGroup: function (choiceName){
+        for(let [id, choiceGroup] of Object.entries(this.choiceObj)) {
+            for (let choice of choiceGroup) {
+                if(choice.name === choiceName){
                     return choice.label;
                 }
             }
@@ -27,6 +30,11 @@ module.exports = {
     },
     FIRST_QUESTION_INDEX: 2,
     END_PAGE_ID: "END_PAGE",
+    OTUS_TEMPLATE_ATTRIBUTES: {
+        QUESTIONS: "itemContainer",
+        NAVIGATION_LIST: "navigationList",
+        GROUPS_LIST: "surveyItemGroupList"
+    },
     // variables
     metaDataGroups: {},
     choiceGroups: choiceGroups,

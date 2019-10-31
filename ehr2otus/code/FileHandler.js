@@ -57,6 +57,18 @@ class FileHandler {
     // -------------------------------------------------
     // json files
 
+    // sync
+    static writeJson(path, obj){
+        const content = JSON.stringify(obj, null, 4);
+        fileSystem.writeFile(path, content, function(err) {
+            if(err) {
+                throw err;
+            }
+        });
+        console.log(`The file ${path} was saved!`);
+    }
+
+    // async
     static async readJson(path) {
         return await loadJsonFile(path);
     }

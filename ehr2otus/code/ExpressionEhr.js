@@ -2,25 +2,35 @@ const globalVars = require('./globalVars');
 
 class ExpressionEhr {
 
-    constructor(ehrExpressionObj, questionId){
+    constructor(questionId, ehrExpressionObj){
         this.questionId = questionId;
-        this.questionName = ehrExpressionObj.questionName;//.
-        this.operator = ehrExpressionObj.operator;
-        this.value = ehrExpressionObj.value;
-        this.isMetadata = (ehrExpressionObj.questionName.includes("Metadata"));
+        if(ehrExpressionObj) {
+            this.questionName = ehrExpressionObj.questionName;//.
+            this.operator = ehrExpressionObj.operator;
+            this.value = ehrExpressionObj.value;
+            this.isMetadata = (ehrExpressionObj.questionName.includes("Metadata"));
+        }
+    }
+
+    setValueAndOperator(value, operator="EQ"){
+        this.operator = operator;
+        this.value = value;
     }
 
     toOtusStudioObj(){
-        //console.log("antes", this.value);//.
         if(!this.isMetadata) {
-            this.value = globalVars.choiceGroups.findChoiceLabel(this.value);
+            const isNumValue = !isNaN(parseInt(this.value));
+            const isBoolValue = (this.value === 'true' || this.value === 'false');
+            if(!isNumValue && !isBoolValue){
+                this.value = globalVars.choiceGroups.findChoiceLabelInAllChoiceGroup(this.value);
+            }
         }
-        //console.log("antes", this.value);//.
 
         const operatorDict = {
             "EQ": "equal",
             "GT": "greater"
         };
+        
         return {
             "extents": "SurveyTemplateObject",
             "objectType": "Rule",

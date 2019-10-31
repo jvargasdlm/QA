@@ -6,8 +6,12 @@ class SingleSelectionQuestion extends EhrQuestion {
     constructor(ehrQuestionObj, pageId){
         super(ehrQuestionObj, pageId);
         this.choiceGroupId = ehrQuestionObj.choiceGroupId;
-        this.visibleWhen = ehrQuestionObj.visibleWhen;
-        this.hiddenQuestion = ehrQuestionObj.hiddenQuestion;
+    }
+
+    replaceHiddenQuestionAnswerValue(){
+        this.hiddenQuestionIsVisibleWhenMyAnswerIs = choiceGroups.findChoiceLabelInSpecificChoiceGroup(
+            this.choiceGroupId, 
+            this.hiddenQuestionIsVisibleWhenMyAnswerIs);
     }
     
     toOtusStudioObj(){

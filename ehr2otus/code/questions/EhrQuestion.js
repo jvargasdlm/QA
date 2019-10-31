@@ -1,4 +1,5 @@
 const globalVars = require('../globalVars');
+//const HiddenQuestion = require('./questions/HiddenQuestion');
 
 let currIndex = globalVars.FIRST_QUESTION_INDEX;
 
@@ -11,23 +12,66 @@ class EhrQuestion {
         this.metaDataGroupId = ehrQuestionObj.metaDataGroupId;
         this.pageId = pageId;
         this.index = currIndex++;
-        this.hiddenQuestion = ehrQuestionObj.hiddenQuestion;
-        this.visibleWhen = ehrQuestionObj.visibleWhen;
+        this.hiddenQuestion = this._extractHiddenQuestion(ehrQuestionObj);
+        this.navigationInfo = {
+            defaultPreviousQuestionId: undefined,
+            defaultNextQuestionId: undefined
+        };
+        this.groupInfo = {
+            defaultPreviousQuestionId: undefined,
+            defaultNextQuestionId: undefined
+        };
     }
 
-    static get globalVars(){
-        return globalVars;
+    extractIdIndexObj(){
+        return {
+            id: this.id,
+            index: this.index
+        };
+    }
+
+    _extractHiddenQuestion(ehrQuestionObj){
+        if(ehrQuestionObj.hiddenQuestion){
+            return {
+                name: ehrQuestionObj.hiddenQuestion,
+                id: undefined,
+                isVisibleWhenThisAnswerIs: ehrQuestionObj.visibleWhen
+            }
+        }
+    }
+
+    setHiddenQuestionIdFromDict(){
+        this.hiddenQuestion.id = globalVars.dictQuestionNameId[this.hiddenQuestion.name];
     }
 
     equals(otherQuestion){
         if(!otherQuestion instanceof EhrQuestion){
             return false;
         }
-        return (otherQuestion.id === this.id || otherQuestion.name === this.name);
+        return (otherQuestion.id === this.id && otherQuestion.name === this.name);
     }
 
     // Must be implemented by children classes
     toOtusStudioObj(){
+
+    }
+
+    replaceHiddenQuestionInfo(basicQuestionGroups){
+        if(this.hiddenQuestion){
+            // find id
+            let hiddenQuestionId = globalVars.dictQuestionNameId[this.hiddenQuestion.name];
+            if(hiddenQuestionId.includes("Group")){ // its a basic question group
+                let basicQuestionGroup = basicQuestionGroups.filter((x) => x.name === this.hiddenQuestion.name)[0];
+                hiddenQuestionId = basicQuestionGroup.getFirstQuestionId();
+            }
+            this.hiddenQuestion.id = hiddenQuestionId;
+            // find option value
+            this.replaceHiddenQuestionAnswerValue();
+        }
+    }
+
+    // Must be implemented by children classes
+    replaceHiddenQuestionAnswerValue(){
 
     }
 

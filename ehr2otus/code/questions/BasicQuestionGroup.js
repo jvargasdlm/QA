@@ -13,6 +13,14 @@ class BasicQuestionGroup {
     getFirstQuestionId(){
         return this.questionIdArr[0];
     }
+
+    getLastQuestionId(){
+        return this.questionIdArr[this.questionIdArr.length-1];
+    }
+
+    hasQuestion(questionId){
+        return this.questionIdArr.includes(questionId);
+    }
 }
 
 module.exports = BasicQuestionGroup;

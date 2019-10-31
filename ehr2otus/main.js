@@ -78,7 +78,7 @@ function makeConversionEhr2OtusTemplate(){
         let content = {};
         xml2json(xmlFilePath, content);
         content = content.result;
-        writeOutputJsonFile("ELEA.json", content);
+        //writeOutputJsonFile("ELEA.json", content);
 
         const ehr = new EhrQuestionnaire();
         ehr.readFromJsonObj(content);
@@ -97,9 +97,15 @@ function makeConversionEhr2OtusTemplate(){
 }
 
 makeConversionEhr2OtusTemplate();
+//quickTest();
 
-/*
-ELEA14aGroup
-ELEA14mGroup
- */
+function quickTest(){
+    var a = [1,2,3,4,5];
+    var b = {x: "1", y:"2"};
+    var arr = ["string",a,b];
+    console.log(arr);
+    console.log((typeof arr[0]) === "string" );
+    console.log(arr[1] instanceof Array);
+    console.log(arr[2] instanceof Array);
+}
 

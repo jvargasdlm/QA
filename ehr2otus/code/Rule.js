@@ -6,19 +6,28 @@ class Rule {
 
     constructor(questionPageId, ehrRule){
         this.originPageId = questionPageId;
-        this.origin = '';
-        this.targetPageId = ehrRule.targetPageId;
-        this.target = '';
+        this.origin = "";
+        this.targetPageId = "";
+        this.target = "";
         this.expressions = [];
-        this._extractExpressions(ehrRule);
+        if(ehrRule) {
+            this.targetPageId = ehrRule.targetPageId;
+            this._extractExpressions(ehrRule);
+        }
+    }
+
+    addEqualExpression(questionId, value){
+        let expression = new ExpressionEhr(questionId);
+        expression.setValueAndOperator(value);
+        this.expressions.push(expression);
     }
 
     _extractExpressions(ehrRule){
         let ehrRuleArr = ehrRule.rule;
         for(let exprObj of ehrRuleArr){
-            for(let expression of exprObj.expression){
-                let questionId = globalVars.dictQuestionNameId[expression.questionName];
-                this.expressions.push(new ExpressionEhr(expression, questionId));
+            for(let expr of exprObj.expression){
+                let questionId = globalVars.dictQuestionNameId[expr.questionName];
+                this.expressions.push(new ExpressionEhr(questionId, expr));
             }
         }
         /*if(br.rule.length > 1){
@@ -35,8 +44,14 @@ class Rule {
             otherRule.targetPageId === this.targetPageId);
     }
 
+    setOrigin(originQuestionId){
+        if(this.origin === ""){
+            this.origin = originQuestionId;
+        }
+    }
+
     setOriginAndTargetQuestionIds(originQuestionId, targetQuestionId){
-        this.origin = originQuestionId;
+        this.setOrigin(originQuestionId);
         if(this.targetPageId === globalVars.END_PAGE_ID){
             this.target = globalVars.DEFAULT_NODES.END.id;
         }
@@ -52,6 +67,10 @@ class Rule {
         }
 
         return NavigationHandler.getNonDefaultRoutesObj(this.origin, this.target, expressions);
+    }
+
+    extractExpressionsWithQuestionId(questionId){
+        return this.expressions.filter(expr => expr.questionId === questionId);
     }
 }
 
