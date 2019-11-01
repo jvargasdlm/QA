@@ -14,10 +14,6 @@ class EhrQuestionnaire {
         globalVars.ehrQuestionnaire = this;
     }
 
-    get END_PAGE_ID(){
-        return this.endPage.id;
-    }
-
     get getFirstQuestionPage(){
         return this.questionPages[0];
     }
@@ -86,10 +82,8 @@ class EhrQuestionnaire {
             }
         }
 
-        /*
-        const ehrEndPage = ehrTemplate.questionPage.filter((questionPage) => questionPage.id === END_PAGE);
-        this.endPage.readFromJsonObj(ehrEndPage);
-        */
+        const ehrEndPageObj = ehrTemplate.questionPage.filter((questionPage) => questionPage.id === this.endPage.id)[0];
+        this.endPage.readFromJsonObj(ehrEndPageObj);
     }
 
     toOtusStudioTemplate(emptyOtusStudioTemplate){

@@ -13,14 +13,6 @@ class EhrQuestion {
         this.pageId = pageId;
         this.index = currIndex++;
         this.hiddenQuestion = this._extractHiddenQuestion(ehrQuestionObj);
-        this.navigationInfo = {
-            defaultPreviousQuestionId: undefined,
-            defaultNextQuestionId: undefined
-        };
-        this.groupInfo = {
-            defaultPreviousQuestionId: undefined,
-            defaultNextQuestionId: undefined
-        };
     }
 
     extractIdIndexObj(){

@@ -12,8 +12,6 @@ const TextQuestion = require('./questions/TextQuestion');
 const HiddenQuestionGroup = require("./HiddenQuestionGroup");
 const Rule = require('./Rule');
 
-const FileHandler = require('./FileHandler');//.
-
 let _basicQuestionGroupStack = {
     stack: [],
     size: 0,
@@ -45,24 +43,6 @@ const OTUS_QUESTIONS_LIST = globalVars.OTUS_TEMPLATE_ATTRIBUTES.QUESTIONS;
 const OTUS_NAVIGATION_LIST = globalVars.OTUS_TEMPLATE_ATTRIBUTES.NAVIGATION_LIST;
 const OTUS_GROUP_LIST = globalVars.OTUS_TEMPLATE_ATTRIBUTES.GROUPS_LIST;
 
-// Debug
-const pageId = "PAGE_168";
-let thisPageId = "";
-const pagesWithHiddenQuestions = [
-    "PAGE_001", //_ 'ELEA1' ]
-    "PAGE_002", //_ 'ELEA1c' ]
-    "PAGE_003", //_ 'ELEA1e', 'ELEA1f' ]
-    "PAGE_006", //_ 'ELEA2c' ]
-    "PAGE_046", //_ 'ELEA2d1' ]
-    "PAGE_086", //_ 'ELEA2d2' ]
-    "PAGE_126", //_ 'ELEA2d3' ]
-    "PAGE_168", //_ 'ELEA9c' ]
-    "PAGE_169", //_ 'ELEA11' ]
-    "PAGE_171", //_ 'ELEA14l', 'ELEA16' ]
-    "PAGE_187" //_ 'ELEA15b' ]
-];
-//.
-
 class QuestionPage {
 
     constructor(){
@@ -75,6 +55,10 @@ class QuestionPage {
         this.hiddenQuestions = [];
     }
 
+    /*-----------------------------------------------------
+     * Getters
+     */
+
     getFirstQuestion(){
         return this.questions[0];
     }
@@ -83,27 +67,8 @@ class QuestionPage {
         return this.questions[this.questions.length-1];
     }
 
-    readFromJsonObj(ehrQuestionPageObj){
-        this.id = ehrQuestionPageObj.id;
-        this.nextPageId = ehrQuestionPageObj.nextPageId;
-        
-        let questionObjsArr = Object.entries(ehrQuestionPageObj).filter(([key,value]) => key.includes('Question'));
-        this._readQuestions(questionObjsArr);
-        _basicQuestionGroupStack.reset();
-
-        this._readRules(ehrQuestionPageObj);
-    }
-
-    /*
-     * 'Private' methods
-     */
-
-    _getSliceQuestionIds(startIndex, endIndex){
-        return this.questions.slice(startIndex, endIndex).map(q => q.id);
-    }
-
-    _indexOfQuestionId(questionId){
-        return _indexOfQuestionIdInArr(questionId, this.questions);
+    _indexOfQuestionById(questionId){
+        return _indexOfQuestionByIdInArr(questionId, this.questions);
     }
 
     _getQuestionsWithHiddenQuestion(){
@@ -122,6 +87,22 @@ class QuestionPage {
             return _getQuestionIdDefaultRouteToNextPage(this.nextPageId);
         }
     }
+
+    /*-----------------------------------------------------
+    * Read methods
+    */
+
+    readFromJsonObj(ehrQuestionPageObj){
+        this.id = ehrQuestionPageObj.id;
+        this.nextPageId = ehrQuestionPageObj.nextPageId;
+        
+        let questionObjsArr = Object.entries(ehrQuestionPageObj).filter(([key,value]) => key.includes('Question'));
+        this._readQuestions(questionObjsArr);
+        _basicQuestionGroupStack.reset();
+
+        this._readRules(ehrQuestionPageObj);
+    }
+
     _readQuestions(questionObjsArr){
         const questionFuncDict = {
             "autocompleteQuestion": AutoCompleteQuestion,
@@ -176,12 +157,11 @@ class QuestionPage {
         }
     }
 
-    /*
+    /*-----------------------------------------------------
      * Conversion To Otus
      */
 
     toOtusStudioTemplate(otusStudioTemplate){
-        thisPageId = this.id;//.
         this._reorganizeQuestionsThatHiddenQuestion();
 
         for(let question of this.questions){
@@ -204,15 +184,18 @@ class QuestionPage {
         for(let question of this.questions){
             question.replaceHiddenQuestionInfo(this.basicQuestionGroups);
         }
-        let questionsWithHidden = this._getQuestionsWithHiddenQuestion();
 
-        let hidderQuestionIndexes = [];
+        let questionsThatHideOthers = this._getQuestionsWithHiddenQuestion();
+        if(questionsThatHideOthers.length === 0){
+            return;
+        }
+        let questionThatHideIndexes = [];
         let hiddenQuestionIndexes = [];
         let lastBasicQuestionGroupIndexes = [];
 
-        for(let question of questionsWithHidden) {
-            let index = this._indexOfQuestionId(question.id);
-            let hiddenIndex = this._indexOfQuestionId(question.hiddenQuestion.id);
+        for(let question of questionsThatHideOthers) {
+            let index = this._indexOfQuestionById(question.id);
+            let hiddenIndex = this._indexOfQuestionById(question.hiddenQuestion.id);
             let basicQuestionGroup = this._getBasicQuestionGroupThatIncludes(question.hiddenQuestion.id);
             let lastQuestionId = (basicQuestionGroup?
                 basicQuestionGroup.getLastQuestionId() :
@@ -224,15 +207,14 @@ class QuestionPage {
             }
             else if(hiddenIndex > index+1 && hiddenIndex < this.questions.length) {
                 this._moveQuestion(question, question.hiddenQuestion.id, lastQuestionId);
-                index = this._indexOfQuestionId(question.id);
-                hiddenIndex = this._indexOfQuestionId(question.hiddenQuestion.id);
+                index = this._indexOfQuestionById(question.id);
+                hiddenIndex = this._indexOfQuestionById(question.hiddenQuestion.id);
             }
-            hidderQuestionIndexes.push(index);
+            questionThatHideIndexes.push(index);
             hiddenQuestionIndexes.push(hiddenIndex);
-            lastBasicQuestionGroupIndexes.push(this._indexOfQuestionId(lastQuestionId));
+            lastBasicQuestionGroupIndexes.push(this._indexOfQuestionById(lastQuestionId));
         }
 
-        let splitedQuestions = this.splitedQuestions;
         const numQuestions = this.questions.length;
 
         if(hiddenQuestionIndexes.includes(numQuestions-1)){
@@ -253,28 +235,28 @@ class QuestionPage {
 
             const sliceStart = this.questions.slice(questionIndex, startIndex)
                                              .map(q => q.extractIdIndexObj());
-            splitedQuestions.push(sliceStart);
+            this.splitedQuestions.push(sliceStart);
             questionIndex = endIndex+1;
 
-            const questionThatHideAnother = this.questions[hidderQuestionIndexes[i]];
+            const questionThatHideAnother = this.questions[questionThatHideIndexes[i]];
             const sliceHidden = this.questions.slice(startIndex, endIndex + 1)
                                               .map(q => q.extractIdIndexObj());
             const nextQuestionId = this._getNextQuestionId(endIndex);
             const hiddenGroup = new HiddenQuestionGroup(sliceHidden, questionThatHideAnother, nextQuestionId);
-            splitedQuestions.push(hiddenGroup);
+            this.splitedQuestions.push(hiddenGroup);
         }
 
         if(questionIndex <= numQuestions-1){
             const sliceEnd = this.questions.slice(questionIndex, numQuestions)
                                               .map(q => q.extractIdIndexObj());
-            splitedQuestions.push(sliceEnd);
+            this.splitedQuestions.push(sliceEnd);
         }
     }
 
     _moveQuestion(newPrevQuestion, firstQuestionId, lastQuestionId){
-        const prevIndex = this._indexOfQuestionId(newPrevQuestion.id);
-        const firstIndex = this._indexOfQuestionId(firstQuestionId);
-        const lastIndex = (lastQuestionId? this._indexOfQuestionId(lastQuestionId) : firstIndex);
+        const prevIndex = this._indexOfQuestionById(newPrevQuestion.id);
+        const firstIndex = this._indexOfQuestionById(firstQuestionId);
+        const lastIndex = (lastQuestionId? this._indexOfQuestionById(lastQuestionId) : firstIndex);
 
         const sliceStart = this.questions.slice(0, prevIndex+1);
         const sliceMiddle = this.questions.slice(prevIndex+1, firstIndex);
@@ -283,6 +265,10 @@ class QuestionPage {
 
         this.questions = sliceStart.concat(sliceHiddenToMove, sliceMiddle, sliceEnd);
     }
+
+    /*
+     * Navigation
+     */
 
     _addNavigationToOtusTemplate(questions, navigationList){
         const firstQuestion = questions[0];
@@ -418,6 +404,10 @@ class QuestionPage {
         }
     }
 
+    /*
+     * Groups
+     */
+
     _getOtusGroupListObj() {
         return _getOtusGroupListObjForGroup(this.questions.map((q) => q.id));//<<
     }
@@ -425,11 +415,11 @@ class QuestionPage {
 
 module.exports = QuestionPage;
 
-/*
+/***************************************************************
  * Private static functions
  */
 
-function _indexOfQuestionIdInArr(questionId, questionArr){
+function _indexOfQuestionByIdInArr(questionId, questionArr){
     let i=0;
     let found = false;
     while(!found && i <  questionArr.length){

@@ -1,7 +1,7 @@
 const xml2js = require('xml2js');
 const FileHandler = require('./code/FileHandler');
 const EhrQuestionnaire = require("./code/EhrQuestionnaire");
-const globalVars = require('./code/globalVars');//.
+//const globalVars = require('./code/globalVars');//.
 
 function createEmptyOtusSutioTemplateObj(name, acronym, oid) {
     return {
@@ -31,7 +31,7 @@ function createEmptyOtusSutioTemplateObj(name, acronym, oid) {
     }
 }
 
-function xml2json(ehrXmlFilePath, resultObj) {
+function xml2json(ehrXmlFilePath) {
     const ATTR_KEY = 'ATTR';
 
     function walkJsonObject(jsonObj) {
@@ -50,6 +50,7 @@ function xml2json(ehrXmlFilePath, resultObj) {
     }
 
     try {
+        let resultObj = {};
         const xml_string = FileHandler.read(ehrXmlFilePath);
         const parser = new xml2js.Parser({ attrkey: ATTR_KEY });
         parser.parseString(xml_string, function (error, result) {
@@ -60,6 +61,7 @@ function xml2json(ehrXmlFilePath, resultObj) {
                 console.log(error);
             }
         });
+        return resultObj.result;
     }
     catch (e) {
         throw e;
@@ -75,9 +77,7 @@ function writeOutputJsonFile(filename, content){
 function makeConversionEhr2OtusTemplate(){
     const xmlFilePath = process.cwd() + "/ELEA.xml"; //. maybe by custom env variable?
     try {
-        let content = {};
-        xml2json(xmlFilePath, content);
-        content = content.result;
+        let content = xml2json(xmlFilePath);
         //writeOutputJsonFile("ELEA.json", content);
 
         const ehr = new EhrQuestionnaire();
@@ -89,6 +89,9 @@ function makeConversionEhr2OtusTemplate(){
         ehr.toOtusStudioTemplate(template);
         writeOutputJsonFile("ELEA-otus-result.json", template);
 
+        const endPageSentences = ehr.endPage.getSentencesObject();
+        writeOutputJsonFile("ELEA-end-page-sentences.json", endPageSentences);
+
         //writeOutputJsonFile("dictQuestionNameId.json", globalVars.dictQuestionNameId);
     }
     catch (e) {
@@ -97,15 +100,3 @@ function makeConversionEhr2OtusTemplate(){
 }
 
 makeConversionEhr2OtusTemplate();
-//quickTest();
-
-function quickTest(){
-    var a = [1,2,3,4,5];
-    var b = {x: "1", y:"2"};
-    var arr = ["string",a,b];
-    console.log(arr);
-    console.log((typeof arr[0]) === "string" );
-    console.log(arr[1] instanceof Array);
-    console.log(arr[2] instanceof Array);
-}
-
