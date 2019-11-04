@@ -3,5 +3,5 @@
 node_modules/*
 output/*
 # files
-ELEA.xml
+input/*.xml
 package-lock.json
