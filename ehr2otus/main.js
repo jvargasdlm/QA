@@ -1,7 +1,10 @@
+//require('custom-env').env('staging');
 const xml2js = require('xml2js');
 const FileHandler = require('./code/FileHandler');
 const EhrQuestionnaire = require("./code/EhrQuestionnaire");
 //const globalVars = require('./code/globalVars');//.
+
+const outputDirPath = process.cwd() + "/output/";
 
 function createEmptyOtusSutioTemplateObj(name, acronym, oid) {
     return {
@@ -69,34 +72,43 @@ function xml2json(ehrXmlFilePath) {
 }
 
 function writeOutputJsonFile(filename, content){
-    const outputDirPath = process.cwd() + "/output/";
     const path = outputDirPath + filename;
     FileHandler.write(path, JSON.stringify(content, null, 4));
 }
 
-function makeConversionEhr2OtusTemplate(){
-    const xmlFilePath = process.cwd() + "/ELEA.xml"; //. maybe by custom env variable?
+function makeConversionEhr2OtusTemplate(templateInfo){
+    const xmlFilePath = process.cwd() + "/input/" + templateInfo.filename;
+
+    let content = xml2json(xmlFilePath);
+    //writeOutputJsonFile(templateInfo.acronym+".json", content);
+
+    const ehr = new EhrQuestionnaire();
+    ehr.readFromJsonObj(content);
+    //writeOutputJsonFile(templateInfo.acronym+"-enxuto.json", ehr);
+
+    //const oid = "eleaOtusSUQ6W3VuZGVmaW5lZF1zdXJ2ZXlVVUlEOltiYmFjYzM1MC1lNDdjLTExZTktOGVmNy02MTUwOTJlYjNkOTFdcmVwb3NpdG9yeVVVSUQ6WyBOb3QgZG9uZSB5ZXQgXQ==";
+    let template = createEmptyOtusSutioTemplateObj(templateInfo.name, templateInfo.acronym, templateInfo.oid);
+    ehr.toOtusStudioTemplate(template);
+    writeOutputJsonFile(templateInfo.acronym+"-otus-result.json", template);
+
+    const endPageSentences = ehr.endPage.getSentencesObject();
+    writeOutputJsonFile(templateInfo.acronym+"-end-page-sentences.json", endPageSentences);
+
+    //writeOutputJsonFile("dictQuestionNameId.json", globalVars.dictQuestionNameId);
+}
+
+function main(){
     try {
-        let content = xml2json(xmlFilePath);
-        //writeOutputJsonFile("ELEA.json", content);
+        FileHandler.mkdir(outputDirPath);
 
-        const ehr = new EhrQuestionnaire();
-        ehr.readFromJsonObj(content);
-        //writeOutputJsonFile("ELEA-enxuto.json", ehr);
-
-        const oid = "eleaOtusSUQ6W3VuZGVmaW5lZF1zdXJ2ZXlVVUlEOltiYmFjYzM1MC1lNDdjLTExZTktOGVmNy02MTUwOTJlYjNkOTFdcmVwb3NpdG9yeVVVSUQ6WyBOb3QgZG9uZSB5ZXQgXQ==";
-        let template = createEmptyOtusSutioTemplateObj("ELEA", "ELEA", oid);
-        ehr.toOtusStudioTemplate(template);
-        writeOutputJsonFile("ELEA-otus-result.json", template);
-
-        const endPageSentences = ehr.endPage.getSentencesObject();
-        writeOutputJsonFile("ELEA-end-page-sentences.json", endPageSentences);
-
-        //writeOutputJsonFile("dictQuestionNameId.json", globalVars.dictQuestionNameId);
+        const templatesInfo = FileHandler.readJsonSync(process.cwd() + "/input/templateInfo.json").templatesInfo;
+        for(let templateInfo of templatesInfo){
+            makeConversionEhr2OtusTemplate(templateInfo);
+        }
     }
     catch (e) {
         console.log(e);
     }
 }
 
-makeConversionEhr2OtusTemplate();
+main();

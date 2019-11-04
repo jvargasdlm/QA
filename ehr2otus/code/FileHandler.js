@@ -9,6 +9,14 @@ class FileHandler {
         return fs.readdirSync(dirPath); // array with  relative path files
     }
 
+    static mkdir (dirPath) {
+        try {
+            fs.mkdirSync(dirPath, { recursive: true })
+        } catch (err) {
+            if (err.code !== 'EEXIST') throw err
+        }
+    }
+
     static getBaseName(path) {
         return pathPkg.basename(path);
     }
