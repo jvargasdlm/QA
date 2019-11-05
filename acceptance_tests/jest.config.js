@@ -8,7 +8,8 @@ module.exports = {
     //'**/tests/otus-studio/*-test.js'
     // otus
     //'**/tests/otus/*-test.js'
-    '**/tests/otus/activity-report-test.js'
+    //'**/tests/otus/activity-report-test.js',
+    '**/tests/otus/activity-redesign-test.js'
   ],
   transformIgnorePatterns: ['<rootDir>/node_modules/'],
   transform: {
