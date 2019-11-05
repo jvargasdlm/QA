@@ -1,7 +1,15 @@
+const PageOtus = require('./PageOtus');
+const ActivityCard = require('./ActivityCard');
 
+class AddActivityPage extends PageOtus {
 
-class AddActitivyPage {
+    constructor(page){
+        super(page);
+    }
 
+    async init(){
+
+    }
 }
 
-module.exports = AddActitivyPage;
+module.exports = AddActivityPage;
