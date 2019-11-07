@@ -23,7 +23,7 @@ afterAll(async () => {
 // *****************************************************************
 // Specific modules for this suite test
 
-const ActivitiesPageSelectors = require('../../code/otus/classes/ActivitiesPage').getSelectors();
+const ActivitiesPageSelectors = require('../../code/otus/classes/activities/ActivitiesPage').getSelectors();
 
 // *****************************************************************
 // Tests

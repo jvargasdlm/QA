@@ -27,9 +27,9 @@ afterAll(async () => {
 
 // *****************************************************************
 // Specific modules for this suite test
-const ActivitiesPage          = require('../../code/otus/classes/ActivitiesPage');
-const ActivityQuestionAnswer  = require('../../code/otus/classes/ActivityQuestionAnswer');
-const ActivityReportPage      = require('../../code/otus/classes/ActivityReportPage');
+const ActivitiesPage          = require('../../code/otus/classes/activities/ActivitiesPage');
+const ActivityQuestionAnswer  = require('../../code/otus/classes/activities/ActivityQuestionAnswer');
+const ActivityReportPage      = require('../../code/otus/classes/activities/ActivityReportPage');
 const ExamReportPage          = require('../../code/otus/classes/ExamReportPage');//.
 
 // Constants
