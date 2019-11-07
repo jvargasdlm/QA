@@ -26,13 +26,15 @@ afterAll(async () => {
 
 // *****************************************************************
 // Specific modules for this suite test
-const ActivitiesPage          = require('../../code/otus/classes/ActivitiesPage');
-const ActivityQuestionAnswer  = require('../../code/otus/classes/ActivityQuestionAnswer');
+const ActivitiesPage          = require('../../code/otus/classes/activities/ActivitiesPage');
+const ActivityQuestionAnswer  = require('../../code/otus/classes/activities/ActivityQuestionAnswer');
 
 // Constants
 const recruitmentNumberOrName = '5001007';
-const acronym = 'ACTA';
-const answerDataTypes = ActivityQuestionAnswer.dataTypes;
+    const acronym = 'FG';
+const answersArr = [
+    new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.number, '0')
+];
 
 // *****************************************************************
 // Auxiliar functions
@@ -41,6 +43,7 @@ async function openParticipantActivities(){
     await pageOtus.openParticipantFromHomePage(recruitmentNumberOrName);
     await pageOtus.openParticipantActivitiesMenu();
     activitiesPage = new ActivitiesPage(pageOtus.page);
+    await activitiesPage.init();
 }
 
 // *****************************************************************
@@ -48,9 +51,9 @@ async function openParticipantActivities(){
 
 suiteArray = [
 
-    xdescribe('Temp Test', () => {
+    describe('Temp Test', () => {
 
-        xtest('Temp test', async() => {
+        test('Temp test', async() => {
 
         });
 
@@ -58,41 +61,44 @@ suiteArray = [
 
     xdescribe('Scenario #2.1 - Activity selection', () => {
 
-        async function checkReportButtonIsHidden(firstActivityCheckboxIndex, secondActivityCheckboxIndex){
-            await activitiesPage.selectActivityCheckbox(firstActivityCheckboxIndex);
-            await activitiesPage.init();
-            await activitiesPage.selectActivityCheckbox(secondActivityCheckboxIndex);
-            const isHidden = await activitiesPage.reportButton.isHidden();
+        async function ActivityButtonsAreHidden(expectedHidden=true, failMessage='Activity buttons should be hidden, but do not.'){
+            await activitiesPage.waitForMilliseconds(500);
+
+            // temp
+            const isHidden = await activitiesPage.page.evaluate(() => {
+                const buttonElem = document.querySelector("button[aria-label='Preencher Atividade']");
+                return (buttonElem.getAttribute("aria-hidden") === "true");
+            });
+
             try {
-                expect(isHidden).toBeTrue();
+                expect(isHidden).toBe(expectedHidden);
             }
             catch (e) {
-                errorLogger.addFailMessageFromCurrSpec(`Report button should be hidden, but does not.`);
+                errorLogger.addFailMessageFromCurrSpec(failMessage);
             }
         }
 
         test('2.1a Select 0 activities', async() => {
-            await checkReportButtonIsHidden(0, 0); // select and unselect
+            await activitiesPage.selectActivityCheckbox(0);
+            await activitiesPage.selectActivityCheckbox(0);
+            await ActivityButtonsAreHidden();
         });
 
         test('2.1b Select 2 activities', async() => {
-            await checkReportButtonIsHidden(0, 1);
+            await activitiesPage.selectActivityCheckbox(0);
+            await activitiesPage.selectActivityCheckbox(1);
+            await ActivityButtonsAreHidden();
+            await activitiesPage.refreshAndWaitLoad();
         });
 
         test('2.1c Select 1 activitiy', async() => {
             await activitiesPage.selectActivityCheckbox(1);
-            await activitiesPage.init();
-            const isHidden = await activitiesPage.reportButton.isHidden();
-            try {
-                expect(isHidden).toBeFalse();
-            }
-            catch (e) {
-                errorLogger.addFailMessageFromCurrSpec(`Report button should be visible, but does not.`);
-            }
+            await ActivityButtonsAreHidden(false, 'Activity buttons should be visible, but do not.');
+            await activitiesPage.refreshAndWaitLoad();
         });
     }),
 
-    describe('Scenario #2.2: Add new activity', () => {
+    xdescribe('Scenario #2.2: Add new activity', () => {
 
         test('2.2 test', async() => {
             await activitiesPage.addOnlineActivity(acronym);
@@ -109,8 +115,7 @@ suiteArray = [
 
     xdescribe('Scenario #2.3: Fill activity', () => {
 
-        xtest('2.3 test', async() => {
-
+        test('2.3 test', async() => {
             await activitiesPage.fillActivity(acronym, answersArr);
         });
 
@@ -121,6 +126,7 @@ suiteArray = [
         test('2.5 test', async() => {
             // use the same activity filled at 2.3 to compare answers
             const answers = await activitiesPage.readFinalizedActivity(acronym);
+            console.log(answers);
         });
 
     }),
@@ -133,7 +139,7 @@ suiteArray = [
         });
 
     }),
-
+/*
     xdescribe('Scenario #2.4: Load report', () => {
 
         xtest('2.4a Load report of activity with block issues', async() => {
@@ -172,5 +178,5 @@ suiteArray = [
         });
 
     })
-
+*/
 ]; // end suiteArray
