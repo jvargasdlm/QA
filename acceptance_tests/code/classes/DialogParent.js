@@ -19,10 +19,10 @@ class DialogParent extends PageElement {
         await this.pageExt.waitForSelector(selectors.DIALOG);
         this.elementHandle = this.pageExt.page.$(selectors.DIALOG);
         if(!closeButtonId){
-            const allButtons = await this.findChildrenButton(selectors.DIALOG);
+            const allButtons = await this.pageExt.findChildrenButtonToSetTempIdsFromInnerText(selectors.DIALOG);
             closeButtonId = allButtons[0];
         }
-        return await this.findChildrenButton(selectors.ACTIONS);
+        return await this.pageExt.findChildrenButtonToSetTempIdsFromInnerText(selectors.ACTIONS);
     }
 
     async waitForClose(){

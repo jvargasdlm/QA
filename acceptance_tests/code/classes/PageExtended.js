@@ -1,5 +1,7 @@
+require('custom-env').env('staging');
+
 const utils         = require('../utils');
-const fileHandler   = require('../handlers/FileHandler');
+const FileHandler   = require('../handlers/FileHandler');
 const ErrorLogger   = require('./ErrorLogger');
 // Page elements
 const Calendar       = require('./Calendar');
@@ -8,6 +10,8 @@ const Dialog         = require('./Dialog');
 const DialogWarning  = require('./DialogWarning');
 const InputField     = require('./InputField');
 const OptionSelector = require('./OptionSelector');
+const SearchInput    = require('./SearchInput');
+const Switch         = require('./Switch');
 
 // ***********************************************
 // Constants
@@ -32,11 +36,22 @@ class PageExtended {
         this.typeCode = -1;
     }
 
+    // --------------------------------------------------------
+    // env variable dependencies
+
+    hideXs(){
+        return (process.env.WINDOW_WIDTH >= 600);
+    }
+
     // ----------------------------------------------------------
     // Getters
 
     get amIAOtusPage(){
         return (this.typeCode === typeCodes.OTUS);
+    }
+
+    get typeCodeName(){
+        return Object.keys(typeCodes)[this.typeCode];
     }
 
     get errorLogger(){
@@ -73,6 +88,14 @@ class PageExtended {
 
     getNewOptionSelector(){
         return new OptionSelector(this);
+    }
+
+    getNewSearchInput(){
+        return new SearchInput(this);
+    }
+
+    getNewSwitch(){
+        return new Switch(this);
     }
 
     /* ********************************************************************
@@ -189,10 +212,10 @@ class PageExtended {
             }
         }
         catch (e) {
-            if(LOG_NAVIGATION_ACTIONS) {
+            //if(LOG_NAVIGATION_ACTIONS) {
                 console.log('ERROR at click on ' + selector);//.
                 await this.hasElementSelector(selector);//.
-            }
+            //}
             throw e;
         }
     };
@@ -205,15 +228,14 @@ class PageExtended {
      * Query selector
      */
 
-    async findChildren(parentSelector, childrenTag){
+    async findChildrenToSetTempIdsFromInnerText(parentSelector, childrenTag){
         return await this.page.evaluate((_parentSelector, _childrenTag) => {
             let parentNode = document.body.querySelector(_parentSelector);
             let tempIdArray = [];
-            const childTagName = _childrenTag;
 
             function pushId(currentNode) {
                 const isNodeEmpty = (Object.entries(currentNode).length === 0);
-                if (!isNodeEmpty && currentNode.tagName.toLowerCase() === childTagName) {
+                if (!isNodeEmpty && currentNode.tagName.toLowerCase() === _childrenTag) {
                     let id = currentNode.getAttribute('id');
                     if(!id){
                         //let elemText = currentNode.querySelector('span');
@@ -237,6 +259,40 @@ class PageExtended {
             return tempIdArray;
 
         }, parentSelector, childrenTag);
+    }
+
+    async findChildrenButtonToSetTempIdsFromInnerText(parentSelector){
+        return await this.findChildrenToSetTempIdsFromInnerText(parentSelector, "button");
+    }
+
+    async findChildrenToSetTempIds(parentSelector, childrenTag, tempIdArr){
+        return await this.page.evaluate((_parentSelector, _childrenTag, _tempIdArr) => {
+            const parentNode = document.body.querySelector(_parentSelector);
+            let i = 0;
+
+            function pushId(currentNode) {
+                const isNodeEmpty = (Object.entries(currentNode).length === 0);
+                if (!isNodeEmpty && currentNode.tagName.toLowerCase() === _childrenTag) {
+                    currentNode.setAttribute('id', _tempIdArr[i++]);
+                }
+            }
+
+            function walkTheDOM(node, func) {
+                func(node);
+                node = node.firstChild;
+                while (node) {
+                    walkTheDOM(node, func);
+                    node = node.nextSibling;
+                }
+            }
+
+            walkTheDOM(parentNode, pushId);
+
+        }, parentSelector, childrenTag, tempIdArr);
+    }
+
+    async findChildrenButtonToSetTempIds(parentSelector, tempIdArr){
+        return await this.findChildrenToSetTempIds(parentSelector, "button", tempIdArr);
     }
 
     async getInnerText(selector){
@@ -317,14 +373,19 @@ class PageExtended {
     }
 
     async hasElementSelector(selector, index=-1){
-        const elemList = await this.page.$$(selector);
-        let has = (elemList.length > 0);
-        let log = `page has element ${selector}? ${has} (${elemList.length})`;
-        if(index >= 0){
-            const iHtml = await this.page.evaluate(el => el.outerHTML, elemList[index]);
-            log += '\n' + iHtml;
+        try {
+            const elemList = await this.page.$$(selector);
+            let has = (elemList.length > 0);
+            let log = `page has element ${selector}? ${has} (${elemList.length})`;
+            if (index >= 0) {
+                const iHtml = await this.page.evaluate(el => el.outerHTML, elemList[index]);
+                log += '\n' + iHtml;
+            }
+            console.log(log);
         }
-        console.log(log);
+        catch (e) {
+            console.log(e);
+        }
     }
 
     async hasElement(directive, uniqueAttributeName, uniqueAttributeValue){
@@ -337,7 +398,7 @@ class PageExtended {
         let content = await this.page.evaluate(() => {
             return document.body.innerHTML;
         });
-        fileHandler.write(path, content);
+        FileHandler.write(path, content);
     }
 
     async saveText(filenameNoExtension){
@@ -345,7 +406,7 @@ class PageExtended {
         let content = await this.page.evaluate(() => {
             return document.body.innerText;
         });
-        fileHandler.write(path, content);
+        FileHandler.write(path, content);
     }
 
 }

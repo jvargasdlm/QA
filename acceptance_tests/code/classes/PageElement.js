@@ -4,16 +4,24 @@ Ao inves de enviar selector para waitForSelector, enviar o PageEelement, que con
 
 class PageElement {
     
-    constructor(pageExt, tagName, elementHandle=undefined){
+    constructor(pageExt, tagName){
         this.pageExt = pageExt;
         this.tagName = tagName;
-        this.elementHandle = elementHandle;
+        this.elementHandle = undefined;
         this.id = undefined;
         this.selector = undefined;
     }
 
+    async setElementHandle(selector){
+        this.elementHandle = await this.pageExt.page.$(selector);
+    }
+
     async getAttribute(attributeName){
-        let objectHandle = await this.elementHandle.getProperty(attributeName);
+        return PageElement.s_getAttribute(this.elementHandle, attributeName);
+    }
+
+    static async s_getAttribute(elementHandle, attributeName){
+        let objectHandle = await elementHandle.getProperty(attributeName);
         let remoteObject = objectHandle._remoteObject; //_remoteObject: { type: 'string', value: 'QSP2' },
         return remoteObject.value;
     }
@@ -61,12 +69,22 @@ class PageElement {
         await this.pageExt.clickAfterFindInList(this.tagName, index);
     }
 
-    async findChildren(parentSelector, childTagName){
-        return await this.pageExt.findChildren(parentSelector, childTagName);
+    async findChildrenAndSetTempIdsFromInnerText(childTagName){
+        const parentSelector = (this.id? `[id='${this.id}']` : this.tagName);
+        return await this.pageExt.findChildrenToSetTempIdsFromInnerText(parentSelector, childTagName);
     }
 
-    async findChildrenButton(parentSelector){
-        return await this.pageExt.findChildren(parentSelector, 'button');
+    async findChildrenButtonAndSetTempIdsFromInnerText(){
+        return this.findChildrenAndSetTempIdsFromInnerText("button");
+    }
+
+    async findChildrenToSetTempIds(childTagName, tempIdArr){
+        const parentSelector = (this.id? `[id='${this.id}']` : this.tagName);
+        return await this.pageExt.findChildrenToSetTempIds(parentSelector, childTagName, tempIdArr);
+    }
+
+    async findChildrenButtonToSetTempIds(parentSelector, tempIdArr){
+        return this.findChildrenToSetTempIds("button", tempIdArr);
     }
 
 }
