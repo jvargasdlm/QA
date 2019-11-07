@@ -9,11 +9,40 @@ class PageElement {
         this.tagName = tagName;
         this.elementHandle = undefined;
         this.id = undefined;
-        this.selector = undefined;
+        //this.selector = undefined;
     }
 
-    async setElementHandle(selector){
-        this.elementHandle = await this.pageExt.page.$(selector);
+    async init(id){
+        this.id = id;
+        this.elementHandle = await this.pageExt.waitForSelector(`[id='${id}']`);
+    }
+
+    async initByTag(){
+        this.elementHandle = await this.pageExt.waitForSelector(this.tagName);
+    }
+
+    async initByUniqueAttribute(attrName, attrValue){
+        const selector = `${this.tagName}[${attrName}='${attrValue}']`;
+        this.elementHandle = await this.pageExt.waitForSelector(selector);
+    }
+
+    async initBySelector(selector){
+        this.elementHandle = await this.pageExt.waitForSelector(selector);
+    }
+
+    async forceSetId(selector, id){
+        try {
+            await this.pageExt.page.evaluate((selector, id) => {
+                const element = document.body.querySelector(selector);
+                element.setAttribute("id", id);
+            }, selector, id);
+            this.id = id;
+            await this.init(id);
+        }
+        catch (e) {
+            console.log(`Force set id='${id}' not work:`, e.message);
+            throw e;
+        }
     }
 
     async getAttribute(attributeName){
@@ -42,12 +71,6 @@ class PageElement {
         let startIndex = description.indexOf('#');
         let endIndex = description.indexOf('.');
         return description.slice(startIndex+1, endIndex);
-    }
-
-    async setId(id){
-        this.id = id;
-        this.elementHandle = await this.pageExt.waitForSelector('#'+id);
-        //this.elementHandle = await this.pageExt.page.$('#'+id);
     }
 
     // -------------------------------------------------------

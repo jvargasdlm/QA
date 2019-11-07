@@ -229,6 +229,7 @@ class PageExtended {
      */
 
     async findChildrenToSetTempIdsFromInnerText(parentSelector, childrenTag){
+        this.enableConsoleLog();//.
         return await this.page.evaluate((_parentSelector, _childrenTag) => {
             let parentNode = document.body.querySelector(_parentSelector);
             let tempIdArray = [];
@@ -238,8 +239,7 @@ class PageExtended {
                 if (!isNodeEmpty && currentNode.tagName.toLowerCase() === _childrenTag) {
                     let id = currentNode.getAttribute('id');
                     if(!id){
-                        //let elemText = currentNode.querySelector('span');
-                        id = currentNode.innerText.replace('\n', ' ');
+                        id = currentNode.innerText.replace('\n', '') + `_${tempIdArray.length}`;
                         currentNode.setAttribute('id', id);
                     }
                     tempIdArray.push(id);

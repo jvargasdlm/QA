@@ -29,7 +29,7 @@ const ActivitiesPageSelectors = require('../../code/otus/classes/activities/Acti
 // Tests
 
 suiteArray = [
-
+/*
 describe('otus test', () => {
 
   xtest('select participant lab', async() => {
@@ -61,10 +61,6 @@ describe('otus test', () => {
       await checkbox.clickAfterFindInList(0);
       await checkbox.clickAfterFindInList(1);
       await checkbox.clickAfterFindInList(2);
-      /*
-      await pageExt.clickOnButtonByAttribute('aria-label', 'Preencher Atividade');
-      await pageExt.clickOnButtonByAttribute('ng-click', '$ctrl.play()'); // 'INICIAR' button
-       */
   });
 
   xtest('Add participant', async() => {
@@ -126,5 +122,5 @@ describe('otus test', () => {
   });
 
 })
-
+*/
 ]; // end suiteArray

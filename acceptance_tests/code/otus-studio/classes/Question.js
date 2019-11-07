@@ -107,8 +107,8 @@ class Question extends PageElement {
         this.templateIdInput.elementHandle = await this.elementHandle.$(selectors.sub_item.TEMPLATE_ID_INPUT);
         //this.templateIdInput.init();
 
-        await this.expandButton.setId(selectors.sub_item.id.getExpandButton(this.templateId));
-        await this.menuButton.setId(selectors.sub_item.id.getMenuButton(this.templateId));
+        await this.expandButton.init(selectors.sub_item.id.getExpandButton(this.templateId));
+        await this.menuButton.init(selectors.sub_item.id.getMenuButton(this.templateId));
 
         await this.initGroupItem();
     }

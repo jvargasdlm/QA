@@ -7,8 +7,8 @@ class Switch extends PageElement {
         this.isOn = false;
     }
 
-    async init(selector){
-        await this.setElementHandle(selector);
+    async init(id){
+        await super.init(id);
         const checked = await this.getAttribute('aria-checked');
         this.isOn = (checked === 'true');
     }

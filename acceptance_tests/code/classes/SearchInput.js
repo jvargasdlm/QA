@@ -1,31 +1,18 @@
 const PageElement = require('./PageElement');
 
-/*
-<input
-type="search" id="..." name="autocompleteField" ng-if="!floatingLabel"
-autocomplete="off" ng-required="$mdAutocompleteCtrl.isRequired" ng-disabled="$mdAutocompleteCtrl.isDisabled"
-ng-readonly="$mdAutocompleteCtrl.isReadonly" ng-model="$mdAutocompleteCtrl.scope.searchText"
-ng-keydown="$mdAutocompleteCtrl.keydown($event)" ng-blur="$mdAutocompleteCtrl.blur($event)"
-ng-focus="$mdAutocompleteCtrl.focus($event)"
-placeholder="Digite ..." aria-autocomplete="list" role="combobox" aria-haspopup="true"
-aria-activedescendant="" aria-expanded="false" class="..." required="required" aria-invalid="true" style="">
- */
-
 const selectors = {
-    AUTO_COMPLETE_SUGGESTIONS: 'md-virtual-repeat-container',
-    AUTO_COMPLETE_ITEM: 'li'
+    SUGGESTIONS_CONTAINER: 'md-virtual-repeat-container', // COULD HAVE MORE THAN ONE
+    SUGGESTIONS_CONTAINER_ID: "autoCompleteOptionList",
+    SUGGESTIONS_CONTAINER_UNIQUE_ATTR: "style",
+    SUGGESTION_LIST: 'ul',
+    SUGGESTION_LIST_ID: "suggestionList",
+    SUGGESTION_ITEM_LIST: 'li'
 };
 
 class SearchInput extends PageElement {
 
     constructor(pageExt){
         super(pageExt, "input");
-    }
-
-    async _clickOnSomeSuggestionOfList(index){
-        await this.pageExt.waitForSelector(selectors.AUTO_COMPLETE_SUGGESTIONS);
-        let tempIdArr = await this.pageExt.findChildrenToSetTempIdsFromInnerText(selectors.AUTO_COMPLETE_SUGGESTIONS, selectors.AUTO_COMPLETE_ITEM);
-        await this.pageExt.clickWithWait(`[id='${tempIdArr[index]}']`);
     }
 
     async typeAndClickOnItemList(inputSelector, text, index){
@@ -46,6 +33,34 @@ class SearchInput extends PageElement {
     async clickOnInputAndOnFirstOfList(inputSelector){
         await this.pageExt.clickWithWait(inputSelector);
         await this._clickOnSomeSuggestionOfList(0);
+    }
+
+    async _clickOnSomeSuggestionOfList(index){
+        await this.pageExt.waitForSelector(selectors.SUGGESTIONS_CONTAINER);
+
+        await this.pageExt.page.evaluate((selectors) => {
+            const elements = Array.from(document.body.querySelectorAll(selectors.SUGGESTIONS_CONTAINER));
+            let i = 0;
+            const n = elements.length;
+            if(n > 1) {
+                let found = false;
+                while(!found && i<n){
+                    let uniqueAttrValue = elements[i++].getAttribute(selectors.SUGGESTIONS_CONTAINER_UNIQUE_ATTR);
+                    found = (uniqueAttrValue && uniqueAttrValue !== '');
+                }
+                --i;
+            }
+            const container = elements[i];
+            container.setAttribute("id", selectors.SUGGESTIONS_CONTAINER_ID);
+            const suggestionList = container.querySelector(selectors.SUGGESTION_LIST);
+            suggestionList.setAttribute("id", selectors.SUGGESTION_LIST_ID);
+
+        }, selectors);
+
+        let tempIdArr = await this.pageExt.findChildrenToSetTempIdsFromInnerText(
+            '#'+selectors.SUGGESTION_LIST_ID,
+            selectors.SUGGESTION_ITEM_LIST);
+        await this.pageExt.clickWithWait(`[id='${tempIdArr[index]}']`);
     }
 }
 

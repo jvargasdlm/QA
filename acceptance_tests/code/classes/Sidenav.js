@@ -33,7 +33,7 @@ class Sidenav extends PageElement {
     }
 
     async init(){
-        await this.setElementHandle(`${this.tagName}[${selectors.sideAttribute}='${this.side}']`);
+        await this.initByUniqueAttribute(selectors.sideAttribute, this.side);
         this.classAttrValue = this.getAttribute("class");
     }
 

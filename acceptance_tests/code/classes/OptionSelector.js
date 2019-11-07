@@ -21,14 +21,21 @@ class OptionSelector extends PageElement {
         selectors = (pageExt.typeCode === pageExt.typeCodes.OTUS_STUDIO ? selectorsForOtusStudio : selectorsForOtus);
     }
 
-    async selectOption(id, optionValue){
-        await this.pageExt.clickWithWait(`md-select[id='${id}']`);
+    async selectOption(optionValue){
+        await this.elementHandle.click();
         await this.pageExt.waitForSelector(selectors.OPTIONS_OPENED); // wait open options
         await this.pageExt.clickWithWait(`md-option[value='${optionValue}']`);
     }
 
+    async selectOptionByIndex_temp(optionIndex){
+        await this.elementHandle.click();
+        await this.pageExt.waitForSelector(selectors.OPTIONS_OPENED); // wait open options
+        const option = (await this.pageExt.page.$$("md-option"))[optionIndex];
+        await option.click();
+    }
+
     async selectOptionBySelectors(selectAttributesSelector, optionValue, optionExtraAttrSelector=''){
-        await this.pageExt.clickWithWait(`md-select${selectAttributesSelector}`);
+        await this.pageExt.clickWithWait(`${this.tagName}${selectAttributesSelector}`);
         await this.pageExt.waitForSelector(selectors.OPTIONS_OPENED); // wait open options
         await this.pageExt.clickWithWait(`md-option${optionExtraAttrSelector}[value='${optionValue}']`);
     }

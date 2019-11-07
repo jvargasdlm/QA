@@ -31,9 +31,14 @@ class SpeedDial extends PageElement {
         this.actionButtons = [];
     }
 
-    async init(triggerButtonId, actionButtonIdArr){
-        const selector = (this.id? `[id='${this.id}']` : `${this.tagName}`);
-        await this.setElementHandle(selector);
+    async init(triggerButtonId, actionButtonIdArr, id){
+        if(id){
+            this.id = id;
+            await this.init(id);
+        }
+        else{
+            await this.initByTag();
+        }
 
         await this.pageExt.findChildrenButtonToSetTempIds(selectors.trigger.tag, [triggerButtonId]);
         await this.pageExt.findChildrenButtonToSetTempIds(selectors.actions.tag, actionButtonIdArr);

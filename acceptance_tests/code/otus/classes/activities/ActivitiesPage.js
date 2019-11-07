@@ -69,7 +69,7 @@ class ActivitiesPage extends PageOtus {
     }
 
     async initReportButton(){
-        await this.reportButton.setId(this.reportButton.id);
+        await this.reportButton.init(this.reportButton.id);
     }
 
     // ---------------------------------------------------------------
@@ -180,10 +180,10 @@ class ActivitiesPage extends PageOtus {
         //console.log(`element '#${nextState}' was found?`, element!==undefined);//.
         if(!element){
             const realState = Object.entries(reportButtonStateIds).filter( (state) => (state !== currState && state !== expectedNextState));
-            await this.reportButton.setId(realState);
+            await this.reportButton.init(realState);
             throw `New state of dynamic element should be '${expectedNextState}', but this state was not found.`;
         }
-        await this.reportButton.setId(expectedNextState);
+        await this.reportButton.init(expectedNextState);
     }
 
 }
