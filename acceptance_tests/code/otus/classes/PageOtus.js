@@ -1,9 +1,10 @@
 const PageExtended = require('../../classes/PageExtended');
 const PageElement = require('../../classes/PageElement');
+const {Sidenav, sideEnum} = require('../../classes/Sidenav');
 
 // ***********************************************
 
-const HOME_PAGE = process.env.OTUS_MAIN_PAGE + '/#/dashboard';
+const HOME_PAGE = process.env.OTUS_URL + '/#/dashboard';
 
 let selectors = {
     //LOADING_PAGE: "div[class='pg-loading-screen pg-loading pg-loaded']",
@@ -34,7 +35,7 @@ let selectors = {
         CONTROLE_LABORATORIAL: "button[ng-click='$ctrl.laboratoryMonitoring()']"
     },
     sidenav:{
-        MENU_ARE_VISIBLE: "otus-dashboard-sidenav[style='overflow: hidden;']",
+        MENU_ARE_VISIBLE: "otus-dashboard-sidenav > div[style='overflow: hidden;']",
         LOGOUT_BUTTON: "button[aria-label='Logout']",
         HOME_BUTTON: "button[ng-click='$ctrl.home()']",
         ATIVIDADES_BUTTON: "button[ng-click='$ctrl.loadParticipantActivities()']",
@@ -42,9 +43,7 @@ let selectors = {
         IMPORTAR_ATIVIDADES_BUTTON: "button[ng-click='$ctrl.importActivity()']"
     },
     searchParticipant: {
-        BUSCA_NOME_NUMERO: "#participantSearchAutoCompleteId", // main page - search participant
-        AUTO_COMPLETE_SUGGESTIONS: 'md-virtual-repeat-container',
-        AUTO_COMPLETE_ITEM: 'li'
+        BUSCA_NOME_NUMERO: "#participantSearchAutoCompleteId" // main page - search participant
     }
 };
 
@@ -55,10 +54,15 @@ class PageOtus extends PageExtended {
     constructor(page){
         super(page);
         this.typeCode = this.typeCodes.OTUS;
+        this.leftSidenav = new Sidenav(this);
     }
 
-    getSelectors(){
+    static getSelectors(){
         return selectors;
+    }
+
+    async initLeftSidenav(){
+        await this.leftSidenav.init();
     }
 
     async waitLoad(){
@@ -103,16 +107,6 @@ class PageOtus extends PageExtended {
         await this.waitLoad();
     }
 
-    async login(email, password){
-        await this.gotoUrl(process.env.OTUS_MAIN_PAGE); // need?
-        const buttonSelector = selectors.login.SUBMIT_BUTTON;
-        await this.waitForSelector(buttonSelector);
-        await this.page.type(selectors.login.EMAIL_INPUT, email);
-        await this.page.type(selectors.login.PASSWORD_INPUT, password);
-        await this.page.click(buttonSelector);
-        await this.waitLoad();
-    }
-
     async clickOnMainMenuButton(){
         await this.clickWithWait(selectors.MAIN_MENU_BUTTON);
         await this.waitForSelector(selectors.sidenav.MENU_ARE_VISIBLE);
@@ -122,10 +116,7 @@ class PageOtus extends PageExtended {
     // Open participant
 
     async openParticipantFromHomePage(recruitmentNumberOrName){
-        await this.typeWithWait(selectors.searchParticipant.BUSCA_NOME_NUMERO, recruitmentNumberOrName);
-        let pageElement = new PageElement(this);
-        let tempIdArr = await pageElement.findChildren(selectors.searchParticipant.AUTO_COMPLETE_SUGGESTIONS, selectors.searchParticipant.AUTO_COMPLETE_ITEM);
-        await this.clickWithWait(`[id='${tempIdArr[0]}']`);
+        await this.getNewSearchInput().typeAndClickOnFirstOfList(selectors.searchParticipant.BUSCA_NOME_NUMERO, recruitmentNumberOrName);
         await this.waitLoad();
     }
 
