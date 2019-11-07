@@ -44,6 +44,8 @@ class ActivitiesPage extends PageOtus {
     constructor(page){
         super(page);
         this.reportButton = new DynamicElement(this, reportButtonStateIds, reportButtonStateIds.LOAD);
+
+        this.activityCards = []; //<<
     }
 
     async initReportButton(){
@@ -82,7 +84,7 @@ class ActivitiesPage extends PageOtus {
             await (this.getNewCheckbox()).clickAfterFindInList(index);
         }
         catch (e) {
-            this.errorLogger.addFailMessageFromCurrSpec(`Activity with index=${activityCheckBoxIndex} was not found.`);
+            this.errorLogger.addFailMessageFromCurrSpec(`Activity checkbox with index=${activityCheckBoxIndex} was not found.`);
         }
     }
 

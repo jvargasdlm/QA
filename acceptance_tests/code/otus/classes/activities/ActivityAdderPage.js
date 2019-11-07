@@ -1,4 +1,4 @@
-const PageOtus = require('./PageOtus');
+const PageOtus = require('../PageOtus');
 const ActivityCard = require('./ActivityCard');
 
 class AddActivityPage extends PageOtus {
