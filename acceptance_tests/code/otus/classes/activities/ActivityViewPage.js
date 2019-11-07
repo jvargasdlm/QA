@@ -1,4 +1,4 @@
-const PageOtus = require('./PageOtus');
+const PageOtus = require('../PageOtus');
 
 const selectors = {
     participantData: '$ctrl.filters.participantData',

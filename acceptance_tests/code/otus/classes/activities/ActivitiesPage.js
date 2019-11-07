@@ -1,7 +1,8 @@
-const PageOtus = require('./PageOtus');
-const PreviewPage = require('./PreviewPage');
+const PageOtus = require('../PageOtus');
+const PreviewPage = require('../PreviewPage');
 const ActivityViewPage = require('./ActivityViewPage');
-const DynamicElement = require('../../classes/DynamicElement');
+const DynamicElement = require('../../../classes/DynamicElement');
+const {SpeedDial, directionEnum} = require('../../../classes/SpeedDial');
 
 // ***********************************************
 
@@ -37,6 +38,18 @@ const reportButtonStateIds = {
     PENDING_INFO: 'pendingInformation'
 };
 
+const addActivityButtons = {
+    ADD: {
+        id: "addActivityButton"
+    },
+    ON_LINE:{
+        index: 0, id: "addActivityOnLine"
+    },
+    PAPER: {
+        index: 1, id: "addActivityPaper"
+    }
+};
+
 // ***********************************************
 
 class ActivitiesPage extends PageOtus {
@@ -46,6 +59,13 @@ class ActivitiesPage extends PageOtus {
         this.reportButton = new DynamicElement(this, reportButtonStateIds, reportButtonStateIds.LOAD);
 
         this.activityCards = []; //<<
+        this.addActivitySpeedDial = new SpeedDial(this, directionEnum.left);
+    }
+
+    async init(){
+        await this.leftSidenav.init();
+        await this.addActivitySpeedDial.init(addActivityButtons.ADD.id, [addActivityButtons.ON_LINE.id, addActivityButtons.PAPER]);
+        //await this.reportButton.setId(this.reportButton.id);
     }
 
     async initReportButton(){
@@ -89,20 +109,28 @@ class ActivitiesPage extends PageOtus {
     }
 
     async addOnlineActivity(acronym){
-        const mySelectors = selectors.bottomMenuButtons;
-        await this.clickWithWait(mySelectors.ADD);
-        await this.setHiddenAttributeValue(selectors.bottomMenuButtons.ACTION_BUTTONS, false); // force
-        await this.waitForMilliseconds(500); // without this wait, action buttons don't open
-        await this.waitForSelector(mySelectors.WAIT_VISIBLE_ACTION);
-        await this.clickWithWait(mySelectors.ATIVIDADE_ONLINE);
-        await this.waitLoad();
-        // select activity
-        await this.searchAndSelectActivity(acronym);
-        await this.clickWithWait(selectors.topMenuButtons.ADD_ACTIVITY);
-        await this.waitLoad();
-        // select default category
-        await this.clickWithWait(selectors.topMenuButtons.ADD_ACTIVITY);
-        await this.waitLoad();
+        try {
+            //await this.addActivitySpeedDial.clickToOpenAndChooseAction(addActivityButtons.ON_LINE.index);
+
+            const mySelectors = selectors.bottomMenuButtons;
+            await this.clickWithWait(mySelectors.ADD);
+            await this.setHiddenAttributeValue(selectors.bottomMenuButtons.ACTION_BUTTONS, false); // force
+            await this.waitForMilliseconds(500); // without this wait, action buttons don't open
+            await this.waitForSelector(mySelectors.WAIT_VISIBLE_ACTION);
+            await this.clickWithWait(mySelectors.ATIVIDADE_ONLINE);
+            await this.waitLoad();
+            // select activity
+            await this.searchAndSelectActivity(acronym);
+            await this.clickWithWait(selectors.topMenuButtons.ADD_ACTIVITY);
+            await this.waitLoad();
+            // select default category
+            await this.clickWithWait(selectors.topMenuButtons.ADD_ACTIVITY);
+            await this.waitLoad();
+        }
+        catch (e) {
+            await this.saveHTML("activPage");
+            console.log(e);
+        }
     }
 
     async addOnLineActivityAndFill(acronym, answersArr){

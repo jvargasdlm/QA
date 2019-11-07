@@ -1,7 +1,7 @@
 const PageOtus = require('../PageOtus');
 const ActivityCard = require('./ActivityCard');
 
-class AddActivityPage extends PageOtus {
+class ActivityAdderPage extends PageOtus {
 
     constructor(page){
         super(page);
@@ -12,4 +12,4 @@ class AddActivityPage extends PageOtus {
     }
 }
 
-module.exports = AddActivityPage;
+module.exports = ActivityAdderPage;

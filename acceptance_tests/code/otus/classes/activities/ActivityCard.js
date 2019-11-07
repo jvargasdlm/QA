@@ -1,4 +1,4 @@
-const Card = require("../../classes/Card");
+const Card = require("../../../classes/Card");
 
 class ActivityCard extends Card {
 

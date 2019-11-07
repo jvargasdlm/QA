@@ -1,4 +1,4 @@
-const ReportPage = require('./ReportPage');
+const ReportPage = require('../ReportPage');
 
 class ActivityReportPage extends ReportPage {
 
