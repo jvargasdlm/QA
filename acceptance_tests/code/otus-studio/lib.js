@@ -22,7 +22,7 @@ let _logged = false;
 
 async function enterAsVisitingBeforeAll(pageOtusStudio){
     if(!_logged){
-        await pageOtusStudio.gotoUrl(process.env.OTUS_STUDIO_MAIN_PAGE);
+        await pageOtusStudio.gotoUrl(process.env.OTUS_STUDIO_URL);
         await pageOtusStudio.clickWithWait(selectors.button.VISITANTE);
         _logged = true;
     }
