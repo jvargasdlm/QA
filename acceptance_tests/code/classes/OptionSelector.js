@@ -35,7 +35,7 @@ class OptionSelector extends PageElement {
     }
 
     async selectOptionBySelectors(selectAttributesSelector, optionValue, optionExtraAttrSelector=''){
-        await this.pageExt.clickWithWait(`${this.tagName}${selectAttributesSelector}`);
+        await this.pageExt.clickWithWait(`${this.selectorObj.tag}${selectAttributesSelector}`);
         await this.pageExt.waitForSelector(selectors.OPTIONS_OPENED); // wait open options
         await this.pageExt.clickWithWait(`md-option${optionExtraAttrSelector}[value='${optionValue}']`);
     }

@@ -8,7 +8,7 @@ class ActivityReportPage extends ReportPage {
 
     // TODO
     async extractItems(){
-        this.enableConsoleLog();
+        //this.enableConsoleLog();
         return await this.page.evaluate((valuesSelector) => {
             const element = document.body.querySelector(valuesSelector);
             return element.innerText.split('\n');

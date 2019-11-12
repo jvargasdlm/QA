@@ -39,7 +39,7 @@ const recruitmentNumberOrName = '5001007';
 async function openParticipantActivities(){
     await pageOtus.openParticipantFromHomePage(recruitmentNumberOrName);
     await pageOtus.openParticipantActivitiesMenu();
-
+/*
     //<< clicar no botao +
     await pageOtus.gotoUrl("http://localhost:3000/#/participant-dashboard/activity-adder");
     await pageOtus.waitLoad();
@@ -47,50 +47,60 @@ async function openParticipantActivities(){
 
     activitiyAdderPage = new ActivityAdderPage(pageOtus.page);
     await activitiyAdderPage.init();
+
+ */
 }
 
 // *****************************************************************
 // Tests
 
+/*
+add 1 por 1, de tipos diferentes
+add lista do mesmo tipo
+excluir do array => verificar se a lista de atividades nao tem a excluída
+salvar => vai para tela de atividades
+cancelar => reset todos os controladores para os valores default
+ */
+
 suiteArray = [
 
-    describe('Temp Test', () => {
+    describe('Temp Tests', () => {
 
-        xtest('Switch test', async() => {
-            await pageOtus.gotoUrl("http://localhost:3000/#/participant-dashboard/activity-adder");
+        xtest('Select switches', async() => {
+            await activitiyAdderPage.switchTypeToPaper();
+            await activitiyAdderPage.waitForMilliseconds(2000);
+            await activitiyAdderPage.switchTypeToOnline();
+            await activitiyAdderPage.waitForMilliseconds(2000);
 
-            const activityTypeSwitch = pageOtus.getNewSwitch();
-            const activitySelectionSwitch = pageOtus.getNewSwitch();
-
-            await activityTypeSwitch.init("[aria-label='ActivityType']");
-            await activitySelectionSwitch.init("[aria-label='ActivitySelection']");
-
-            console.log("activityTypeSwitch isOn?", activityTypeSwitch.isOn);
-            console.log("activitySelectionSwitch isOn?", activitySelectionSwitch.isOn);
-
-            await pageOtus.waitForMilliseconds(5000);
-
-            await activityTypeSwitch.change();
-            await activitySelectionSwitch.change();
-
-            console.log("activityTypeSwitch isOn?", activityTypeSwitch.isOn);
-            console.log("activitySelectionSwitch isOn?", activitySelectionSwitch.isOn);
-
-            await pageOtus.waitForMilliseconds(5000);
+            await activitiyAdderPage.switchQuantityToUnit();
+            await activitiyAdderPage.waitForMilliseconds(2000);
+            await activitiyAdderPage.switchQuantityToList();
+            await activitiyAdderPage.waitForMilliseconds(2000);
         });
 
-        test('Switch test 2', async() => {
-            /*
-            await activitiyAdderPage.switchTypeToOnline();
-            await activitiyAdderPage.switchTypeToPaper();
-            await pageOtus.waitForMilliseconds(3000);
-
+        xtest('Select categories', async() => {
             await activitiyAdderPage.selectCategory(categoryEnum.QUALITY_CONTROLL);
-            await pageOtus.waitForMilliseconds(3000);
-*/
-            await pageOtus.waitForMilliseconds(3000);
+            await activitiyAdderPage.waitForMilliseconds(3000);
+        });
+
+        xtest('Search and choose activity', async() => {
+            await activitiyAdderPage.waitForMilliseconds(3000);
             await activitiyAdderPage.searchActivity("MARAVILHA");
-            await pageOtus.waitForMilliseconds(3000);
+            await activitiyAdderPage.waitForMilliseconds(3000);
+        });
+
+        xtest('Add activities', async() => {
+
+            const acronyms = ["CS", "RETCLQ", "DSN"];
+
+            for(let acronym of acronyms){
+                await activitiyAdderPage.addActivity(acronym);
+            }
+
+            await activitiyAdderPage.waitForMilliseconds(2000);
+            //await activitiyAdderPage.deleteActivityFromTemporaryList(1);
+            //await activitiyAdderPage.saveChanges();
+            await activitiyAdderPage.waitForMilliseconds(2000);
         });
 
     }),

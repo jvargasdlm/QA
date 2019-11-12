@@ -31,7 +31,7 @@ class SpeedDial extends PageElement {
         this.actionButtons = [];
     }
 
-    async init(triggerButtonId, actionButtonIdArr, id){
+    async init(triggerButtonId, actionButtonIdArr, id=undefined){
         if(id){
             this.id = id;
             await this.init(id);

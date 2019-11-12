@@ -183,9 +183,9 @@ suiteArray = [
     xdescribe('Activities Report Generation - Scenario #3: Not exactly selecting 1 activity', () => {
 
         async function checkReportButtonIsHidden(firstActivityCheckboxIndex, secondActivityCheckboxIndex){
-            await activitiesPage.selectActivityCheckbox(firstActivityCheckboxIndex);
+            await activitiesPage.selectActivityItem(firstActivityCheckboxIndex);
             await activitiesPage.init();
-            await activitiesPage.selectActivityCheckbox(secondActivityCheckboxIndex);
+            await activitiesPage.selectActivityItem(secondActivityCheckboxIndex);
             const isHidden = await activitiesPage.reportButton.isHidden();
             try {
                 expect(isHidden).toBeTrue();
@@ -208,7 +208,7 @@ suiteArray = [
     describe('Activities Report Generation - Scenario #1: A set of variables meets the previously defined values', () => {
 
         async function createAndFillActivityGenerateReportAndGetData(acronym, answersArr, mustSatisfyConditions, canNotSatisfyConditions, activityCheckboxIndex=0){
-            await activitiesPage.fillActivity(acronym, answersArr);
+            await activitiesPage.selectActivityAndClickOnFillButton(acronym, answersArr);
             const reportDataObj = await generateReportAndGetData(acronym, activityCheckboxIndex);
             //assertSentences(acronym, reportDataObj.items, mustSatisfyConditions, canNotSatisfyConditions);
         }
@@ -254,7 +254,7 @@ suiteArray = [
     xdescribe('Activities Report Generation - Scenario #2: A set of variables DOES NOT meet previously set values', () => {
 
         async function clickReportButtonAndWaitDialogForClose(activityCheckboxIndex){
-            await activitiesPage.selectActivityCheckbox(activityCheckboxIndex);
+            await activitiesPage.selectActivityItem(activityCheckboxIndex);
             await activitiesPage.init();
             await activitiesPage.clickOnReportButtonAndUpdateId(reportButtonStateIds.PENDING_INFO); // load state
             await activitiesPage.clickOnReportButton(); // pending state

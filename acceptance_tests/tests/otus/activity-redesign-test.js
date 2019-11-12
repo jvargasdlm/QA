@@ -28,10 +28,11 @@ afterAll(async () => {
 // Specific modules for this suite test
 const ActivitiesPage          = require('../../code/otus/classes/activities/ActivitiesPage');
 const ActivityQuestionAnswer  = require('../../code/otus/classes/activities/ActivityQuestionAnswer');
+const PreviewPage             = require('../../code/otus/classes/PreviewPage');
 
 // Constants
-const recruitmentNumberOrName = '5001007';
-    const acronym = 'FG';
+const recruitmentNumberOrName = '5001007';// '2000735';
+const acronym = 'FG';
 const answersArr = [
     new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.number, '0')
 ];
@@ -51,15 +52,37 @@ async function openParticipantActivities(){
 
 suiteArray = [
 
-    describe('Temp Test', () => {
+    xdescribe('Temp Test', () => {
 
         test('Temp test', async() => {
+            const activityItem = await activitiesPage.selectActivityItem(1);
+            await activityItem.extractInfo();
+            console.log(activityItem.data);
 
+            // await activitiesPage.sortActivitiesByOptionIndex(1);
+            // await activitiesPage.selectAllBlocks();
+            // await activitiesPage.waitForMilliseconds(5000);
+
+            const topMenuButtons = {
+                ALTERAR_AFERIDOR: "button[aria-label='Alterar Aferidor']",
+                GERAR_RELATORIO: "button[aria-label='Carregar Relatório']",
+                PREENCHER_ATIVIDADE: "button[aria-label='Preencher Atividade']",
+                VISUALIZAR_ATIVIDADE: "button[aria-label='Visualizar Atividade']",
+                EXCLUIR: "button[aria-label='Excluir']",
+                DETALHES: "button[aria-label='Detalhes']"
+            };
+
+            for(let selector of Object.values(topMenuButtons)){
+                await activitiesPage.hasElementSelector(selector);
+                await activitiesPage.hasElementSelector(selector+"[hide-xs]");
+                await activitiesPage.hasElementSelector(selector+"[hide-gt-xs]");
+            }
         });
 
     }),
 
-    xdescribe('Scenario #2.1 - Activity selection', () => {
+/*
+    describe('Scenario #2.1 - Activity selection', () => {
 
         async function ActivityButtonsAreHidden(expectedHidden=true, failMessage='Activity buttons should be hidden, but do not.'){
             await activitiesPage.waitForMilliseconds(500);
@@ -79,25 +102,25 @@ suiteArray = [
         }
 
         test('2.1a Select 0 activities', async() => {
-            await activitiesPage.selectActivityCheckbox(0);
-            await activitiesPage.selectActivityCheckbox(0);
+            await activitiesPage.selectActivityItem(0);
+            await activitiesPage.selectActivityItem(0);
             await ActivityButtonsAreHidden();
         });
 
         test('2.1b Select 2 activities', async() => {
-            await activitiesPage.selectActivityCheckbox(0);
-            await activitiesPage.selectActivityCheckbox(1);
+            await activitiesPage.selectActivityItem(0);
+            await activitiesPage.selectActivityItem(1);
             await ActivityButtonsAreHidden();
             await activitiesPage.refreshAndWaitLoad();
         });
 
         test('2.1c Select 1 activitiy', async() => {
-            await activitiesPage.selectActivityCheckbox(1);
+            await activitiesPage.selectActivityItem(1);
             await ActivityButtonsAreHidden(false, 'Activity buttons should be visible, but do not.');
             await activitiesPage.refreshAndWaitLoad();
         });
     }),
-
+/*
     xdescribe('Scenario #2.2: Add new activity', () => {
 
         test('2.2 test', async() => {
@@ -116,15 +139,27 @@ suiteArray = [
     xdescribe('Scenario #2.3: Fill activity', () => {
 
         test('2.3 test', async() => {
-            await activitiesPage.fillActivity(acronym, answersArr);
+            const acronym = 'CSJ';
+            const answersArr = [];
+            for (let i = 1; i <= 6 ; i++) {
+                answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.singleOption, 'Sim'))
+            }
+            answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.time, '18:54'));
+            answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.time, '18:55'));
+            answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.multipleOption, 'Formação de hematoma'));
+
+            await activitiesPage.selectActivityAndClickOnFillButton(acronym, 1);
+            const previewPage = new PreviewPage(activitiesPage.page);
+            await previewPage.fillActivityQuestions(answersArr);
         });
 
     }),
 
-    xdescribe('Scenario #2.5 - View activity', () => {
+    describe('Scenario #2.5 - View activity', () => {
 
         test('2.5 test', async() => {
             // use the same activity filled at 2.3 to compare answers
+            const acronym = 'CSJ';
             const answers = await activitiesPage.readFinalizedActivity(acronym);
             console.log(answers);
         });
@@ -139,7 +174,7 @@ suiteArray = [
         });
 
     }),
-/*
+
     xdescribe('Scenario #2.4: Load report', () => {
 
         xtest('2.4a Load report of activity with block issues', async() => {

@@ -43,7 +43,7 @@ let selectors = {
         IMPORTAR_ATIVIDADES_BUTTON: "button[ng-click='$ctrl.importActivity()']"
     },
     searchParticipant: {
-        BUSCA_NOME_NUMERO: "#participantSearchAutoCompleteId" // main page - search participant
+        BUSCA_NOME_NUMERO: "participantSearchAutoCompleteId" // main page - search participant
     }
 };
 
@@ -54,7 +54,7 @@ class PageOtus extends PageExtended {
     constructor(page){
         super(page);
         this.typeCode = this.typeCodes.OTUS;
-        this.leftSidenav = new Sidenav(this);
+        //this.leftSidenav = new Sidenav(this);
     }
 
     static getSelectors(){
@@ -116,7 +116,9 @@ class PageOtus extends PageExtended {
     // Open participant
 
     async openParticipantFromHomePage(recruitmentNumberOrName){
-        await this.getNewSearchInput().typeAndClickOnFirstOfList(selectors.searchParticipant.BUSCA_NOME_NUMERO, recruitmentNumberOrName);
+        const autoCompleteSearch = this.getNewAutoCompleteSearch();
+        await autoCompleteSearch.initBySelectorAndSetTempId(autoCompleteSearch.tagName, selectors.searchParticipant.BUSCA_NOME_NUMERO);
+        await autoCompleteSearch.typeAndClickOnFirstOfList(recruitmentNumberOrName);
         await this.waitLoad();
     }
 

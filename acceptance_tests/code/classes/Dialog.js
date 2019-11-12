@@ -44,8 +44,8 @@ class Dialog extends DialogParent {
             await this.waitForClose();
         }
         catch (e) {
-            await this.pageExt.clickWithWait(`[id='${this.cancelButtonId}']`);
-            throw "Could not save changes. Check console messages.";
+            //await this.pageExt.clickWithWait(`[id='${this.cancelButtonId}']`);
+            //throw "Could not save changes. Check console messages.";
         }
     }
 

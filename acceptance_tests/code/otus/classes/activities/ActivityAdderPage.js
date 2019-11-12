@@ -1,14 +1,5 @@
 const PageOtus = require('../PageOtus');
-const ActivityCard = require('./ActivityCard');
-
-const selectors = {
-    switches: {
-        type: "[aria-label='ActivityType']",
-        quantity: "[aria-label='ActivitySelection']"
-    },
-    category: "md-select", // "[aria-label='Categoria: NORMAL']" //<<
-    SEARCH_INPUT: "input[aria-label='Atividade']"
-};
+const ActivityItem = require('./ActivityItem');
 
 const enums = {
     type:{
@@ -20,11 +11,36 @@ const enums = {
         LIST: true
     },
     category:{
-        NORMAL: 0,
-        QUALITY_CONTROLL: 1,
-        REPETITION: 2
+        NORMAL: {
+            index: 0, value: "NORMAL"
+        },
+        QUALITY_CONTROLL: {
+            index: 1, value: "CONTROLE DE QUALIDADE"
+        },
+        REPETITION: {
+            index: 2, value: "REPETICAO"
+        }
     }
 };
+
+const selectors = {
+    switches: {
+        type: "[aria-label='ActivityType']",
+        quantity: "[aria-label='ActivitySelection']"
+    },
+    buttons:{
+        ADD: "button[ng-click='$ctrl.addPreviewActivity($ctrl.selectedItem)']",
+        SAVE: "md-icon[aria-label='save']", //<<
+        CANCEL: "md-icon[aria-label='cancel']" //<<
+    },
+    activityCard :{
+        TAG: "md-grid-tile",
+        DELETE_BUTTON: ""
+    },
+    CATEGORY_SELECTOR: "md-select", // "[aria-label='Categoria: NORMAL']" //<<
+    AUTO_COMPLETE_SEARCH_ID: "autoCompleteActivity"
+};
+
 
 class ActivityAdderPage extends PageOtus {
 
@@ -33,14 +49,24 @@ class ActivityAdderPage extends PageOtus {
         this.typeSwitch = this.getNewSwitch();
         this.quantitySwitch = this.getNewSwitch();
         this.categorySelector = this.getNewOptionSelector();
-        this.searchInput = this.getNewSearchInput();
+        this.autoCompleteSearch = this.getNewAutoCompleteSearch();
+        this.addButton = this.getNewButton();
+        this.saveButton = this.getNewButton();
+        this.cancelButton = this.getNewButton();
     }
 
     async init(){
-        await this.typeSwitch.forceSetId(selectors.switches.type, "typeSwitch");
-        await this.quantitySwitch.forceSetId(selectors.switches.quantity, "quantitySwitch");
-        await this.categorySelector.forceSetId(selectors.category, "categorySelector");
-        await this.searchInput.forceSetId("md-autocomplete-wrap > input", "searchActivityInput");
+        //this.enableConsoleLog();
+        // temp
+        await this.typeSwitch.initBySelectorAndSetTempId(selectors.switches.type, "typeSwitch");
+        await this.quantitySwitch.initBySelectorAndSetTempId(selectors.switches.quantity, "quantitySwitch");
+        await this.categorySelector.initBySelectorAndSetTempId(selectors.CATEGORY_SELECTOR, "categorySelector");
+
+        await this.autoCompleteSearch.initByTagAndSetTempId(selectors.AUTO_COMPLETE_SEARCH_ID, 1);
+
+        await this.addButton.initBySelectorAndSetTempId(selectors.buttons.ADD, "addButton");
+        await this.saveButton.initBySelectorAndSetTempId(selectors.buttons.SAVE, "saveButton");
+        await this.cancelButton.initBySelectorAndSetTempId(selectors.buttons.CANCEL, "cancelButton");
     }
 
     static get categoryEnum(){
@@ -74,11 +100,35 @@ class ActivityAdderPage extends PageOtus {
     }
 
     async selectCategory(categoryEnumValue=enums.category.NORMAL){
-        //await this.categorySelector.selectOptionByIndex_temp(categoryEnumValue); // todo
+        await this.categorySelector.selectOptionByIndex_temp(categoryEnumValue.index); // todo
     }
 
     async searchActivity(nameOrAcronym){
-        await this.searchInput.typeAndClickOnFirstOfList(selectors.SEARCH_INPUT, nameOrAcronym);
+        await this.autoCompleteSearch.typeAndClickOnFirstOfList(nameOrAcronym);
+        //await this.autoCompleteSearch.clear();
+    }
+
+    async addActivity(nameOrAcronym){
+        await this.autoCompleteSearch.typeAndClickOnFirstOfList(nameOrAcronym);
+        await this.addButton.click();
+        await this.waitForMilliseconds(500); // wait activity card appear
+        await this.autoCompleteSearch.clear();
+        await this.page.mouse.click(0,0);
+    }
+
+    async deleteActivityFromTemporaryList(index){
+        const cardElem = (await this.page.$$(selectors.activityCard.TAG))[index];
+        const deleteActivityButton = this.getNewButton(this);
+        deleteActivityButton.elementHandle = (await cardElem.$$(deleteActivityButton.tagName))[1]; //<<
+        await deleteActivityButton.click();
+    }
+
+    async saveChanges(){
+        await this.saveButton.click();
+    }
+
+    async cancelChanges(){
+        await this.cancelButton.click();
     }
 }
 

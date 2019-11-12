@@ -4,13 +4,15 @@ const utils         = require('../utils');
 const FileHandler   = require('../handlers/FileHandler');
 const ErrorLogger   = require('./ErrorLogger');
 // Page elements
+const AutoCompleteSearch = require('./AutoCompleteSearch');
+const Button         = require('./Button');
 const Calendar       = require('./Calendar');
 const Checkbox       = require('./Checkbox');
 const Dialog         = require('./Dialog');
 const DialogWarning  = require('./DialogWarning');
 const InputField     = require('./InputField');
 const OptionSelector = require('./OptionSelector');
-const SearchInput    = require('./SearchInput');
+const Menu           = require('./Menu');
 const Switch         = require('./Switch');
 
 // ***********************************************
@@ -39,7 +41,7 @@ class PageExtended {
     // --------------------------------------------------------
     // env variable dependencies
 
-    hideXs(){
+    isHideXs(){
         return (process.env.WINDOW_WIDTH >= 600);
     }
 
@@ -66,6 +68,18 @@ class PageExtended {
         return typeCodes;
     }
 
+    /***************************************************
+     * Get new page element instance
+     */
+
+    getNewAutoCompleteSearch(){
+        return new AutoCompleteSearch(this);
+    }
+
+    getNewButton(){
+        return new Button(this);
+    }
+
     getNewCalendar(){
         return new Calendar(this);
     }
@@ -86,12 +100,12 @@ class PageExtended {
         return new InputField(this);
     }
 
-    getNewOptionSelector(){
-        return new OptionSelector(this);
+    getNewMenu(){
+        return new Menu(this);
     }
 
-    getNewSearchInput(){
-        return new SearchInput(this);
+    getNewOptionSelector(){
+        return new OptionSelector(this);
     }
 
     getNewSwitch(){
@@ -229,7 +243,7 @@ class PageExtended {
      */
 
     async findChildrenToSetTempIdsFromInnerText(parentSelector, childrenTag){
-        this.enableConsoleLog();//.
+        //this.enableConsoleLog();//.
         return await this.page.evaluate((_parentSelector, _childrenTag) => {
             let parentNode = document.body.querySelector(_parentSelector);
             let tempIdArray = [];
@@ -239,10 +253,14 @@ class PageExtended {
                 if (!isNodeEmpty && currentNode.tagName.toLowerCase() === _childrenTag) {
                     let id = currentNode.getAttribute('id');
                     if(!id){
-                        id = currentNode.innerText.replace('\n', '') + `_${tempIdArray.length}`;
+                        id = currentNode.innerText.replace('\n', '');
+                        //console.log(currentNode.outerHTML, `\nset id: innerText = *${id}*`);//.
+                        id += `_${tempIdArray.length}`;
                         currentNode.setAttribute('id', id);
                     }
                     tempIdArray.push(id);
+
+                    //console.log(typeof currentNode, "after set id: id =", currentNode.getAttribute("id"));//.
                 }
             }
 

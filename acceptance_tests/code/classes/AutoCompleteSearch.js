@@ -1,6 +1,10 @@
 const PageElement = require('./PageElement');
+const InputField = require('./InputField');
+const Button = require('./Button');
 
 const selectors = {
+    TAG: "md-autocomplete-wrap",
+    //CLEAN_BUTTON: "button[aria-label='Clear Input']",
     SUGGESTIONS_CONTAINER: 'md-virtual-repeat-container', // COULD HAVE MORE THAN ONE
     SUGGESTIONS_CONTAINER_ID: "autoCompleteOptionList",
     SUGGESTIONS_CONTAINER_UNIQUE_ATTR: "style",
@@ -9,10 +13,24 @@ const selectors = {
     SUGGESTION_ITEM_LIST: 'li'
 };
 
-class SearchInput extends PageElement {
+class AutoCompleteSearch extends PageElement {
 
-    constructor(pageExt, id){
-        super(pageExt, "input", id);
+    constructor(pageExt){
+        super(pageExt, "md-autocomplete-wrap");
+        this.inputText = new InputField(pageExt);
+        this.clearButton = new Button(pageExt);
+    }
+
+    async _initMyOwnAttributes(index=0){
+        this.inputText.elementHandle = await this.elementHandle.$(this.inputText.tagName);
+        this.clearButton.elementHandle = await this.elementHandle.$(this.clearButton.tagName);
+    }
+
+    async clear(){
+        //if(!this.clearButton.elementHandle){
+            this.clearButton.elementHandle = await this.elementHandle.$(this.clearButton.tagName);
+        //}
+        await this.clearButton.click();
     }
 
     async typeAndClickOnItemList(inputSelector, text, index){
@@ -20,8 +38,9 @@ class SearchInput extends PageElement {
         await this._clickOnSomeSuggestionOfList(index);
     }
 
-    async typeAndClickOnFirstOfList(inputSelector, text){
-        await this.pageExt.typeWithWait(inputSelector, text);
+    async typeAndClickOnFirstOfList(text){
+        await this.inputText.type(text);
+        await this.pageExt.waitForMilliseconds(1000); // wait options appear
         await this._clickOnSomeSuggestionOfList(0);
     }
 
@@ -61,8 +80,6 @@ class SearchInput extends PageElement {
             '#'+selectors.SUGGESTION_LIST_ID,
             selectors.SUGGESTION_ITEM_LIST);
 
-        await this.pageExt.saveHTML("bug");//.
-
         const id = tempIdArr[index];
         try{
             await this.pageExt.clickWithWait(`[id='${id}']`);
@@ -74,4 +91,4 @@ class SearchInput extends PageElement {
     }
 }
 
-module.exports = SearchInput;
+module.exports = AutoCompleteSearch;

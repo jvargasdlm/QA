@@ -42,7 +42,7 @@ class PreviewPage extends PageOtus {
         const inputSelectors = selectors.inputDataType;
         const types = ActivityQuestionAnswer.dataTypes;
 
-        const index = selectors.commanderButtons.defineToolbarIndexAccordingHideXs(this.hideXs());
+        const index = selectors.commanderButtons.defineToolbarIndexAccordingHideXs(this.isHideXs());
         const nextQuestionButtonElem = (await this.page.$$(selectors.commanderButtons.NEXT_QUESTION))[index];
 
         for(let answer of answersArr){

@@ -4,45 +4,89 @@ Ao inves de enviar selector para waitForSelector, enviar o PageEelement, que con
 
 class PageElement {
     
-    constructor(pageExt, tagName){
+    constructor(pageExt, tag){
         this.pageExt = pageExt;
-        this.tagName = tagName;
+        this.tagName = tag;
         this.elementHandle = undefined;
-        this.id = undefined;
-        //this.selector = undefined;
     }
 
-    async init(id){
-        this.id = id;
+    get wasInitialized(){
+        return (this.elementHandle !== undefined);
+    }
+
+    async initById(id){
         this.elementHandle = await this.pageExt.waitForSelector(`[id='${id}']`);
+        await this._initMyOwnAttributes();
     }
 
-    async initByTag(){
-        this.elementHandle = await this.pageExt.waitForSelector(this.tagName);
+    async initByTag(index=0){
+        await this.pageExt.waitForSelector(this.tagName);
+        this.elementHandle = (await this.pageExt.page.$$(this.tagName))[index];
+        await this._initMyOwnAttributes();
     }
 
-    async initByUniqueAttribute(attrName, attrValue){
-        const selector = `${this.tagName}[${attrName}='${attrValue}']`;
-        this.elementHandle = await this.pageExt.waitForSelector(selector);
-    }
-
-    async initBySelector(selector){
-        this.elementHandle = await this.pageExt.waitForSelector(selector);
-    }
-
-    async forceSetId(selector, id){
+    async initByTagAndSetTempId(tempId, index=0){
+        await this.pageExt.waitForSelector(this.tagName);
+        this.elementHandle = (await this.pageExt.page.$$(this.tagName))[index];
         try {
-            await this.pageExt.page.evaluate((selector, id) => {
-                const element = document.body.querySelector(selector);
-                element.setAttribute("id", id);
-            }, selector, id);
-            this.id = id;
-            await this.init(id);
+            await this.pageExt.page.evaluate((selector, tempId, index) => {
+                const element = (document.body.querySelectorAll(selector))[index];
+                element.setAttribute("id", tempId);
+            }, this.tagName, tempId, index);
+
+            await this._initMyOwnAttributes(index);
         }
-        catch (e) {
-            console.log(`Force set id='${id}' not work:`, e.message);
+        catch (e) {//.
+            console.log(`ERROR at init pageElement by tag "${this.tagName}" with set id '${tempId}':`, e.message);
+            await this.pageExt.hasElementSelector(this.tagName);
             throw e;
         }
+    }
+
+    async initBySelector(selector, index=0){
+        try {
+            await this.pageExt.waitForSelector(selector);
+            this.elementHandle = (await this.pageExt.page.$$(selector))[index];
+            await this._initMyOwnAttributes();
+        }
+        catch (e) {//.
+            console.log(`ERROR at init pageElement by selector "${selector}":`, e.message);
+            await this.pageExt.hasElementSelector(selector);
+            throw e;
+        }
+    }
+
+    async initBySelectorAndSetTempId(selector, tempId, index=0){
+        await this.pageExt.waitForSelector(selector);
+        try {
+            await this.pageExt.page.evaluate((selector, tempId, index) => {
+                const element = (document.body.querySelectorAll(selector))[index];
+                element.setAttribute("id", tempId);
+            }, selector, tempId, index);
+
+            await this.initById(tempId);
+        }
+        catch (e) {//.
+            console.log(`ERROR at init pageElement by selector "${selector}" with set id '${tempId}':`, e.message);
+            await this.pageExt.hasElementSelector(selector);
+            throw e;
+        }
+    }
+
+    // Implemented by children classes
+    async _initMyOwnAttributes(){
+
+    }
+
+    async setTempId(selector, tempId, index=0){
+        await this.pageExt.page.evaluate((selector, tempId, index) => {
+            const element = (document.body.querySelectorAll(selector))[index];
+            element.setAttribute("id", tempId);
+        });
+    }
+
+    async getId(){
+        return await this.getAttribute("id");
     }
 
     async getAttribute(attributeName){
@@ -55,8 +99,15 @@ class PageElement {
         return remoteObject.value;
     }
 
+    extractIdFromElemHandle(){
+        const description = this.elementHandle._remoteObject.description;
+        let startIndex = description.indexOf('#');
+        let endIndex = description.indexOf('.');
+        return description.slice(startIndex+1, endIndex);
+    }
+
     async isHidden(){
-        return this.isHiddenUsingSelector(`[id=${this.id}]`);
+        return this.isHiddenUsingSelector(`[id=${this.getId()}]`);
     }
 
     async isHiddenUsingSelector(selector){
@@ -66,11 +117,8 @@ class PageElement {
         }, selector);
     }
 
-    extractIdFromElemHandle(){
-        const description = this.elementHandle._remoteObject.description;
-        let startIndex = description.indexOf('#');
-        let endIndex = description.indexOf('.');
-        return description.slice(startIndex+1, endIndex);
+     pageIsHidenXs(){
+        return this.pageExt.isHideXs();
     }
 
     // -------------------------------------------------------
@@ -78,10 +126,6 @@ class PageElement {
 
     async click(){
         await this.elementHandle.click();
-    }
-
-    async clickById(id){
-        await this.pageExt.clickWithWait(`${this.tagName}[id='${id}']`);
     }
 
     async clickByAttribute(uniqueAttrName, uniqueAttrValue){
@@ -93,7 +137,8 @@ class PageElement {
     }
 
     async findChildrenAndSetTempIdsFromInnerText(childTagName){
-        const parentSelector = (this.id? `[id='${this.id}']` : this.tagName);
+        const id = await this.getId();
+        const parentSelector = (id? `[id='${id}']` : this.tagName);
         return await this.pageExt.findChildrenToSetTempIdsFromInnerText(parentSelector, childTagName);
     }
 
@@ -102,7 +147,8 @@ class PageElement {
     }
 
     async findChildrenToSetTempIds(childTagName, tempIdArr){
-        const parentSelector = (this.id? `[id='${this.id}']` : this.tagName);
+        const id = await this.getId();
+        const parentSelector = (id? `[id='${id}']` : this.tagName);
         return await this.pageExt.findChildrenToSetTempIds(parentSelector, childTagName, tempIdArr);
     }
 

@@ -6,6 +6,8 @@ class Button extends PageElement {
         super(pageExt, 'button');
     }
 
+
+
 }
 
 module.exports = Button;
