@@ -9,14 +9,12 @@ TEST_RESULTS_DIR_PATH = $(OUTPUT_DIR_PATH)/test_results
 
 # main rules
 
-init:
+init: install_ set_login_data
 	tar xzf chrome.tar.gz
 	mkdir $(DOWNLOADS_DIR_PATH)
 	mkdir $(OUTPUT_DIR_PATH)
 	mkdir $(SCREENSHOT_DIR_PATH)
 	mkdir $(TEST_RESULTS_DIR_PATH)
-	install_
-	set_login_data
 
 run:
 	npm test -- --passWithNoTests --detectOpenHandles --verbose
