@@ -10,8 +10,11 @@ TEST_RESULTS_DIR_PATH = $(OUTPUT_DIR_PATH)/test_results
 # main rules
 
 init:
-	extract_chrome
-	createDirs
+	tar xzf chrome.tar.gz
+	mkdir $(DOWNLOADS_DIR_PATH)
+	mkdir $(OUTPUT_DIR_PATH)
+	mkdir $(SCREENSHOT_DIR_PATH)
+	mkdir $(TEST_RESULTS_DIR_PATH)
 	install_
 	set_login_data
 
@@ -26,19 +29,8 @@ reinstall:
 	sudo rm package-lock.json
 	install_
 
-# helper rules
-
 set_login_data:
 	EMAIL=$(EMAIL) PASSWORD=$(PASSWORD) npm start
-
-extract_chrome:
-	tar xzf chrome.tar.gz
-
-createDirs:
-	mkdir $(DOWNLOADS_DIR_PATH)
-	mkdir $(OUTPUT_DIR_PATH)
-	mkdir $(SCREENSHOT_DIR_PATH)
-	mkdir $(TEST_RESULTS_DIR_PATH)
 
 install_:
 	sudo npm set PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true

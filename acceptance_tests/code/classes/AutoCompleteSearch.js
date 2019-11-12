@@ -11,8 +11,8 @@ const selectors = {
 
 class SearchInput extends PageElement {
 
-    constructor(pageExt){
-        super(pageExt, "input");
+    constructor(pageExt, id){
+        super(pageExt, "input", id);
     }
 
     async typeAndClickOnItemList(inputSelector, text, index){
@@ -60,7 +60,17 @@ class SearchInput extends PageElement {
         let tempIdArr = await this.pageExt.findChildrenToSetTempIdsFromInnerText(
             '#'+selectors.SUGGESTION_LIST_ID,
             selectors.SUGGESTION_ITEM_LIST);
-        await this.pageExt.clickWithWait(`[id='${tempIdArr[index]}']`);
+
+        await this.pageExt.saveHTML("bug");//.
+
+        const id = tempIdArr[index];
+        try{
+            await this.pageExt.clickWithWait(`[id='${id}']`);
+        }
+        catch (e) {
+            console.log(id);
+            throw e;
+        }
     }
 }
 
