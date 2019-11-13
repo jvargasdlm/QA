@@ -66,7 +66,7 @@ suiteArray = [
 
     describe('Temp Tests', () => {
 
-        xtest('Select switches', async() => {
+        test('Select switches', async() => {
             await activitiyAdderPage.switchTypeToPaper();
             await activitiyAdderPage.waitForMilliseconds(2000);
             await activitiyAdderPage.switchTypeToOnline();

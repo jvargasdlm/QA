@@ -56,12 +56,19 @@ suiteArray = [
 
         test('Temp test', async() => {
             const activityItem = await activitiesPage.selectActivityItem(1);
-            await activityItem.extractInfo();
-            console.log(activityItem.data);
+            console.log(await activityItem.extractInfo());
 
-            // await activitiesPage.sortActivitiesByOptionIndex(1);
-            // await activitiesPage.selectAllBlocks();
-            // await activitiesPage.waitForMilliseconds(5000);
+            await activitiesPage.clickOnActionButton(activitiesPage.getActionButtonTempIds.VIEW);
+        });
+
+        xtest('Clicks test', async() => {
+            await activitiesPage.sortActivitiesByOptionIndex(1);
+            await activitiesPage.selectAllBlocks();
+            await activitiesPage.waitForMilliseconds(5000);
+        });
+
+        xtest('Count action buttons', async() => {
+            await activitiesPage.selectActivityItem(1);
 
             const topMenuButtons = {
                 ALTERAR_AFERIDOR: "button[aria-label='Alterar Aferidor']",
@@ -77,47 +84,75 @@ suiteArray = [
                 await activitiesPage.hasElementSelector(selector+"[hide-xs]");
                 await activitiesPage.hasElementSelector(selector+"[hide-gt-xs]");
             }
+
+            await activitiesPage.selectActivityItem(1);
         });
 
     }),
 
-/*
+
     describe('Scenario #2.1 - Activity selection', () => {
 
-        async function ActivityButtonsAreHidden(expectedHidden=true, failMessage='Activity buttons should be hidden, but do not.'){
+        async function checkVisibilityOfActivityButtons(buttonsThatShouldBeVisibleArr){
             await activitiesPage.waitForMilliseconds(500);
 
-            // temp
-            const isHidden = await activitiesPage.page.evaluate(() => {
-                const buttonElem = document.querySelector("button[aria-label='Preencher Atividade']");
-                return (buttonElem.getAttribute("aria-hidden") === "true");
-            });
-
+            let hiddenButtonsArr = null;
             try {
-                expect(isHidden).toBe(expectedHidden);
+                const visibleButtonsArr = await activitiesPage.page.evaluate((buttonIds) => {
+                    let arr = [];
+                    for(let id of buttonIds){
+                        const element = document.querySelector(`[id='${id}']`);
+                        if (element.getAttribute("aria-hidden") === "false" ||
+                            element.getAttribute("ng-disable") === "true"){
+                            arr.push(id);
+                        }
+                    }
+                    return arr;
+                }, buttonsThatShouldBeVisibleArr);
+
+                const hiddenButtonsArr = buttonsThatShouldBeVisibleArr.filter(id => !visibleButtonsArr.includes(id));
+
+                expect(hiddenButtonsArr.length).toBe(0);
             }
             catch (e) {
-                errorLogger.addFailMessageFromCurrSpec(failMessage);
+                if(!hiddenButtonsArr){
+                    throw e;
+                }
+                errorLogger.addFailMessageFromCurrSpec('Some activity buttons should be visible, but do not. '
+                    + 'Hidden buttons: ' + hiddenButtonsArr.join(", "));
+            }
+            finally {
+                await activitiesPage.refreshAndWaitLoad();
+                await activitiesPage.init();
             }
         }
 
-        test('2.1a Select 0 activities', async() => {
+        xtest('2.1a Select 0 activities', async() => {
             await activitiesPage.selectActivityItem(0);
             await activitiesPage.selectActivityItem(0);
-            await ActivityButtonsAreHidden();
+            await checkVisibilityOfActivityButtons([]);
         });
 
-        test('2.1b Select 2 activities', async() => {
+        xtest('2.1b Select 2 activities', async() => {
             await activitiesPage.selectActivityItem(0);
             await activitiesPage.selectActivityItem(1);
-            await ActivityButtonsAreHidden();
-            await activitiesPage.refreshAndWaitLoad();
+            const deleteButtonId = activitiesPage.getActionButtonsInfo.DELETE.tempId;
+            await checkVisibilityOfActivityButtons([deleteButtonId]);
         });
 
-        test('2.1c Select 1 activitiy', async() => {
+        test('2.1c1 Select 1 activity of ON-LINE type', async() => {
+            await activitiesPage.selectActivityItem(0);
+            await activitiesPage.initReportButton();
+            const inspectorButtonId = activitiesPage.getActionButtonsInfo.CHANGE_INSPECTOR.tempId;
+            const buttonsThatShouldBeVisibleArr = activitiesPage.getNotDynamicActionButtonTempIds.filter(id => id !== inspectorButtonId);
+            await checkVisibilityOfActivityButtons(buttonsThatShouldBeVisibleArr);
+        });
+
+        test('2.1c2 Select 1 activity of PAPER type', async() => {
             await activitiesPage.selectActivityItem(1);
-            await ActivityButtonsAreHidden(false, 'Activity buttons should be visible, but do not.');
-            await activitiesPage.refreshAndWaitLoad();
+            await activitiesPage.initReportButton();
+            const buttonsThatShouldBeVisibleArr = activitiesPage.getNotDynamicActionButtonTempIds;
+            await checkVisibilityOfActivityButtons(buttonsThatShouldBeVisibleArr);
         });
     }),
 /*

@@ -49,7 +49,7 @@ class SpeedDial extends PageElement {
         }
     }
 
-    async clickToOpenAndChooseAction(actionOptionIndex){
+    async openAndChooseAction(actionOptionIndex){
         try{
             await this.elementHandle.click();
             await this.pageExt.waitForSelector(selectors.trigger.open());

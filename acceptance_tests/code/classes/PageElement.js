@@ -117,10 +117,6 @@ class PageElement {
         }, selector);
     }
 
-     pageIsHidenXs(){
-        return this.pageExt.isHideXs();
-    }
-
     // -------------------------------------------------------
     // Clicks
 

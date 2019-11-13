@@ -10,52 +10,44 @@ const {SpeedDial,
 
 const selectors = {
     SEARCH_FILTER_INPUT: "input[ng-model='$ctrl.filter']",
-    ACTION_TRIGGER_BUTTON_XS_ID: "actionTriggerButton",
-    activityActions:{
-        CHANGE_INSPECTOR: {
-            selector: "button[aria-label='Alterar Aferidor']",
-            tempId: "changeInspectorButton"
+    activityActions: {
+        parentElement: {
+            XS: "md-bottom-sheet",
+            GT_XS: "md-fab-speed-dial"
         },
-        FILL: {
-            selector: "button[aria-label='Preencher Atividade']",
-            tempId: "fillActivityButton"
-        },
-        GENERATE_REPORT: {
-            selector: "button[aria-label='Carregar Relatório']",
-            tempId: "generateReportButton",
-            sateIds: {
-                LOAD: "loadReport",
-                GENERATE: "generateReport",
-                PENDING_INFO: 'pendingInformation'
+        TRIGGER_BUTTON_XS_ID: "actionTriggerButton",
+        buttons: {
+            FILL: {
+                selector: "button[aria-label='Preencher Atividade']",
+                tempId: "fillActivityButton"
             },
-        },
-        VIEW: {
-            selector: "button[aria-label='Visualizar Atividade']",
-            tempId: "viewActivityButton"
-        },
-        DELETE: {
-            selector: "button[aria-label='Excluir']",
-            tempId: "deleteActivityButton"
-        },
-        DETAILS: {
-            selector: "button[aria-label='Detalhes']",
-            tempId: "detailsButton"
+            VIEW: {
+                selector: "button[aria-label='Visualizar Atividade']",
+                tempId: "viewActivityButton"
+            },
+            CHANGE_INSPECTOR: {
+                selector: "button[aria-label='Alterar Aferidor']",
+                tempId: "changeInspectorButton"
+            },
+            DELETE: {
+                selector: "button[aria-label='Excluir']",
+                tempId: "deleteActivityButton"
+            },
+            DETAILS: {
+                selector: "button[aria-label='Detalhes']",
+                tempId: "detailsButton"
+            },
+            REPORT: {
+                parentSelector: "otus-activity-report",
+                selector: "button[aria-label='Carregar Relatório']",
+                tempId: "loadReportButton",
+                stateIds: {
+                    LOAD: "loadReport",
+                    GENERATE: "generateReport",
+                    PENDING_INFO: 'pendingInformation'
+                },
+            }
         }
-    },
-    topMenuButtons: {
-        //TOOLBAR_MANAGER: 'otus-activity-manager-toolbar',
-        reportButtons:{
-            LOADING: "",
-            VIEW: "",
-        },
-        ALTERAR_AFERIDOR: "button[aria-label='Alterar Aferidor']",
-        GERAR_RELATORIO: "button[aria-label='Carregar Relatório']",
-        PREENCHER_ATIVIDADE: "button[aria-label='Preencher Atividade']",
-        VISUALIZAR_ATIVIDADE: "button[aria-label='Visualizar Atividade']",
-        EXCLUIR: "button[aria-label='Excluir']",
-        DETALHES: "button[aria-label='Detalhes']",
-        // while adding activity
-        ADD_ACTIVITY: "button[aria-label='Adicionar']"
     },
     bottomMenuButtons: {
         //MANAGER_COMMANDER: "otus-activity-manager-commander",
@@ -111,9 +103,6 @@ class ActivitiesPage extends PageOtus {
         this.sortMenu = this.getNewMenu();
 
         this.actionButtons = undefined;
-
-        this.activityItems = []; //<<
-        //this.addActivitySpeedDial = new SpeedDial(this, directionEnum.left);
     }
 
     async init(){
@@ -123,36 +112,54 @@ class ActivitiesPage extends PageOtus {
         await this.allBlocksCheckbox.initBySelectorAndSetTempId(this.allBlocksCheckbox.tagName,
             checkboxIndexes.ALL_BLOCKS.tempId, checkboxIndexes.ALL_BLOCKS.index);
 
-        //await this.leftSidenav.init();
         await this.sortMenuButton.initBySelectorAndSetTempId(selectors.SORT_MENU_BUTTON, selectors.SORT_MENU_BUTTON_ID);
 
-        //await this.reportButton.setId(this.reportButton.id);
-
-        if(this.isHideXs()){
-            await this.page.evaluate(() => {
-
-            });
+        const buttonIds = Object.values(selectors.activityActions.buttons).map(obj => obj.tempId);
+        if(this.isBigScreenHideXs){
+            await this.findChildrenButtonToSetTempIds(selectors.activityActions.parentElement.XS, buttonIds);
         }
         else{
             this.actionButtons = new SpeedDial(this, directionEnum.down);
-            const buttonIds = Object.values(selectors.activityActions).map(obj => obj.tempId);
-            await this.actionButtons.init(selectors.ACTION_TRIGGER_BUTTON_XS_ID, buttonIds);
+            await this.actionButtons.init(selectors.activityActions.TRIGGER_BUTTON_XS_ID, buttonIds);
         }
     }
 
     async initReportButton(){
-        await this.reportButton.init(this.reportButton.id);
+        const grandparentSelector = (this.isBigScreenHideXs?
+            selectors.activityActions.parentElement.XS :
+            selectors.activityActions.TRIGGER_BUTTON_XS_ID);
+
+        const parentSelector = selectors.activityActions.buttons.REPORT.parentSelector;
+        const parentId = selectors.activityActions.buttons.REPORT.tempId;
+        await this.findChildrenToSetTempIds(grandparentSelector, parentSelector, [parentId]);
+
+        let parentElementHandle = await this.page.$('#'+parentId);
+        await this.reportButton.init(parentElementHandle, '#'+this.reportButton.id);
     }
 
     // ---------------------------------------------------------------
     // Getters
 
-    get selectors(){
-        return selectors;
+    get getActionButtonsInfo(){
+        return selectors.activityActions.buttons;
     }
 
-    static getSelectors(){
-        return selectors;
+    get getActionButtonTempIds(){
+        //return Object.values(selectors.activityActions.buttons).map(obj => obj.tempId);
+        return this.getNotDynamicActionButtonTempIds.concat(this.reportButton.id);
+    }
+
+    get getNotDynamicActionButtonTempIds(){
+        const buttons = Object.values(selectors.activityActions.buttons);
+        return buttons
+            .filter((obj) => obj !== selectors.activityActions.buttons.REPORT)
+            .map(obj => obj.tempId);
+    }
+
+    get getActivityActionButtonsParentTag(){
+        return (this.isBigScreenHideXs?
+            selectors.activityActions.parentElement.XS :
+            selectors.activityActions.parentElement.GT_XS);
     }
 
     // ---------------------------------------------------------------
@@ -206,7 +213,7 @@ class ActivitiesPage extends PageOtus {
 
     async deleteActivity(acronym, activityIndex=0){
         await this.searchAndSelectActivity(acronym, activityIndex);
-        await this.clickWithWait(selectors.topMenuButtons.EXCLUIR);
+        await this.clickWithWait(selectors.activityActions.buttons.DELETE.tempId);
         await (this.getNewDialog()).waitForOpenAndClickOnOkButton();
         await this.refreshAndWaitLoad();
     }
@@ -220,16 +227,7 @@ class ActivitiesPage extends PageOtus {
 
     async selectActivityAndClickOnFillButton(acronym, activityIndex=0){
         await this.searchAndSelectActivity(acronym, activityIndex);
-        await this.clickWithWait(selectors.topMenuButtons.PREENCHER_ATIVIDADE);
-    }
-
-    async readFinalizedActivity(acronym, activityIndex=0){
-        await this.searchAndSelectActivity(acronym, activityIndex);
-        await this.clickWithWait(selectors.topMenuButtons.VISUALIZAR_ATIVIDADE);
-        await this.waitForMilliseconds(500);
-        let answers = await (new ActivityViewPage(this.page)).extractAnswers();
-        await this.goBackAndWaitLoad();
-        return answers;
+        await this.clickWithWait(selectors.activityActions.buttons.FILL.tempId);
     }
 
     async selectAllActivities(){
@@ -238,6 +236,29 @@ class ActivitiesPage extends PageOtus {
 
     async selectAllBlocks(){
         await this.allBlocksCheckbox.click();
+    }
+
+    async extractDataFromActivityByIndex(activityIndex){
+        const activityItem = new ActivityItem(this);
+        await activityItem.init(activityIndex);
+        return (await activityItem.extractInfo());
+    }
+
+    /*
+     * Action buttons
+     */
+
+    async clickOnActionButton(buttonId){
+        await this.clickWithWait(buttonId);
+    }
+
+    async readFinalizedActivity(acronym, activityIndex=0){
+        await this.searchAndSelectActivity(acronym, activityIndex);
+        await this.clickWithWait(selectors.activityActions.buttons.VIEW.tempId);
+        await this.waitForMilliseconds(500);
+        let answers = await (new ActivityViewPage(this.page)).extractAnswers();
+        await this.goBackAndWaitLoad();
+        return answers;
     }
 
     /*******************************************************

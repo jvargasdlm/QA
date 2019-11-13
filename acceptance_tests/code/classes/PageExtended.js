@@ -20,7 +20,7 @@ const Switch         = require('./Switch');
 require('custom-env').env('staging');
 const WAIT_FOR_SELECTOR_TIMEOUT = parseInt(process.env.WAIT_FOR_SELECTOR_TIMEOUT, 10);
 const LOG_NAVIGATION_ACTIONS    = (process.env.LOG_NAVIGATION_ACTIONS === 'true');
-
+const IS_HIDE_XS = (process.env.WINDOW_WIDTH >= 600);
 const typeCodes ={
     OTUS: 0,
     OTUS_STUDIO: 1,
@@ -41,8 +41,8 @@ class PageExtended {
     // --------------------------------------------------------
     // env variable dependencies
 
-    isHideXs(){
-        return (process.env.WINDOW_WIDTH >= 600);
+    get isBigScreenHideXs(){
+        return IS_HIDE_XS;
     }
 
     // ----------------------------------------------------------
