@@ -15,8 +15,15 @@ const selectors = {
     type: {
         ON_LINE: "div[aria-label='Online']",
         PAPER: "div[aria-label='Em papel']"
+    },
+    /**
+     * @return {string}
+     */
+    getId: function(index){
+        return "activity" + index;
     }
 };
+
 
 class ActivityItem extends GridItem {
 
@@ -31,6 +38,10 @@ class ActivityItem extends GridItem {
 
     get getTypeEnum(){
         return typeEnum;
+    }
+
+    async init(index){
+        await this.initById(selectors.getId(index));
     }
 
     async extractInfo() {

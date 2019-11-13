@@ -10,6 +10,10 @@ class Checkbox extends PageElement {
         await this.pageExt.clickWithWait(`${this.tagName}[aria-label='${optionLabel}']`);
     }
 
+    async isChecked(){
+        return ((await this.getAttribute("aria-checked")) === 'true');
+    }
+
 }
 
 module.exports = Checkbox;

@@ -7,6 +7,7 @@ class PageElement {
     constructor(pageExt, tag){
         this.pageExt = pageExt;
         this.tagName = tag;
+        this.id = undefined;
         this.elementHandle = undefined;
     }
 
@@ -15,6 +16,17 @@ class PageElement {
     }
 
     async initById(id){
+        // try {
+        //     const innerText = await this.pageExt.page.evaluate((selector) => {
+        //             return (document.body.querySelector(selector)).innerText;
+        //         }, id);
+        //     console.log(innerText);
+        // }
+        // catch (e) {
+        //
+        // }
+
+        this.id = id;
         this.elementHandle = await this.pageExt.waitForSelector(`[id='${id}']`);
         await this._initMyOwnAttributes();
     }
@@ -35,6 +47,7 @@ class PageElement {
             }, this.tagName, tempId, index);
 
             await this._initMyOwnAttributes(index);
+            this.id = tempId;
         }
         catch (e) {//.
             console.log(`ERROR at init pageElement by tag "${this.tagName}" with set id '${tempId}':`, e.message);
@@ -87,6 +100,12 @@ class PageElement {
 
     async getId(){
         return await this.getAttribute("id");
+    }
+
+    async getAttributeByDOM(selector, attributeName){
+        return await this.pageExt.page.evaluate((selector, attributeName) => {
+            return document.body.querySelector(selector).getAttribute(attributeName);
+        }, selector, attributeName);
     }
 
     async getAttribute(attributeName){

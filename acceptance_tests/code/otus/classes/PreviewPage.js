@@ -53,7 +53,17 @@ class PreviewPage extends PageOtus {
                 case types.singleOption:
                     await this.clickWithWait(inputSelectors.singleOption(answer.value)); break;
                 case types.multipleOption:
-                    await this.clickWithWait(inputSelectors.multipleOption(answer.value));
+                    const checkbox = this.getNewCheckbox();
+                    const checkBoxSelector = inputSelectors.multipleOption(answer.value);
+                    checkbox.elementHandle = await this.page.$(checkBoxSelector);
+                    //!(await checkbox.isChecked())
+                    const isChecked = await this.page.evaluate((selector) => {
+                        const value = document.body.querySelector(selector).getAttribute("aria-checked");
+                        return (value === 'true');
+                    }, checkBoxSelector);
+                    if( !isChecked ){
+                        await checkbox.click();
+                    }
                     break;
                 default:
                     await this.typeWithWait(inputSelectors[answer.type], answer.value); break;

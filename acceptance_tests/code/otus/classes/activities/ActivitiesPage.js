@@ -1,6 +1,6 @@
 const PageOtus          = require('../PageOtus');
 const PreviewPage       = require('../PreviewPage');
-const ActivityViewPage  = require('./ActivityViewPage');
+
 const DynamicElement    = require('../../../classes/DynamicElement');
 const ActivityItem      = require('./ActivityItem');
 const {SpeedDial,
@@ -55,8 +55,8 @@ const selectors = {
         ACTION_BUTTONS: "md-fab-actions",
     },
     sortMenu:{
-        selector: "button[ng-click='$mdOpenMenu()']",
-        id: "sortMenuButton",
+        selector: "button[ng-click='$mdMenu.open()']",
+        tempId: "sortMenuButton",
         itemIds: {
             INSERTION: '$index',
             NAME: 'name',
@@ -71,15 +71,7 @@ const selectors = {
         LOAD: "loadReport",
         GENERATE: "generateReport",
         PENDING_INFO: 'pendingInformation'
-    },
-    /**
-     * @return {string}
-     */
-    ACTIVITY_ITEM: function(index){
-        return "activity"+index;
-    },
-    SORT_MENU_BUTTON: "button[ng-click='$mdOpenMenu()']",
-    SORT_MENU_BUTTON_ID: "sortMenuButton",
+    }
 };
 
 const checkboxIndexes = {
@@ -93,15 +85,11 @@ class ActivitiesPage extends PageOtus {
 
     constructor(page){
         super(page);
-
         this.allActivitiesCheckbox = this.getNewCheckbox();
         this.allBlocksCheckbox = this.getNewCheckbox();
-
         this.reportButton = new DynamicElement(this, selectors.reportButtonStateIds, selectors.reportButtonStateIds.LOAD);
-
         this.sortMenuButton = this.getNewButton();
         this.sortMenu = this.getNewMenu();
-
         this.actionButtons = undefined;
     }
 
@@ -112,7 +100,7 @@ class ActivitiesPage extends PageOtus {
         await this.allBlocksCheckbox.initBySelectorAndSetTempId(this.allBlocksCheckbox.tagName,
             checkboxIndexes.ALL_BLOCKS.tempId, checkboxIndexes.ALL_BLOCKS.index);
 
-        await this.sortMenuButton.initBySelectorAndSetTempId(selectors.SORT_MENU_BUTTON, selectors.SORT_MENU_BUTTON_ID);
+        await this.sortMenuButton.initBySelectorAndSetTempId(selectors.sortMenu.selector, selectors.sortMenu.tempId);
 
         const buttonIds = Object.values(selectors.activityActions.buttons).map(obj => obj.tempId);
         if(this.isBigScreenHideXs){
@@ -171,7 +159,7 @@ class ActivitiesPage extends PageOtus {
 
     async selectActivityItem(activityIndex){
         const activityItem = new ActivityItem(this);
-        await activityItem.initById(selectors.ACTIVITY_ITEM(activityIndex));
+        await activityItem.init(activityIndex);
         await activityItem.click();
         return activityItem;
     }
@@ -186,48 +174,17 @@ class ActivitiesPage extends PageOtus {
         await this.clickWithWait(selectors.bottomMenuButtons.ADD);
     }
 
-    // async addOnlineActivity(acronym){
-    //     try {
-    //         //await this.addActivitySpeedDial.clickToOpenAndChooseAction(addActivityButtons.ON_LINE.index);
-    //
-    //         const mySelectors = selectors.bottomMenuButtons;
-    //         await this.clickWithWait(mySelectors.ADD);
-    //         await this.setHiddenAttributeValue(selectors.bottomMenuButtons.ACTION_BUTTONS, false); // force
-    //         await this.waitForMilliseconds(500); // without this wait, action buttons don't open
-    //         await this.waitForSelector(mySelectors.WAIT_VISIBLE_ACTION);
-    //         await this.clickWithWait(mySelectors.ATIVIDADE_ONLINE);
-    //         await this.waitLoad();
-    //         // select activity
-    //         await this.searchAndSelectActivity(acronym);
-    //         await this.clickWithWait(selectors.topMenuButtons.ADD_ACTIVITY);
-    //         await this.waitLoad();
-    //         // select default category
-    //         await this.clickWithWait(selectors.topMenuButtons.ADD_ACTIVITY);
-    //         await this.waitLoad();
-    //     }
-    //     catch (e) {
-    //         await this.saveHTML("activPage");
-    //         console.log(e);
-    //     }
-    // }
-
     async deleteActivity(acronym, activityIndex=0){
         await this.searchAndSelectActivity(acronym, activityIndex);
-        await this.clickWithWait(selectors.activityActions.buttons.DELETE.tempId);
+        await this.clickWithWait('#'+selectors.activityActions.buttons.DELETE.tempId);
         await (this.getNewDialog()).waitForOpenAndClickOnOkButton();
-        await this.refreshAndWaitLoad();
+        await this.waitLoad();
+        await this.init();
     }
-
-    // async selectActivityAndClickOnFillButton(acronym, answersArr, activityIndex=0){
-    //     await this.searchAndSelectActivity(acronym, activityIndex);
-    //     await this.clickWithWait(selectors.topMenuButtons.PREENCHER_ATIVIDADE);
-    //     const previewPage = new PreviewPage(this.page);
-    //     await previewPage.fillActivityQuestions(answersArr);
-    // }
 
     async selectActivityAndClickOnFillButton(acronym, activityIndex=0){
         await this.searchAndSelectActivity(acronym, activityIndex);
-        await this.clickWithWait(selectors.activityActions.buttons.FILL.tempId);
+        await this.clickWithWait('#'+selectors.activityActions.buttons.FILL.tempId);
     }
 
     async selectAllActivities(){
@@ -244,6 +201,16 @@ class ActivitiesPage extends PageOtus {
         return (await activityItem.extractInfo());
     }
 
+    async extractAllActivitiesData(){
+        let data = [];
+        const numActivities = await this.countActivities();
+        for (let i = 0; i < numActivities; i++) {
+            let data_i = await this.extractDataFromActivityByIndex(i);
+            data.push(data_i);
+        }
+        return data;
+    }
+
     /*
      * Action buttons
      */
@@ -252,13 +219,10 @@ class ActivitiesPage extends PageOtus {
         await this.clickWithWait(buttonId);
     }
 
-    async readFinalizedActivity(acronym, activityIndex=0){
+    async viewFinalizedActivity(acronym, activityIndex=0){
         await this.searchAndSelectActivity(acronym, activityIndex);
-        await this.clickWithWait(selectors.activityActions.buttons.VIEW.tempId);
+        await this.clickWithWait('#'+selectors.activityActions.buttons.VIEW.tempId);
         await this.waitForMilliseconds(500);
-        let answers = await (new ActivityViewPage(this.page)).extractAnswers();
-        await this.goBackAndWaitLoad();
-        return answers;
     }
 
     /*******************************************************

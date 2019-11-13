@@ -86,6 +86,7 @@ class PageOtus extends PageExtended {
     async refreshAndWaitLoad(){
         await super.refresh();
         await this.waitLoad();
+        await this.init();
     }
 
     async gotoUrlAndWaitLoad(url){

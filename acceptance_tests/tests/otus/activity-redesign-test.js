@@ -28,6 +28,7 @@ afterAll(async () => {
 // Specific modules for this suite test
 const ActivitiesPage          = require('../../code/otus/classes/activities/ActivitiesPage');
 const ActivityQuestionAnswer  = require('../../code/otus/classes/activities/ActivityQuestionAnswer');
+const ActivityViewPage        = require('../../code/otus/classes/activities/ActivityViewPage');
 const PreviewPage             = require('../../code/otus/classes/PreviewPage');
 
 // Constants
@@ -90,8 +91,7 @@ suiteArray = [
 
     }),
 
-
-    describe('Scenario #2.1 - Activity selection', () => {
+    xdescribe('Scenario #2.1 - Activity selection', () => {
 
         async function checkVisibilityOfActivityButtons(buttonsThatShouldBeVisibleArr){
             await activitiesPage.waitForMilliseconds(500);
@@ -127,13 +127,13 @@ suiteArray = [
             }
         }
 
-        xtest('2.1a Select 0 activities', async() => {
+        test('2.1a Select 0 activities', async() => {
             await activitiesPage.selectActivityItem(0);
             await activitiesPage.selectActivityItem(0);
             await checkVisibilityOfActivityButtons([]);
         });
 
-        xtest('2.1b Select 2 activities', async() => {
+        test('2.1b Select 2 activities', async() => {
             await activitiesPage.selectActivityItem(0);
             await activitiesPage.selectActivityItem(1);
             const deleteButtonId = activitiesPage.getActionButtonsInfo.DELETE.tempId;
@@ -155,23 +155,40 @@ suiteArray = [
             await checkVisibilityOfActivityButtons(buttonsThatShouldBeVisibleArr);
         });
     }),
-/*
-    xdescribe('Scenario #2.2: Add new activity', () => {
 
-        test('2.2 test', async() => {
-            await activitiesPage.addOnlineActivity(acronym);
-            try {
-                await activitiesPage.searchAndSelectActivity(acronym); //add log already
-                expect(true).toBeTrue();
-            }
-            catch (e) {
-                expect(false).toBeTrue();
-            }
+    xdescribe('Scenario #2.5 - View activity', () => {
+
+        test('2.5 test', async() => {
+            const acronym = 'CSJ';
+            await activitiesPage.viewFinalizedActivity(acronym);
+            const activityViewPage = new ActivityViewPage(activitiesPage.page);
+            const answers = await activityViewPage.extractAnswers();
+            await activityViewPage.goBackAndWaitLoad();
+            expect(Object.values(answers).length).not.toBe(0);
         });
 
     }),
 
-    xdescribe('Scenario #2.3: Fill activity', () => {
+    xdescribe('Scenario #2.2: Fill and View activity', () => {
+
+        function checkAnswer(readedAnswer, expectedAnswer, questionNumber){
+            const expectedAnswerIsMultiple = (expectedAnswer.type === ActivityQuestionAnswer.dataTypes.multipleOption);
+            try{
+                expect(readedAnswer.isMultiple).toBe(expectedAnswerIsMultiple);
+            }
+            catch (e) {
+                errorLogger.addFailMessageFromCurrSpec(`Answer types for question ${questionNumber} don\'t match: 
+                    readAnswer isMultiple = ${readedAnswer.isMultiple}, expected = ${expectedAnswer.type}`);
+            }
+
+            try{
+                expect(readedAnswer.value).toBe(expectedAnswer.value);
+            }
+            catch (e) {
+                errorLogger.addFailMessageFromCurrSpec(`Answer values for question ${questionNumber} don\'t match: 
+                    readAnswer =  ${readedAnswer.value}, expected = ${expectedAnswer.value}`);
+            }
+        }
 
         test('2.3 test', async() => {
             const acronym = 'CSJ';
@@ -181,35 +198,65 @@ suiteArray = [
             }
             answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.time, '18:54'));
             answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.time, '18:55'));
-            answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.multipleOption, 'Formação de hematoma'));
+            answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.multipleOption, 'Veia de difícil acesso'));
 
-            await activitiesPage.selectActivityAndClickOnFillButton(acronym, 1);
+            // Fill
+            await activitiesPage.selectActivityAndClickOnFillButton(acronym, 0);
             const previewPage = new PreviewPage(activitiesPage.page);
             await previewPage.fillActivityQuestions(answersArr);
+
+            // View
+            await activitiesPage.init();
+            await activitiesPage.viewFinalizedActivity(acronym);
+            const activityViewPage = new ActivityViewPage(activitiesPage.page);
+            const readedAnswer = Object.values(await activityViewPage.extractAnswers());
+            await activityViewPage.goBackAndWaitLoad();
+
+            try{
+                expect(readedAnswer.length).toBe(answersArr.length);
+            }
+            catch (e) {
+                errorLogger.addFailMessageFromCurrSpec(`Answers quantity don\'t match: 
+                    readedAnswers =  ${readedAnswer.length}, expectedAnswers = ${answersArr.length}`);
+            }
+
+            for (let i = 0; i < answersArr.length ; i++) {
+                const expectedAnswer = answersArr[i];
+                const readAnswer = readedAnswer[i];
+                checkAnswer(readAnswer, expectedAnswer, i+1);
+            }
         });
 
     }),
 
-    describe('Scenario #2.5 - View activity', () => {
-
-        test('2.5 test', async() => {
-            // use the same activity filled at 2.3 to compare answers
-            const acronym = 'CSJ';
-            const answers = await activitiesPage.readFinalizedActivity(acronym);
-            console.log(answers);
-        });
-
-    }),
-
-    xdescribe('Scenario #2.6 - Delete activity', () => {
+    describe('Scenario #2.6 - Delete activity', () => {
 
         test('2.6 test', async() => {
-            // use the same activity filled at 2.3 to clean data
-            await activitiesPage.deleteActivity(acronym);
+            const acronym = 'CSJ';
+            const index = 2;
+            let activitiesDataBefore = await activitiesPage.extractAllActivitiesData();
+            // console.log(activitiesDataBefore.map(obj => obj.category));
+
+            activitiesDataBefore = activitiesDataBefore.slice(0, index)
+                .concat(activitiesDataBefore.slice(index+1, activitiesDataBefore.length));
+            // console.log(activitiesDataBefore.map(obj => obj.category));
+
+            await activitiesPage.deleteActivity(acronym, index);
+            await activitiesPage.refreshAndWaitLoad(); // to clear search filter
+
+            const activitiesDataAfter = await activitiesPage.extractAllActivitiesData();
+
+            // console.log(activitiesDataAfter.map(obj => obj.category));
+
+            expect(activitiesDataAfter.length).toBe(activitiesDataBefore.length);
+
+            for (let i = 0; i < activitiesDataAfter.length; i++) {
+                expect(activitiesDataAfter[i]).toBe(activitiesDataBefore[i]);
+            }
         });
 
     }),
-
+/*
     xdescribe('Scenario #2.4: Load report', () => {
 
         xtest('2.4a Load report of activity with block issues', async() => {

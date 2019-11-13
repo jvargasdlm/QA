@@ -37,7 +37,7 @@ class ActivityViewPage extends PageOtus  {
 
             function findAnswer(answerArr){
                 const firstAnswer = answerArr[0];
-                let answer = undefined, isSingleAnswer = true;
+                let answer = undefined, isMultipleAnswer = false;
                 if(answerArr.length === 1){
                     answer = firstAnswer;
                 }
@@ -56,12 +56,12 @@ class ActivityViewPage extends PageOtus  {
                             answer.push(option.replace(selectedInnerText, ''));
                         }
                     }
-                    isSingleAnswer = (answer.length === 1);
-                    if(isSingleAnswer){
+                    isMultipleAnswer = (answer.length === 1);
+                    if(isMultipleAnswer){
                         answer = answer[0];
                     }
                 }
-                return [answer, isSingleAnswer];
+                return [answer, isMultipleAnswer];
             }
 
             let questionElems = document.body.querySelectorAll(selectors.questionInfo.item);
@@ -78,10 +78,10 @@ class ActivityViewPage extends PageOtus  {
                     let parts = content.split('\n');
                     let templateId = parts[0];
                     let answers = parts.slice(1, parts.length);
-                    let [filteredAnswer, singleAnswer] = findAnswer(answers);
+                    let [filteredAnswer, isMultipleAnswer] = findAnswer(answers);
                     result[templateId] = {
-                        singleAnswer: singleAnswer,
-                        answer: filteredAnswer
+                        isMultiple: isMultipleAnswer,
+                        value: filteredAnswer
                     };
                 }
             }
