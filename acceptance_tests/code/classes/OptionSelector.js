@@ -23,7 +23,7 @@ class OptionSelector extends PageElement {
 
     async selectOption(optionValue){
         await this.elementHandle.click();
-        await this.pageExt.waitForSelector(selectors.OPTIONS_OPENED); // wait open options
+        //await this.pageExt.waitForSelector(selectors.OPTIONS_OPENED); // wait open options
         await this.pageExt.clickWithWait(`md-option[value='${optionValue}']`);
     }
 

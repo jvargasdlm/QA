@@ -8,11 +8,13 @@ class GridItem extends PageElement {
 
     constructor(pageExt){
         super(pageExt, "md-grid-tile");
+        this.headerId = undefined;
     }
 
-    // async init(index=0){
-    //     await this.initByTag(index);
-    // }
+    async init(){
+        this.headerId = this.id + '_header';
+        await this.findChildrenToSetTempIds(selectors.HEADER, [this.headerId]);
+    }
 
     async extractBodyContent(){
         const text = await this.pageExt.page.evaluate((selector) => {

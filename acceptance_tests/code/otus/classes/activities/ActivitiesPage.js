@@ -3,12 +3,18 @@ const PreviewPage       = require('../PreviewPage');
 
 const DynamicElement    = require('../../../classes/DynamicElement');
 const ActivityItem      = require('./ActivityItem');
+
+const {Sidenav, sideEnum} = require('../../../classes/Sidenav');
 const {SpeedDial,
     directionEnum} = require('../../../classes/SpeedDial');
 
 // ***********************************************
 
 const selectors = {
+    blocks:{
+        attrSelector: "[aria-label='Blocos']",
+        tempId: "blocksSelector"
+    },
     SEARCH_FILTER_INPUT: "input[ng-model='$ctrl.filter']",
     activityActions: {
         parentElement: {
@@ -85,25 +91,35 @@ class ActivitiesPage extends PageOtus {
 
     constructor(page){
         super(page);
-        this.allActivitiesCheckbox = this.getNewCheckbox();
         this.allBlocksCheckbox = this.getNewCheckbox();
+        this.blockSelector = this.getNewOptionSelector();
+
+        this.allActivitiesCheckbox = this.getNewCheckbox();
+
         this.reportButton = new DynamicElement(this, selectors.reportButtonStateIds, selectors.reportButtonStateIds.LOAD);
         this.sortMenuButton = this.getNewButton();
         this.sortMenu = this.getNewMenu();
         this.actionButtons = undefined;
 
-        this.leftSidenav = this.getnews
+        this.detailsSidenav = new Sidenav(this, sideEnum.right);
     }
 
     async init(){
-        await this.allActivitiesCheckbox.initBySelectorAndSetTempId(this.allActivitiesCheckbox.tagName,
-            checkboxIndexes.ALL_ACTIVITIES.tempId, checkboxIndexes.ALL_ACTIVITIES.index);
+        // Blocks
+        await this.allBlocksCheckbox.initBySelectorAndSetTempId(
+            this.allBlocksCheckbox.tagName, checkboxIndexes.ALL_BLOCKS.tempId, checkboxIndexes.ALL_BLOCKS.index);
 
-        await this.allBlocksCheckbox.initBySelectorAndSetTempId(this.allBlocksCheckbox.tagName,
-            checkboxIndexes.ALL_BLOCKS.tempId, checkboxIndexes.ALL_BLOCKS.index);
+        let selector = this.blockSelector.tagName + selectors.blocks.attrSelector;
+        await this.blockSelector.initBySelectorAndSetTempId(selector, selectors.blocks.tempId);
 
+        // Activity Selection
+        await this.allActivitiesCheckbox.initBySelectorAndSetTempId(
+            this.allActivitiesCheckbox.tagName, checkboxIndexes.ALL_ACTIVITIES.tempId, checkboxIndexes.ALL_ACTIVITIES.index);
+
+        // Menu
         await this.sortMenuButton.initBySelectorAndSetTempId(selectors.sortMenu.selector, selectors.sortMenu.tempId);
 
+        // Action Buttons
         const buttonIds = Object.values(selectors.activityActions.buttons).map(obj => obj.tempId);
         if(this.isBigScreenHideXs){
             await this.findChildrenButtonToSetTempIds(selectors.activityActions.parentElement.XS, buttonIds);
@@ -112,6 +128,8 @@ class ActivitiesPage extends PageOtus {
             this.actionButtons = new SpeedDial(this, directionEnum.down);
             await this.actionButtons.init(selectors.activityActions.TRIGGER_BUTTON_XS_ID, buttonIds);
         }
+
+        await this.detailsSidenav.init();
     }
 
     async initReportButton(){
@@ -157,6 +175,12 @@ class ActivitiesPage extends PageOtus {
     async countActivities(){
         const tag = (new ActivityItem(this)).tagName;
         return (await this.page.$$(tag)).length;
+    }
+
+    async getActivityItemInstance(activityIndex){
+        const activityItem = new ActivityItem(this);
+        await activityItem.init(activityIndex);
+        return activityItem;
     }
 
     async selectActivityItem(activityIndex){
@@ -216,6 +240,13 @@ class ActivitiesPage extends PageOtus {
     /*
      * Action buttons
      */
+
+    async openDetails(acronym, activityIndex=0){
+        await this.searchAndSelectActivity(acronym, activityIndex);
+        await this.clickWithWait('#'+selectors.activityActions.buttons.DETAILS.tempId);
+        await this.waitForMilliseconds(500);
+        //await this.detailsSidenav.waitForOpen();
+    }
 
     async clickOnActionButton(buttonId){
         await this.clickWithWait(buttonId);

@@ -42,6 +42,7 @@ class ActivityItem extends GridItem {
 
     async init(index){
         await this.initById(selectors.getId(index));
+        await super.init();
     }
 
     async extractInfo() {
@@ -58,6 +59,11 @@ class ActivityItem extends GridItem {
                 typeEnum.ON_LINE : typeEnum.PAPER);
 
         return this.data;
+    }
+
+    async isSelected(){
+        const backGroundColor = await this.getAttributeByDOM('#'+this.headerId, "style");
+        return (backGroundColor.length > 0);
     }
 
 }

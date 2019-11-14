@@ -15,7 +15,8 @@ beforeEach(async () => {
 
 afterEach(async () => {
     errorLogger.advanceToNextSpec();
-    await pageOtus.waitForMilliseconds(5000);//.
+    await activitiesPage.refreshAndWaitLoad();
+    //await pageOtus.waitForMilliseconds(5000);//.
 });
 
 afterAll(async () => {
@@ -81,10 +82,6 @@ suiteArray = [
                 }
                 errorLogger.addFailMessageFromCurrSpec('Some activity buttons should be visible, but do not. '
                     + 'Hidden buttons: ' + hiddenButtonsArr.join(", "));
-            }
-            finally {
-                await activitiesPage.refreshAndWaitLoad();
-                await activitiesPage.init();
             }
         }
 
@@ -216,38 +213,28 @@ suiteArray = [
         });
 
     }),
-/*
-    xdescribe('Scenario #2.4: Load report', () => {
 
-        xtest('2.4a Load report of activity with block issues', async() => {
-
-        });
-
-        xtest('2.4b Load report of activity with issues that not block', async() => {
-
-        });
-
-        xtest('2.4c Load report of activity with no issues', async() => {
-
-        });
-    }),
-*/
     xdescribe('Scenario #2.7 - Details right sidenav', () => {
 
         test('2.7 test', async() => {
-
+            const acronym = 'CSJ';
+            await activitiesPage.openDetails(acronym);
+            const content = await activitiesPage.page.evaluate((id) => {
+                const elem = document.body.querySelector('#'+id);
+                return elem.innerText;
+            }, activitiesPage.detailsSidenav.id);
+            expect(content.includes(acronym)).toBeTrue();
         });
 
     }),
 
-    describe('Scenario #2.8 - Search filter', () => {
+    xdescribe('Scenario #2.8 - Search Filter and Select All', () => {
 
-        test('2.8 test', async() => {
+        test('2.8a Search Filter', async() => {
             const acronym = 'CSJ';
             const numActivitiesBefore = await activitiesPage.countActivities();
             await activitiesPage.searchAndSelectActivity(acronym);
             const activitiesDataAfter = await activitiesPage.extractAllActivitiesData();
-            await activitiesPage.refreshAndWaitLoad(); // to clear search filter
             const numActivitiesAfter = activitiesDataAfter.length;
 
             let failMessage = `Filtered activities quantity (${numActivitiesAfter}) should be < activities total (${numActivitiesBefore}), but is not.`;
@@ -265,13 +252,67 @@ suiteArray = [
             }
         });
 
+        test('2.8b Select All', async() => {
+            const numActivities = await activitiesPage.countActivities();
+            await activitiesPage.allActivitiesCheckbox.click();
+
+            let notSelectedAcronyms = [];
+            for (let i = 0; i < numActivities; i++) {
+                let activityItem = await activitiesPage.getActivityItemInstance(i);
+                let isSelected = await activityItem.isSelected();
+                if(!isSelected){
+                    await activityItem.extractInfo();
+                    notSelectedAcronyms.push({acronym: activityItem.acronym, index: i});
+                    console.log({acronym: activityItem.acronym, index: i});//.
+                }
+            }
+
+            try{
+                expect(notSelectedAcronyms.length).toBe(0);
+            }
+            catch (e) {
+                errorLogger.addFailMessageFromCurrSpec("Select all activities checkbox doesn't select all. " +
+                    "Unselected activities: ", notSelectedAcronyms);
+            }
+        });
+
     }),
 
     xdescribe('Scenario #2.9 - View by blocks', () => {
 
-        test('2.9 test', async() => {
-            await activitiesPage.selectAllBlocks();
-            await activitiesPage.waitForMilliseconds(5000);
+        test('2.9 Select specific block', async() => {
+            const groupName = 'Grupo 1';
+            const groupAcronyms = ['CSJ'];
+            // await activitiesPage.selectAllBlocks();
+            // await activitiesPage.waitForMilliseconds(5000);
+            //
+            // await activitiesPage.selectAllBlocks();
+            // await activitiesPage.waitForMilliseconds(500);
+
+            const numActivitiesBefore = await activitiesPage.countActivities();
+
+            await activitiesPage.blockSelector.selectOption(groupName);
+
+            const activitiesDataAfter = await activitiesPage.extractAllActivitiesData();
+            const numActivitiesAfter = activitiesDataAfter.length;
+
+            let failMessage = `Filtered activities quantity (${numActivitiesAfter}) should be < activities total (${numActivitiesBefore}), but is not.`;
+            try{
+                expect(numActivitiesAfter).toBeLessThan(numActivitiesBefore);
+
+                failMessage = "There is at least one filtered activity whose acronym is not wanted.";
+
+                for (let i = 0; i < activitiesDataAfter.length; i++) {
+                    expect(groupAcronyms.includes(activitiesDataAfter[i].acronym)).toBeTrue();
+                }
+            }
+            catch (e) {
+                errorLogger.addFailMessageFromCurrSpec(failMessage);
+            }
+        });
+
+        test('2.9b Select All', async() => {
+            // await activitiesPage.selectAllBlocks();
         });
 
     })
