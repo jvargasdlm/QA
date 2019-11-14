@@ -91,6 +91,8 @@ class ActivitiesPage extends PageOtus {
         this.sortMenuButton = this.getNewButton();
         this.sortMenu = this.getNewMenu();
         this.actionButtons = undefined;
+
+        this.leftSidenav = this.getnews
     }
 
     async init(){

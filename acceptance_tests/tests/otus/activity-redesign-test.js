@@ -15,7 +15,6 @@ beforeEach(async () => {
 
 afterEach(async () => {
     errorLogger.advanceToNextSpec();
-    //await activitiesPage.refreshAndWaitLoad();
     await pageOtus.waitForMilliseconds(5000);//.
 });
 
@@ -52,44 +51,6 @@ async function openParticipantActivities(){
 // Tests
 
 suiteArray = [
-
-    xdescribe('Temp Test', () => {
-
-        test('Temp test', async() => {
-            const activityItem = await activitiesPage.selectActivityItem(1);
-            console.log(await activityItem.extractInfo());
-
-            await activitiesPage.clickOnActionButton(activitiesPage.getActionButtonTempIds.VIEW);
-        });
-
-        xtest('Clicks test', async() => {
-            await activitiesPage.sortActivitiesByOptionIndex(1);
-            await activitiesPage.selectAllBlocks();
-            await activitiesPage.waitForMilliseconds(5000);
-        });
-
-        xtest('Count action buttons', async() => {
-            await activitiesPage.selectActivityItem(1);
-
-            const topMenuButtons = {
-                ALTERAR_AFERIDOR: "button[aria-label='Alterar Aferidor']",
-                GERAR_RELATORIO: "button[aria-label='Carregar Relatório']",
-                PREENCHER_ATIVIDADE: "button[aria-label='Preencher Atividade']",
-                VISUALIZAR_ATIVIDADE: "button[aria-label='Visualizar Atividade']",
-                EXCLUIR: "button[aria-label='Excluir']",
-                DETALHES: "button[aria-label='Detalhes']"
-            };
-
-            for(let selector of Object.values(topMenuButtons)){
-                await activitiesPage.hasElementSelector(selector);
-                await activitiesPage.hasElementSelector(selector+"[hide-xs]");
-                await activitiesPage.hasElementSelector(selector+"[hide-gt-xs]");
-            }
-
-            await activitiesPage.selectActivityItem(1);
-        });
-
-    }),
 
     xdescribe('Scenario #2.1 - Activity selection', () => {
 
@@ -229,7 +190,7 @@ suiteArray = [
 
     }),
 
-    describe('Scenario #2.6 - Delete activity', () => {
+    xdescribe('Scenario #2.6 - Delete activity', () => {
 
         test('2.6 test', async() => {
             const acronym = 'CSJ';
@@ -242,7 +203,6 @@ suiteArray = [
             // console.log(activitiesDataBefore.map(obj => obj.category));
 
             await activitiesPage.deleteActivity(acronym, index);
-            await activitiesPage.refreshAndWaitLoad(); // to clear search filter
 
             const activitiesDataAfter = await activitiesPage.extractAllActivitiesData();
 
@@ -271,7 +231,7 @@ suiteArray = [
 
         });
     }),
-
+*/
     xdescribe('Scenario #2.7 - Details right sidenav', () => {
 
         test('2.7 test', async() => {
@@ -280,10 +240,29 @@ suiteArray = [
 
     }),
 
-    xdescribe('Scenario #2.8 - Search with filter', () => {
+    describe('Scenario #2.8 - Search filter', () => {
 
         test('2.8 test', async() => {
+            const acronym = 'CSJ';
+            const numActivitiesBefore = await activitiesPage.countActivities();
+            await activitiesPage.searchAndSelectActivity(acronym);
+            const activitiesDataAfter = await activitiesPage.extractAllActivitiesData();
+            await activitiesPage.refreshAndWaitLoad(); // to clear search filter
+            const numActivitiesAfter = activitiesDataAfter.length;
 
+            let failMessage = `Filtered activities quantity (${numActivitiesAfter}) should be < activities total (${numActivitiesBefore}), but is not.`;
+            try{
+                expect(numActivitiesAfter).toBeLessThan(numActivitiesBefore);
+
+                failMessage = "There is at least one filtered activity whose acronym is not wanted.";
+
+                for (let i = 0; i < activitiesDataAfter.length; i++) {
+                    expect(activitiesDataAfter[i].acronym).toBe(acronym);
+                }
+            }
+            catch (e) {
+                errorLogger.addFailMessageFromCurrSpec(failMessage);
+            }
         });
 
     }),
@@ -291,9 +270,10 @@ suiteArray = [
     xdescribe('Scenario #2.9 - View by blocks', () => {
 
         test('2.9 test', async() => {
-
+            await activitiesPage.selectAllBlocks();
+            await activitiesPage.waitForMilliseconds(5000);
         });
 
     })
-*/
+
 ]; // end suiteArray

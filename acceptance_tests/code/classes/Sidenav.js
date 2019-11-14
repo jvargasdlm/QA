@@ -8,38 +8,35 @@ const sideEnum = {
 const selectors = {
     sideAttribute: "md-component-id",
     closedAttrValue: {
-        key: "md-close",
-        closedAtBegin: "class='md-sidenav-left md-whiteframe-1dp md-closed ng-isolate-scope _md md-default-theme layout-column'",
-        open: "class=''",
-        closedAgain: "class=''",
+        key: "md-close"
     }
 };
 
 /*
-closed:
-md-sidenav-left md-whiteframe-1dp md-closed ng-isolate-scope _md md-default-theme layout-column
-open:
-md-sidenav-left md-whiteframe-1dp ng-isolate-scope _md md-default-theme layout-column
-closed again:
-md-sidenav-left md-whiteframe-1dp ng-isolate-scope _md md-default-theme layout-column md-closed
+closed (at benig):  md-sidenav-left md-whiteframe-1dp md-closed ng-isolate-scope _md md-default-theme layout-column
+open:               md-sidenav-left md-whiteframe-1dp ng-isolate-scope _md md-default-theme layout-column
+closed again:       md-sidenav-left md-whiteframe-1dp ng-isolate-scope _md md-default-theme layout-column md-closed
  */
 
 class Sidenav extends PageElement {
 
-    constructor(pageExt, side=sideEnum.left){
+    constructor(pageExt, side=sideEnum.left, index=0){
         super(pageExt, "md-sidenav");
         this.side = side;
-        this.classAttrValue = '';
+        this.index = index; // if exist more than one with same side
+        this.id = `sidenav_${this.side}_${this.index}`;
+        this.classAttrValue = undefined;
     }
 
     async init(){
-        await this.initBySelector(`${this.tagName}[${selectors.sideAttribute}=${this.side}`);
-        this.classAttrValue = this.getAttribute("class");
+        await this.initBySelectorAndSetTempId(`${this.tagName}[${selectors.sideAttribute}=${this.side}`, this.id, this.index);
+        this.classAttrValue = await this.getAttributeByDOM("class");
     }
 
     async isOpen(){
-        const classAttrValue = this.getAttribute("class");
-        return (!classAttrValue.includes(selectors.closedAttrValue));
+        //const classAttrValue = this.getAttribute("class");
+        const classAttrValue = this.getAttributeByDOM("class");
+        return (!classAttrValue.includes(selectors.closedAttrValue.key));
     }
 
     async waitForOpen(){
