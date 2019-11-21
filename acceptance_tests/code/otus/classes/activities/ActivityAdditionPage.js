@@ -31,7 +31,7 @@ const selectors = {
     buttons:{
         ADD: "button[aria-label='Adicionar']", // "button[ng-click='$ctrl.addActivityDtos($ctrl.selectedItem)']",
         SAVE: "button[aria-label='Salvar']", //<<
-        CANCEL: "button[aria-label='Cancelar']" //<<
+        CANCEL: "button[aria-label='deletar lista']" //<<
     },
     activityCard :{
         TAG: "md-grid-tile",
