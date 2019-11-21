@@ -1,33 +1,34 @@
-const PageElement = require('./PageElement');
+const Dialog = require('./Dialog');
 
-class Calendar extends PageElement {
+class Calendar extends Dialog {
 
     constructor(pageExt){
-        super(pageExt, '');
+        super(pageExt);
+        this.input = pageExt.getNewInputField();
+        this.currDate = null;
     }
 
-    async open(inputAriaLabelValue){
-        await this.pageExt.clickWithWait(`input[aria-label='${inputAriaLabelValue}']`);
-        await (this.pageExt.getNewDialog()).waitForOpen();
+    async init(index=0){
+        await this.initBySelector("md-input-container[id='date']", index);
     }
 
-    async waitForClose(){
-        await (this.pageExt.getNewDialog()).waitForClose();
+    async _initMyOwnAttributes(){
+        this.input.elementHandle = await this.elementHandle.$("input[id='datetime']");
+    }
+
+    async open(){
+        await this.input.click();
+        await this.waitForOpen();
+        this.currDate = new Date();
     }
 
     async chooseToday(){
-        await this.pageExt.clickWithWait("button[ng-click='picker.today()'");
+        await this.clickOnCustomizedActionButtonByIndex(0);
+        //await this.pageExt.clickWithWait("button[ng-click='picker.today()'");
     }
 
-    async clickCancelButton(){
-        await this.pageExt.clickWithWait("button[ng-click='picker.cancel()'");
-    }
-
-    async clickOkButton(){
-        await this.pageExt.clickWithWait("button[ng-click='picker.ok()'");
-    }
-
-    async selectYear(numSteps, millisecondsToWait=10){
+    async selectYear(year, millisecondsToWait=10){
+        const numSteps = year - this.currDate.getFullYear();
         let numClicks = Math.abs(numSteps);
         let sign = numSteps / numClicks;
         let selector = `div[ng-click ='picker.incrementYear(${sign})']`;
@@ -35,9 +36,11 @@ class Calendar extends PageElement {
             await this.pageExt.page.click(selector);
             await this.pageExt.waitForMilliseconds(millisecondsToWait);
         }
+        this.currDate.year = year;
     }
 
-    async selectMonth(numSteps, millisecondsToWait=10){
+    async selectMonth(month, millisecondsToWait=10){
+        const numSteps = month - (this.currDate.getMonth()+1);
         let numClicks = Math.abs(numSteps);
         let sign = numSteps / numClicks;
         let selector = `div[ng-click ='picker.incrementMonth(${sign})']`;
@@ -45,6 +48,7 @@ class Calendar extends PageElement {
             await this.pageExt.page.click(selector);
             await this.pageExt.waitForMilliseconds(millisecondsToWait);
         }
+        this.currDate.month = month-1;
     }
 
     async selectDay(day){
@@ -60,23 +64,25 @@ class Calendar extends PageElement {
         let dayStr = day.toString().padStart(2, '0');
 
         await this.pageExt.clickWithWait(`#date-${year}-${monthStr}-${dayStr}`);
+        this.currDate.date = day;
     }
 
-    async openAndSelectDate(inputAriaLabel, yearSteps, monthSteps, day) {
-        await this.open(inputAriaLabel);
-        await this.selectYear(yearSteps);
-        await this.selectMonth(monthSteps);
-        await this.selectDay(day);
-        await this.clickOkButton();
-        await this.waitForClose();
+    async openAndSelectDate(date) {
+        await this.open();
+        await this.selectYear(date.getFullYear());
+        await this.selectMonth(date.getMonth());
+        await this.selectDay(date.getDate());
+        await this.clickOnOkButton();
     }
 
-    async openAndSelectPeriod(inputAriaLabel, yearSteps, monthSteps) {
-        await this.open(inputAriaLabel);
+    async openAndSelectPeriod(year, month) {
+        await this.open();
+        const today = new Date();
+
         await this.selectYear(yearSteps);
+        const monthSteps = month - (today.getMonth());
         await this.selectMonth(monthSteps);
-        await this.clickOkButton();
-        await this.waitForClose();
+        await this.clickOnOkButton();
     }
 
 }

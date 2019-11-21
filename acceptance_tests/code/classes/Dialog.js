@@ -26,7 +26,8 @@ class Dialog extends DialogParent {
 
         let okButtonIndex = numButtons-2,
             cancelButtonIndex = numButtons-1;
-        if(!this.pageExt.amIAOtusPage){
+        const lastId = allButtonIds[numButtons-1];
+        if(!lastId.includes('CANCEL')){//if(!this.pageExt.amIAOtusPage){
             cancelButtonIndex = numButtons-2;
             okButtonIndex = numButtons-1;
         }
@@ -54,19 +55,14 @@ class Dialog extends DialogParent {
         await this.waitForClose();
     }
 
-    async waitForOpenAndClickOnOkButton(){
-        await this.waitForOpen();
-        await this.clickOnOkButton();
-    }
-
-    async waitForOpenAndClickOnCancelButton(){
-        await this.waitForOpen();
-        await this.clickOnCancelButton();
-    }
-
     async clickOnCustomizedActionButton(buttonLabel) {
         await this.waitForOpen();
         await this.pageExt.clickWithWait(`[id='${buttonLabel}']`);
+        await this.waitForClose();
+    }
+
+    async clickOnCustomizedActionButtonByIndex(index) {
+        await this.pageExt.clickWithWait(`[id='${this.customizeActionButtonIds[index]}']`);
         await this.waitForClose();
     }
 
@@ -83,6 +79,16 @@ class Dialog extends DialogParent {
         finally {
             await this.waitForClose();
         }
+    }
+
+    async waitForOpenAndClickOnOkButton(){
+        await this.waitForOpen();
+        await this.clickOnOkButton();
+    }
+
+    async waitForOpenAndClickOnCancelButton(){
+        await this.waitForOpen();
+        await this.clickOnCancelButton();
     }
 }
 

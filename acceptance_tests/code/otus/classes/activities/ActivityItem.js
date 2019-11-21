@@ -32,17 +32,9 @@ class ActivityItem extends GridItem {
         this.data = {};
     }
 
-    get getAllStatus(){
-        return statusIcons;
-    }
-
-    get getTypeEnum(){
-        return typeEnum;
-    }
-
     async init(index){
         await this.initById(selectors.getId(index));
-        await super.init();
+        await super.initHeader();
     }
 
     async extractInfo() {
@@ -51,8 +43,8 @@ class ActivityItem extends GridItem {
             acronym: content[0],
             status: content[1],
             name: content[2],
-            externId: content[3].split(": ")[1],
-            realization: content[4].split(": ")[1],
+            externalId: content[3].split(": ")[1],
+            realizationDate: content[4].split(": ")[1],
             category: content[5]
         };
         this.data.type = (await this.elementHandle.$(selectors.type.ON_LINE) ?

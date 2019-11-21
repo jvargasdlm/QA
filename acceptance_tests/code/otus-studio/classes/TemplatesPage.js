@@ -68,7 +68,7 @@ class TemplatesPage extends PageOtusStudio {
 
     async create(name, acronym){
         await this.clickOnAddTemplateAndWaitOptions();
-        await this.hasElementSelector(selectors.button.NEW);//.
+        await this.hasElementWithLog(selectors.button.NEW);//.
         await utils.wait.forMilliseconds(10000);// without does not work (why?)
 
         await this.clickWithWait(selectors.button.NEW); // 'Criar' button

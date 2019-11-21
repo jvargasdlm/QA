@@ -118,6 +118,7 @@ class PageOtus extends PageExtended {
 
     async openParticipantFromHomePage(recruitmentNumberOrName){
         const autoCompleteSearch = this.getNewAutoCompleteSearch();
+
         await autoCompleteSearch.initBySelectorAndSetTempId(autoCompleteSearch.tagName, selectors.searchParticipant.BUSCA_NOME_NUMERO);
         await autoCompleteSearch.typeAndClickOnFirstOfList(recruitmentNumberOrName);
         await this.waitLoad();

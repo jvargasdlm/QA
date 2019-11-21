@@ -159,7 +159,7 @@ class PageExtended {
             return await this.page.waitForSelector(selector, {timeout: timeout});
         }
         catch (e) {
-            await this.hasElementSelector(selector);//.
+            await this.hasElementWithLog(selector);//.
             throw e;
         }
     }
@@ -201,7 +201,7 @@ class PageExtended {
         catch (e) {
             if(LOG_NAVIGATION_ACTIONS) {
                 console.log('ERROR at type on ' + selector);//.
-                await this.hasElementSelector(selector);//.
+                await this.hasElementWithLog(selector);//.
             }
             throw e;
         }
@@ -228,7 +228,7 @@ class PageExtended {
         catch (e) {
             //if(LOG_NAVIGATION_ACTIONS) {
                 console.log('ERROR at click on ' + selector);//.
-                await this.hasElementSelector(selector);//.
+                await this.hasElementWithLog(selector);//.
             //}
             throw e;
         }
@@ -283,9 +283,9 @@ class PageExtended {
         return await this.findChildrenToSetTempIdsFromInnerText(parentSelector, "button");
     }
 
-    async findChildrenToSetTempIds(parentSelector, childrenTag, tempIdArr){
-        return await this.page.evaluate((_parentSelector, _childrenTag, _tempIdArr) => {
-            const parentNode = document.body.querySelector(_parentSelector);
+    async findChildrenToSetTempIds(parentSelector, childrenTag, tempIdArr, index=0){
+        return await this.page.evaluate((_parentSelector, _childrenTag, _tempIdArr, index) => {
+            const parentNode = (document.body.querySelectorAll(_parentSelector))[index];
             let i = 0;
 
             function pushId(currentNode) {
@@ -306,7 +306,7 @@ class PageExtended {
 
             walkTheDOM(parentNode, pushId);
 
-        }, parentSelector, childrenTag, tempIdArr);
+        }, parentSelector, childrenTag, tempIdArr, index);
     }
 
     async findChildrenButtonToSetTempIds(parentSelector, tempIdArr){
@@ -323,7 +323,7 @@ class PageExtended {
         }
         catch (e) {
             console.log('getInnerText: selector =', selector);
-            await this.hasElementSelector(selector);
+            await this.hasElementWithLog(selector);
         }
     }
 
@@ -374,23 +374,37 @@ class PageExtended {
     }
 
     async setHiddenAttributeValue(selector, boolValue){
-        return await this.page.$eval(selector, (element, boolValue) => {
+        await this.page.$eval(selector, (element, boolValue) => {
             if(element.getAttribute('aria-hidden')){
                 element.setAttribute('aria-hidden', boolValue.toString());
             }
-            return element.outerHTML;
+            //return element.outerHTML;
         }, boolValue);
     }
 
     /* ********************************************************************
-     * Debug
+     * Checks
      */
 
-    enableConsoleLog(){
-        this.page.on('console', consoleObj => console.log(consoleObj.text()));
+    async countElementsBySelector(selector){
+        return (await this.page.$$(selector)).length;
     }
 
-    async hasElementSelector(selector, index=-1){
+    async hasElement(selector){
+        try {
+            const elemList = await this.page.$$(selector);
+            return (elemList.length > 0);
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+
+    /* ********************************************************************
+     * Debugs
+     */
+
+    async hasElementWithLog(selector, index=-1){
         try {
             const elemList = await this.page.$$(selector);
             let has = (elemList.length > 0);
@@ -406,9 +420,8 @@ class PageExtended {
         }
     }
 
-    async hasElement(directive, uniqueAttributeName, uniqueAttributeValue){
-        let selector = `${directive}[${uniqueAttributeName}='${uniqueAttributeValue}']`;
-        await this.hasElementSelector(selector);
+    enableConsoleLog(){
+        this.page.on('console', consoleObj => console.log(consoleObj.text()));
     }
 
     async saveHTML(filenameNoExtension){
@@ -425,6 +438,12 @@ class PageExtended {
             return document.body.innerText;
         });
         FileHandler.write(path, content);
+    }
+
+    async forceDeleteElementFromHTML(selector){
+        await this.page.$eval(selector, elem => {
+            elem.parentNode.removeChild(elem);
+        });
     }
 
 }

@@ -19,11 +19,25 @@ class AutoCompleteSearch extends PageElement {
         super(pageExt, "md-autocomplete-wrap");
         this.inputText = new InputField(pageExt);
         this.clearButton = new Button(pageExt);
+        this.suggestionsContainer = new PageElement(pageExt, "md-virtual-repeat-container");
     }
 
-    async _initMyOwnAttributes(index=0){
+    async initById(id, index=0, suggestionsContainerIndex=0){
+        await super.initById(id);
+        await this._initMyOwnAttributes(index, suggestionsContainerIndex);
+    }
+
+    async initByTag(index=0, suggestionsContainerIndex=0){
+        await super.initByTag(index);
+        await this._initMyOwnAttributes(index, suggestionsContainerIndex);
+    }
+
+    async _initMyOwnAttributes(index=0, suggestionsContainerIndex=0){
         this.inputText.elementHandle = await this.elementHandle.$(this.inputText.tagName);
         this.clearButton.elementHandle = await this.elementHandle.$(this.clearButton.tagName);
+
+        const suggestionsId = `suggestionList${suggestionsContainerIndex}`;
+        await this.suggestionsContainer.initByTagAndSetTempId(suggestionsId, suggestionsContainerIndex);
     }
 
     async clear(){
@@ -38,7 +52,13 @@ class AutoCompleteSearch extends PageElement {
         await this._clickOnSomeSuggestionOfList(index);
     }
 
+    async type(text){
+        await this.inputText.type(text);
+    }
+
     async typeAndClickOnFirstOfList(text){
+        await this.inputText.click();
+        await this.pageExt.waitForMilliseconds(1000); // wait options appear
         await this.inputText.type(text);
         await this.pageExt.waitForMilliseconds(1000); // wait options appear
         await this._clickOnSomeSuggestionOfList(0);
@@ -54,38 +74,24 @@ class AutoCompleteSearch extends PageElement {
         await this._clickOnSomeSuggestionOfList(0);
     }
 
-    async _clickOnSomeSuggestionOfList(index){
-        await this.pageExt.waitForSelector(selectors.SUGGESTIONS_CONTAINER);
-
-        await this.pageExt.page.evaluate((selectors) => {
-            const elements = Array.from(document.body.querySelectorAll(selectors.SUGGESTIONS_CONTAINER));
-            let i = 0;
-            const n = elements.length;
-            if(n > 1) {
-                let found = false;
-                while(!found && i<n){
-                    let uniqueAttrValue = elements[i++].getAttribute(selectors.SUGGESTIONS_CONTAINER_UNIQUE_ATTR);
-                    found = (uniqueAttrValue && uniqueAttrValue !== '');
-                }
-                --i;
-            }
-            const container = elements[i];
-            container.setAttribute("id", selectors.SUGGESTIONS_CONTAINER_ID);
-            const suggestionList = container.querySelector(selectors.SUGGESTION_LIST);
-            suggestionList.setAttribute("id", selectors.SUGGESTION_LIST_ID);
-
-        }, selectors);
-
-        let tempIdArr = await this.pageExt.findChildrenToSetTempIdsFromInnerText(
-            '#'+selectors.SUGGESTION_LIST_ID,
-            selectors.SUGGESTION_ITEM_LIST);
-
-        const id = tempIdArr[index];
+    async _clickOnSomeSuggestionOfList(suggestionIndex, optionPrefixId="autoCompleteOption"){
+        const id = `${optionPrefixId}${suggestionIndex}`;
         try{
+            //await this.inputText.click();
+            // const selector = `${this.suggestionsContainer.tagName}[aria-hidden='false']`;
+            // await this.pageExt.waitForSelector(selector);
+
+            await this.pageExt.setHiddenAttributeValue('#'+this.suggestionsContainer.id, false);
+
+            await this.pageExt.findChildrenToSetTempIds(
+                '#'+this.suggestionsContainer.id,
+                selectors.SUGGESTION_ITEM_LIST,
+                [id], suggestionIndex);
+
             await this.pageExt.clickWithWait(`[id='${id}']`);
         }
         catch (e) {
-            console.log(id);
+            console.log("option id =", id);
             throw e;
         }
     }

@@ -57,7 +57,7 @@ const selectors = {
     },
     bottomMenuButtons: {
         //MANAGER_COMMANDER: "otus-activity-manager-commander",
-        ADD: "md-fab-trigger[aria-label='Adicionar atividade']",
+        ADD: "button[aria-label='Adicionar Atividade']",
         ACTION_BUTTONS: "md-fab-actions",
     },
     sortMenu:{
@@ -190,9 +190,13 @@ class ActivitiesPage extends PageOtus {
         return activityItem;
     }
 
-    async searchAndSelectActivity(acronym, activityIndex=0){
-        await this.typeWithWait(selectors.SEARCH_FILTER_INPUT, acronym);
+    async searchActivity(text){
+        await this.typeWithWait(selectors.SEARCH_FILTER_INPUT, text);
         await this.waitForMilliseconds(500); // wait for update list
+    }
+
+    async searchAndSelectActivity(text, activityIndex=0){
+        await this.searchActivity(text);
         await this.selectActivityItem(activityIndex);
     }
 
@@ -200,12 +204,16 @@ class ActivitiesPage extends PageOtus {
         await this.clickWithWait(selectors.bottomMenuButtons.ADD);
     }
 
-    async deleteActivity(acronym, activityIndex=0){
-        await this.searchAndSelectActivity(acronym, activityIndex);
+    async deleteSelectedActivities(){
         await this.clickWithWait('#'+selectors.activityActions.buttons.DELETE.tempId);
         await (this.getNewDialog()).waitForOpenAndClickOnOkButton();
         await this.waitLoad();
         await this.init();
+    }
+
+    async deleteActivity(acronym, activityIndex=0){
+        await this.searchAndSelectActivity(acronym, activityIndex);
+        await this.deleteSelectedActivities();
     }
 
     async selectActivityAndClickOnFillButton(acronym, activityIndex=0){

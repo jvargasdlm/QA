@@ -11,7 +11,7 @@ class GridItem extends PageElement {
         this.headerId = undefined;
     }
 
-    async init(){
+    async initHeader(){
         this.headerId = this.id + '_header';
         await this.findChildrenToSetTempIds(selectors.HEADER, [this.headerId]);
     }

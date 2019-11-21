@@ -16,19 +16,9 @@ class PageElement {
     }
 
     async initById(id){
-        // try {
-        //     const innerText = await this.pageExt.page.evaluate((selector) => {
-        //             return (document.body.querySelector(selector)).innerText;
-        //         }, id);
-        //     console.log(innerText);
-        // }
-        // catch (e) {
-        //
-        // }
-
         this.id = id;
         this.elementHandle = await this.pageExt.waitForSelector(`[id='${id}']`);
-        await this._initMyOwnAttributes();
+        // await this._initMyOwnAttributes();
     }
 
     async initByTag(index=0){
@@ -51,7 +41,7 @@ class PageElement {
         }
         catch (e) {//.
             console.log(`ERROR at init pageElement by tag "${this.tagName}" with set id '${tempId}':`, e.message);
-            await this.pageExt.hasElementSelector(this.tagName);
+            await this.pageExt.hasElementWithLog(this.tagName);
             throw e;
         }
     }
@@ -64,14 +54,15 @@ class PageElement {
         }
         catch (e) {//.
             console.log(`ERROR at init pageElement by selector "${selector}":`, e.message);
-            await this.pageExt.hasElementSelector(selector);
+            await this.pageExt.hasElementWithLog(selector);
             throw e;
         }
     }
 
     async initBySelectorAndSetTempId(selector, tempId, index=0){
-        await this.pageExt.waitForSelector(selector);
         try {
+            await this.pageExt.waitForSelector(selector);
+
             await this.pageExt.page.evaluate((selector, tempId, index) => {
                 const element = (document.body.querySelectorAll(selector))[index];
                 element.setAttribute("id", tempId);
@@ -81,7 +72,7 @@ class PageElement {
         }
         catch (e) {//.
             console.log(`ERROR at init pageElement by selector "${selector}" with set id '${tempId}':`, e.message);
-            await this.pageExt.hasElementSelector(selector);
+            await this.pageExt.hasElementWithLog(selector);
             throw e;
         }
     }

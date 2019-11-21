@@ -1,5 +1,5 @@
 const PageOtus = require('../PageOtus');
-const ActivityItem = require('./ActivityItem');
+const ActivityAdditionItemPaper     = require('./ActivityAdditionItemPaper');
 
 const enums = {
     type:{
@@ -29,20 +29,19 @@ const selectors = {
         quantity: "[aria-label='ActivitySelection']"
     },
     buttons:{
-        ADD: "button[ng-click='$ctrl.addPreviewActivity($ctrl.selectedItem)']",
-        SAVE: "md-icon[aria-label='save']", //<<
-        CANCEL: "md-icon[aria-label='cancel']" //<<
+        ADD: "button[aria-label='Adicionar']", // "button[ng-click='$ctrl.addActivityDtos($ctrl.selectedItem)']",
+        SAVE: "button[aria-label='Salvar']", //<<
+        CANCEL: "button[aria-label='Cancelar']" //<<
     },
     activityCard :{
         TAG: "md-grid-tile",
         DELETE_BUTTON: ""
     },
     CATEGORY_SELECTOR: "md-select", // "[aria-label='Categoria: NORMAL']" //<<
-    AUTO_COMPLETE_SEARCH_ID: "autoCompleteActivity"
+    AUTO_COMPLETE_SEARCH_ID: "autocomplete_selectSurvey"
 };
 
-
-class ActivityAdderPage extends PageOtus {
+class ActivityAdditionPage extends PageOtus {
 
     constructor(page){
         super(page);
@@ -53,24 +52,33 @@ class ActivityAdderPage extends PageOtus {
         this.addButton = this.getNewButton();
         this.saveButton = this.getNewButton();
         this.cancelButton = this.getNewButton();
+        this.activityAddItems = [];
     }
 
     async init(){
-        //this.enableConsoleLog();
-        // temp
         await this.typeSwitch.initBySelectorAndSetTempId(selectors.switches.type, "typeSwitch");
         await this.quantitySwitch.initBySelectorAndSetTempId(selectors.switches.quantity, "quantitySwitch");
         await this.categorySelector.initBySelectorAndSetTempId(selectors.CATEGORY_SELECTOR, "categorySelector");
 
-        await this.autoCompleteSearch.initByTagAndSetTempId(selectors.AUTO_COMPLETE_SEARCH_ID, 1);
+        await this.autoCompleteSearch.initById(selectors.AUTO_COMPLETE_SEARCH_ID, 1, 1);
 
         await this.addButton.initBySelectorAndSetTempId(selectors.buttons.ADD, "addButton");
         await this.saveButton.initBySelectorAndSetTempId(selectors.buttons.SAVE, "saveButton");
         await this.cancelButton.initBySelectorAndSetTempId(selectors.buttons.CANCEL, "cancelButton");
     }
 
-    static get categoryEnum(){
-        return enums.category;
+    static get enums(){
+        return enums;
+    }
+
+    getItem(index){
+        return this.activityAddItems[index];
+    }
+
+    async switchTypeTo(typeEnumValue){
+        if(this.typeSwitch.isOn !== typeEnumValue){
+            await this.typeSwitch.change();
+        }
     }
 
     async switchTypeToOnline(){
@@ -84,6 +92,12 @@ class ActivityAdderPage extends PageOtus {
         console.log("to paper");
         if(this.typeSwitch.isOn !== enums.type.PAPER){
             await this.typeSwitch.change();
+        }
+    }
+
+    async switchQuantityTo(quantityEnumValue){
+        if(this.quantitySwitch.isOn !== quantityEnumValue){
+            await this.quantitySwitch.change();
         }
     }
 
@@ -108,28 +122,62 @@ class ActivityAdderPage extends PageOtus {
         //await this.autoCompleteSearch.clear();
     }
 
-    async addActivity(nameOrAcronym){
+    async addActivity(nameOrAcronym, ActivityAdditionItemClass){
         await this.autoCompleteSearch.typeAndClickOnFirstOfList(nameOrAcronym);
         await this.addButton.click();
         await this.waitForMilliseconds(500); // wait activity card appear
         await this.autoCompleteSearch.clear();
         await this.page.mouse.click(0,0);
+
+        const activityAddItem = new ActivityAdditionItemClass(this);
+        let nextPaperActivityIndex = this.activityAddItems.filter(item => item instanceof ActivityAdditionItemPaper).length;
+        await activityAddItem.init(this.activityAddItems.length, nextPaperActivityIndex);
+        this.activityAddItems.push(activityAddItem);
+        return activityAddItem;
+    }
+
+    async fillExternalIdForActivity(index, externalId){
+        const activityAddItem = this.activityAddItems[index];
+        await activityAddItem.insertExternalId(externalId);
+    }
+
+    async fillPaperTypeActivity(index, realizationDate, inspectorName){
+        const activityAddItem = this.activityAddItems[index];
+        await activityAddItem.insertPaperExclusiveData(realizationDate, inspectorName);
     }
 
     async deleteActivityFromTemporaryList(index){
-        const cardElem = (await this.page.$$(selectors.activityCard.TAG))[index];
-        const deleteActivityButton = this.getNewButton(this);
-        deleteActivityButton.elementHandle = (await cardElem.$$(deleteActivityButton.tagName))[1]; //<<
-        await deleteActivityButton.click();
+        const activityAddItemToDelete = this.activityAddItems[index];
+        await activityAddItemToDelete.closeButton.click();
+        await this.waitForMilliseconds(500); // wait for update list
+
+        await this.forceDeleteElementFromHTML('#'+activityAddItemToDelete.id);//.
+
+        const numActivityAddItems = await this.countElementsBySelector(activityAddItemToDelete.tagName);
+        const stillHasActivityToDelete = await this.hasElement('#'+activityAddItemToDelete.id);
+
+        if(numActivityAddItems === this.activityAddItems.length || stillHasActivityToDelete){
+            throw `Deleting activity index=${index} doesn't work. The element is still on the page.`;
+        }
+
+        const numItems = this.activityAddItems.length;
+        this.activityAddItems = this.activityAddItems.slice(0, index).concat(this.activityAddItems.slice(index+1, numItems));
+        for (let i = index; i < numItems-1; i++) {
+            await this.activityAddItems[i].init(i);
+        }
     }
 
     async saveChanges(){
         await this.saveButton.click();
+        await (this.getNewDialog()).waitForOpenAndClickOnOkButton();
+        await this.waitLoad();
     }
 
     async cancelChanges(){
         await this.cancelButton.click();
+        await this.waitForMilliseconds(500); // wait for page clear list
+        await this.init();
     }
 }
 
-module.exports = ActivityAdderPage;
+module.exports = ActivityAdditionPage;
