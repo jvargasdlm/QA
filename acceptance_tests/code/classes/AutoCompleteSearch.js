@@ -45,6 +45,7 @@ class AutoCompleteSearch extends PageElement {
             this.clearButton.elementHandle = await this.elementHandle.$(this.clearButton.tagName);
         //}
         await this.clearButton.click();
+        await this.pageExt.clickOut();
     }
 
     async typeAndClickOnItemList(inputSelector, text, index){
