@@ -34,7 +34,7 @@ const ActivityAdditionItemPaper     = require('../../code/otus/classes/activitie
 
 // Constants
 const enums = ActivityAdditionPage.enums;
-const recruitmentNumberOrName = '2000735';// '5001007';
+const recruitmentNumberOrName = '5001007'; //'2000735';
 
 // *****************************************************************
 // Auxiliar functions
@@ -44,18 +44,18 @@ async function openParticipantActivities(){
     await pageOtus.openParticipantActivitiesMenu();
 }
 
-async function getCurrActivityDataAndGoToAdderPage(){
-    activitiesPage = new ActivitiesPage(pageOtus.page);
+async function extractAllActivityDataFromOldPage(){
+    //activitiesPage.enableConsoleLog();
+    const rowSelector = "div[class='dynamic-table-body-row layout-align-start-center layout-row flex']";
+    await activitiesPage.waitForSelector(rowSelector);
 
-    activitiesPage.enableConsoleLog();
-
-    activitiesDataBefore = await activitiesPage.page.evaluate((enums) => { // using the old activities page version
+    return await activitiesPage.page.evaluate((rowSelector, enums) => { // using the old activities page version
         const categoryDict = {
             "Normal": enums.category.NORMAL,
             "Controle de Qualidade": enums.category.QUALITY_CONTROLL,
             "Repetição": enums.category.REPETITION,
         };
-        const rowSelector = "div[class='dynamic-table-body-row layout-align-start-center layout-row flex']";
+
         const rows = Array.from(document.querySelectorAll(rowSelector));
         let data = [];
         for (let i = 0; i < rows.length; i++) {
@@ -69,7 +69,13 @@ async function getCurrActivityDataAndGoToAdderPage(){
             })
         }
         return data;
-    }, enums);
+    }, rowSelector, enums);
+}
+
+async function getCurrActivityDataAndGoToAdderPage(){
+    activitiesPage = new ActivitiesPage(pageOtus.page);
+
+    activitiesDataBefore = await extractAllActivityDataFromOldPage();
 
     await activitiesPage.clickWithWait("md-fab-trigger[aria-label='Adicionar atividade']"); // old button selector
     await pageOtus.waitLoad();
@@ -99,7 +105,7 @@ function getPaperActivityDataToAddObj(acronym, category, date, inspectorName, ex
 }
 
 async function addActivitiesUnitary(activitiesDataToAdd){
-    await activitiyAdderPage.switchQuantityTo(enums.type.UNIT);
+    await activitiyAdderPage.switchQuantityToUnit();
 
     const classDict = {};
     classDict[enums.type.ON_LINE] = ActivityAdditionItem;
@@ -133,12 +139,13 @@ async function checkAddition(addedActivitiesData){
         return {
             acronym: activityData.acronym,
             category: activityData.category,
-            externalId: activityData.externalId,
+            //externalId: activityData.externalId,
             realizationDate: activityData.realizationDate
         };
     }
 
-    let activitiesDataAfter = await activitiesPage.extractAllActivitiesData();
+    let activitiesDataAfter = await extractAllActivityDataFromOldPage();
+
     let newActivitiesData=[], newActivitiesIndexes = [];
     for (let i = 0; i < activitiesDataAfter.length; i++) {
         if(activitiesDataAfter[i].status.length > 0){
@@ -210,34 +217,59 @@ const onlineRETCLQ = getOnlineActivityDataToAddObj("RETCLQ", enums.category.REPE
 
 suiteArray = [
 
-    describe('Scenario #2.2: Add 1 by 1', () => {
+    describe('TEMP SUITE', () => {
+
+        test('test', async() => {
+
+            function filterDataToCheck(activityData){
+                return {
+                    acronym: activityData.acronym,
+                    category: activityData.category,
+                    realizationDate: activityData.realizationDate
+                };
+            }
+
+            await activitiyAdderPage.goBackAndWaitLoad();
+            let activitiesDataAfter = await extractAllActivityDataFromOldPage();
+            activitiesDataAfter = activitiesDataAfter.map(data => filterDataToCheck(data));
+            console.log(activitiesDataAfter);
+
+            const optionSelector = activitiesPage.getNewMultipleOptionSelector();
+            await optionSelector.initByAttributesSelector("[aria-label='Blocos']");
+            await optionSelector.selectOptions(['Grupo 1']);
+            await activitiesPage.waitForMilliseconds(5000);
+        });
+
+    }),
+
+    xdescribe('Scenario #2.2: Add 1 by 1', () => {
 
         test('2.2a Only one of paper type', async() => {
             const activitiesDataToAdd = [ paperCSJ ];
             await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
         });
 
-        // test('2.2b Only one of online type', async() => {
-        //     const activitiesDataToAdd = [ onlineDSN ];
-        //     await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
-        // });
-        //
-        // test('2.2c More than one', async() => {
-        //     const activitiesDataToAdd = [ paperCSJ, onlineDSN ];
-        //     await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
-        // });
-        //
-        // test('2.2d One of each type/category', async() => {
-        //     const activitiesDataToAdd = [
-        //         paperCSJ,
-        //         onlineCSJ,
-        //         paperDSN,
-        //         onlineDSN,
-        //         onlineRETCLQ,
-        //         paperRETCLQ
-        //     ];
-        //     await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
-        // });
+        test('2.2b Only one of online type', async() => {
+            const activitiesDataToAdd = [ onlineDSN ];
+            await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
+        });
+
+        test('2.2c More than one', async() => {
+            const activitiesDataToAdd = [ paperCSJ, onlineDSN ];
+            await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
+        });
+
+        test('2.2d One of each type/category', async() => {
+            const activitiesDataToAdd = [
+                paperCSJ,
+                onlineCSJ,
+                paperDSN,
+                onlineDSN,
+                onlineRETCLQ,
+                paperRETCLQ
+            ];
+            await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
+        });
 
     }),
 

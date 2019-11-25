@@ -11,10 +11,6 @@ module.exports = {
     //'**/tests/otus/activity-report-test.js',
     //'**/tests/otus/activity-redesign-test.js'
     '**/tests/otus/activity-adder-test.js'
-
-    '**/tests/telaDeLogin.js'
-    
-
   ],
   transformIgnorePatterns: ['<rootDir>/node_modules/'],
   transform: {
