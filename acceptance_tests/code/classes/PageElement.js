@@ -46,6 +46,10 @@ class PageElement {
         }
     }
 
+    async initByAttributesSelector(attributesSelector, index=0){
+        await this.initBySelector(this.tagName + attributesSelector, index);
+    }
+
     async initBySelector(selector, index=0){
         try {
             await this.pageExt.waitForSelector(selector);
