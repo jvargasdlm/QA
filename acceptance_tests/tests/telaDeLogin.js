@@ -1,4 +1,4 @@
-const lib = require('../lib');
+const lib = require('../code/otus/lib');
 
 let browser, pageOtus, selectors;
 let suiteArray=[], errorLogger;
@@ -28,14 +28,14 @@ afterAll(async () => {
 // *****************************************************************
 // Tests
 
-  var PreviewPage = require('./PreviewPage')
-
+  var PreviewPage = require('../code/otus/classes/PreviewPage')
+  suiteArray = [
 
   describe('Test Suite A', () => {
 
     test('Test 1', async() => {
 
-      await pageOtus.waitForMilliseconds(2000)
+      await pageOtus.waitForMilliseconds(2000)      
       await pageOtus.clickWithWait("button[ng-if='attrs.showParticipantsButton']")/*exibe os partisipantes*/
       await pageOtus.waitLoad();
       var button = await pageOtus.page.$$("button[aria-label='Ver participante']")/*seleciona todos participante*/
@@ -54,15 +54,7 @@ afterAll(async () => {
       await pageOtus.waitForMilliseconds(2000)
       await pageOtus.clickWithWait("input[ng-model='$ctrl.answer']")/*clica no campo para inserir um valor*/
       await pageOtus.waitForMilliseconds(2000)
-      
-      
-
-
-
-
-      
-
-      
+            
 
 
 
@@ -71,12 +63,21 @@ afterAll(async () => {
 
   }),
 
-  describe('Test Suite B', () => {
 
-    test('Test 2', async() => {
-
-    });
-
-  })
-
- // end suiteArray
+    describe('Test Suite A', () => {
+  
+      test('Test 1', async() => {
+  
+      });
+  
+    }),
+  
+    describe('Test Suite B', () => {
+  
+      test('Test 2', async() => {
+  
+      });
+  
+    })
+  
+  ]; // end suiteArray

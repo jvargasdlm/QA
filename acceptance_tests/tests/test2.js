@@ -11,7 +11,7 @@ describe('Test Suite A', () => {
 
         await page.type("input[name='email']", 'ASDFG');
         await page.type("input[name='pass']", '12345');
-
+        
       
         
         

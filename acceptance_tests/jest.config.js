@@ -2,7 +2,7 @@ module.exports = {
   //preset: "puppeteer",
   moduleFileExtensions: ['js', 'jsx', 'json', 'vue'],
   testMatch: [
-    '**/code/otus/classes/telaDeLogin.js'
+    '**/tests/telaDeLogin.js'
     
   ],
   transformIgnorePatterns: ['<rootDir>/node_modules/'],
