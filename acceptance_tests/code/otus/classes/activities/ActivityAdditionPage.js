@@ -7,8 +7,8 @@ const enums = {
         PAPER: true
     },
     quantity: {
-        UNIT: false,
-        LIST: true
+        LIST: false,
+        UNIT: true
     },
     category:{
         NORMAL: {
@@ -29,15 +29,15 @@ const selectors = {
         quantity: "[aria-label='ActivitySelection']"
     },
     buttons:{
-        ADD: "button[aria-label='Adicionar']", // "button[ng-click='$ctrl.addActivityDtos($ctrl.selectedItem)']",
-        SAVE: "button[aria-label='Salvar']", //<<
-        CANCEL: "button[aria-label='deletar lista']" //<<
+        ADD: "button[aria-label='Adicionar']",
+        SAVE: "button[aria-label='Salvar']",
+        CANCEL: "button[aria-label='deletar']"
     },
     activityCard :{
         TAG: "md-grid-tile",
         DELETE_BUTTON: ""
     },
-    CATEGORY_SELECTOR: "md-select", // "[aria-label='Categoria: NORMAL']" //<<
+    CATEGORY_SELECTOR: "md-select[ng-model='$ctrl.configuration.category']",
     AUTO_COMPLETE_SEARCH_ID: "autocomplete_selectSurvey"
 };
 
@@ -48,7 +48,8 @@ class ActivityAdditionPage extends PageOtus {
         this.typeSwitch = this.getNewSwitch();
         this.quantitySwitch = this.getNewSwitch();
         this.categorySelector = this.getNewOptionSelector();
-        this.autoCompleteSearch = this.getNewAutoCompleteSearch();
+        this.activityAutocomplete = this.getNewAutoCompleteSearch();
+        this.blockSelector = this.getNewMultipleOptionSelector();
         this.addButton = this.getNewButton();
         this.saveButton = this.getNewButton();
         this.cancelButton = this.getNewButton();
@@ -60,7 +61,7 @@ class ActivityAdditionPage extends PageOtus {
         await this.quantitySwitch.initBySelectorAndSetTempId(selectors.switches.quantity, "quantitySwitch");
         await this.categorySelector.initBySelectorAndSetTempId(selectors.CATEGORY_SELECTOR, "categorySelector");
 
-        await this.autoCompleteSearch.initById(selectors.AUTO_COMPLETE_SEARCH_ID, 1, 1);
+        await this.blockSelector.initById(); //todo
 
         await this.addButton.initBySelectorAndSetTempId(selectors.buttons.ADD, "addButton");
         await this.saveButton.initBySelectorAndSetTempId(selectors.buttons.SAVE, "saveButton");
@@ -69,10 +70,6 @@ class ActivityAdditionPage extends PageOtus {
 
     static get enums(){
         return enums;
-    }
-
-    getItem(index){
-        return this.activityAddItems[index];
     }
 
     async switchTypeTo(typeEnumValue){
@@ -95,21 +92,17 @@ class ActivityAdditionPage extends PageOtus {
         }
     }
 
-    async switchQuantityTo(quantityEnumValue){
-        if(this.quantitySwitch.isOn !== quantityEnumValue){
-            await this.quantitySwitch.change();
-        }
-    }
-
     async switchQuantityToUnit(){
         if(this.quantitySwitch.isOn !== enums.quantity.UNIT){
             await this.quantitySwitch.change();
+            await this.activityAutocomplete.initById(selectors.AUTO_COMPLETE_SEARCH_ID, 1, 1);
         }
     }
 
     async switchQuantityToList(){
         if(this.quantitySwitch.isOn !== enums.quantity.LIST){
             await this.quantitySwitch.change();
+            //await this.blockSelector.initById(); // todo
         }
     }
 
@@ -118,22 +111,36 @@ class ActivityAdditionPage extends PageOtus {
     }
 
     async searchActivity(nameOrAcronym){
-        await this.autoCompleteSearch.typeAndClickOnFirstOfList(nameOrAcronym);
-        //await this.autoCompleteSearch.clear();
+        await this.activityAutocomplete.typeAndClickOnFirstOfList(nameOrAcronym);
+        //await this.activityAutocomplete.clear();
     }
 
     async addActivity(nameOrAcronym, ActivityAdditionItemClass){
-        await this.autoCompleteSearch.typeAndClickOnFirstOfList(nameOrAcronym);
+        await this.activityAutocomplete.typeAndClickOnFirstOfList(nameOrAcronym);
         await this.addButton.click();
         await this.waitForMilliseconds(500); // wait activity card appear
-        await this.autoCompleteSearch.clear();
-        await this.page.mouse.click(0,0);
+        await this.activityAutocomplete.clear();
 
         const activityAddItem = new ActivityAdditionItemClass(this);
-        let nextPaperActivityIndex = this.activityAddItems.filter(item => item instanceof ActivityAdditionItemPaper).length;
+        let nextPaperActivityIndex = (this.activityAddItems.filter(item => item instanceof ActivityAdditionItemPaper)).length;
         await activityAddItem.init(this.activityAddItems.length, nextPaperActivityIndex);
         this.activityAddItems.push(activityAddItem);
         return activityAddItem;
+    }
+
+    async addActivityBlock(blockName, ActivityAdditionItemClass){
+        await this.blockSelector.typeAndClickOnFirstOfList(blockName);
+        await this.addButton.click();
+        await this.waitForMilliseconds(500); // wait activity cards appear
+        await this.blockSelector.clear();
+
+        let nextPaperActivityIndex = (this.activityAddItems.filter(item => item instanceof ActivityAdditionItemPaper)).length;
+        const numActivities = (await this.page.$$((new ActivityAdditionItemClass(this)).tagName)).length;
+        for (let i = 0; i < numActivities; i++) {
+            let activityAddItem = new ActivityAdditionItemClass(this);
+            await activityAddItem.init(this.activityAddItems.length, nextPaperActivityIndex++);
+            this.activityAddItems.push(activityAddItem);
+        }
     }
 
     async fillExternalIdForActivity(index, externalId){
@@ -151,7 +158,7 @@ class ActivityAdditionPage extends PageOtus {
         await activityAddItemToDelete.closeButton.click();
         await this.waitForMilliseconds(500); // wait for update list
 
-        await this.forceDeleteElementFromHTML('#'+activityAddItemToDelete.id);//.
+        //await this.forceDeleteElementFromHTML('#'+activityAddItemToDelete.id);//.
 
         const numActivityAddItems = await this.countElementsBySelector(activityAddItemToDelete.tagName);
         const stillHasActivityToDelete = await this.hasElement('#'+activityAddItemToDelete.id);
