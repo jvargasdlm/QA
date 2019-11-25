@@ -5,15 +5,16 @@ const FileHandler   = require('../handlers/FileHandler');
 const ErrorLogger   = require('./ErrorLogger');
 // Page elements
 const AutoCompleteSearch = require('./AutoCompleteSearch');
-const Button         = require('./Button');
-const Calendar       = require('./Calendar');
-const Checkbox       = require('./Checkbox');
-const Dialog         = require('./Dialog');
-const DialogWarning  = require('./DialogWarning');
-const InputField     = require('./InputField');
-const OptionSelector = require('./OptionSelector');
-const Menu           = require('./Menu');
-const Switch         = require('./Switch');
+const Button                 = require('./Button');
+const Calendar               = require('./Calendar');
+const Checkbox               = require('./Checkbox');
+const Dialog                 = require('./Dialog');
+const DialogWarning          = require('./DialogWarning');
+const InputField             = require('./InputField');
+const MultipleOptionSelector = require('./MultipleOptionSelector');
+const OptionSelector         = require('./OptionSelector');
+const Menu                   = require('./Menu');
+const Switch                 = require('./Switch');
 
 // ***********************************************
 // Constants
@@ -106,6 +107,10 @@ class PageExtended {
 
     getNewOptionSelector(){
         return new OptionSelector(this);
+    }
+
+    getNewMultipleOptionSelector(){
+        return new MultipleOptionSelector(this);
     }
 
     getNewSwitch(){
@@ -236,6 +241,10 @@ class PageExtended {
 
     async clickOnButtonByAttribute(uniqueAttrName, uniqueAttrValue){
         await this.clickWithWait(`button[${uniqueAttrName}='${uniqueAttrValue}']`);
+    }
+
+    async clickOut(){
+        await this.page.mouse.click(0,0);
     }
 
     /* ********************************************************************
