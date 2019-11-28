@@ -90,7 +90,7 @@ class PageOtus extends PageExtended {
     }
 
     async gotoUrlAndWaitLoad(url){
-        await super.goto(url);
+        await super.gotoUrl(url);
         await this.waitLoad();
     }
 

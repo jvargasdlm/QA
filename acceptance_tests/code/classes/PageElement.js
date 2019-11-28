@@ -18,7 +18,7 @@ class PageElement {
     async initById(id){
         this.id = id;
         this.elementHandle = await this.pageExt.waitForSelector(`[id='${id}']`);
-        // await this._initMyOwnAttributes();
+        await this._initMyOwnAttributes();
     }
 
     async initByTag(index=0){
@@ -46,8 +46,8 @@ class PageElement {
         }
     }
 
-    async initByAttributesSelector(attributesSelector, index=0){
-        await this.initBySelector(this.tagName + attributesSelector, index);
+    async initByAttributesSelector(attributesSelector, tempId, index=0){
+        await this.initBySelectorAndSetTempId(this.tagName + attributesSelector, tempId, index);
     }
 
     async initBySelector(selector, index=0){
@@ -75,7 +75,7 @@ class PageElement {
             await this.initById(tempId);
         }
         catch (e) {//.
-            console.log(`ERROR at init pageElement by selector "${selector}" with set id '${tempId}':`, e.message);
+            console.log(`ERROR at init pageElement by selector "${selector}" with index=${index} and tempId '${tempId}':`, e.message);
             await this.pageExt.hasElementWithLog(selector);
             throw e;
         }
@@ -153,7 +153,7 @@ class PageElement {
     }
 
     async findChildrenButtonAndSetTempIdsFromInnerText(){
-        return this.findChildrenAndSetTempIdsFromInnerText("button");
+        //return this.findChildrenAndSetTempIdsFromInnerText("button");
     }
 
     async findChildrenToSetTempIds(childTagName, tempIdArr){

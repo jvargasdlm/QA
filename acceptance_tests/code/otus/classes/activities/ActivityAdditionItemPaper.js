@@ -22,22 +22,22 @@ class ActivityAdditionItemPaper extends ActivityAdditionItem {
         }
     }
 
-    async _insertRealizationData(date){
+    async insertRealizationData(date){
         await this.realizationDate.openAndSelectDate(date);
     }
 
     async insertInspector(inspectorName){
-        //await this.inspectorAutoComplete.typeAndClickOnFirstOfList(inspectorName);
         await this.inspectorAutoComplete.type(inspectorName);
+        await this.pageExt.clickOut();
     }
 
     async insertPaperExclusiveData(date, inspectorName){
         try {
-            await this._insertRealizationData(date);
+            await this.insertRealizationData(date);
             await this.insertInspector(inspectorName);
         }
         catch (e) {
-            if(!this.realizationDate.elementHandle || this.inspectorAutoComplete.elementHandle){
+            if(!this.realizationDate.elementHandle || !this.inspectorAutoComplete.elementHandle){
                 throw `Activity item doesn't have inputs for paper type data.`
             }
             throw e;

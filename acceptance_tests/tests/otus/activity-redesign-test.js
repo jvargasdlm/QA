@@ -148,7 +148,7 @@ suiteArray = [
             }
         }
 
-        test('2.3 test', async() => {
+        test('2.2 Test', async() => {
             const acronym = 'CSJ';
             const answersArr = [];
             for (let i = 1; i <= 6 ; i++) {
@@ -191,7 +191,7 @@ suiteArray = [
 
         test('2.6 test', async() => {
             const acronym = 'CSJ';
-            const index = 2;
+            const index = 1;
             let activitiesDataBefore = await activitiesPage.extractAllActivitiesData();
             // console.log(activitiesDataBefore.map(obj => obj.category));
 
@@ -261,7 +261,7 @@ suiteArray = [
                 let activityItem = await activitiesPage.getActivityItemInstance(i);
                 let isSelected = await activityItem.isSelected();
                 if(!isSelected){
-                    await activityItem.extractInfo();
+                    await activityItem.extractData();
                     notSelectedAcronyms.push({acronym: activityItem.acronym, index: i});
                     console.log({acronym: activityItem.acronym, index: i});//.
                 }

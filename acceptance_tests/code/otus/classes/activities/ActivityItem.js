@@ -1,29 +1,22 @@
 const GridItem = require('../../../classes/GridItem');
 
-const statusIcons = {
-    NEW: "fiber_new",
-    SAVE: "save",
-    FINALIZED: "check_circle"
-};
-
 const typeEnum = {
     ON_LINE: 0,
     PAPER: 1
+};
+
+const statusEnum = {
+    NEW: 0, //"fiber_new"
+    SAVE: 1, //"save"
+    FINALIZED: 2 //"check_circle"
 };
 
 const selectors = {
     type: {
         ON_LINE: "div[aria-label='Online']",
         PAPER: "div[aria-label='Em papel']"
-    },
-    /**
-     * @return {string}
-     */
-    getId: function(index){
-        return "activity" + index;
     }
 };
-
 
 class ActivityItem extends GridItem {
 
@@ -32,13 +25,25 @@ class ActivityItem extends GridItem {
         this.data = {};
     }
 
-    async init(index){
-        await this.initById(selectors.getId(index));
-        await super.initHeader();
+    static get typeEnum(){
+        return typeEnum;
     }
 
-    async extractInfo() {
-        const content = await super.extractBodyContent();
+    static get statusEnum(){
+        return statusEnum;
+    }
+
+    getId(index){
+        return "activity" + index;
+    }
+
+    async init(index){
+        await this.initById(this.getId(index));
+        //await super.initHeader();
+    }
+
+    async extractData() {
+        const content = await super.extractContent();
         this.data = {
             acronym: content[0],
             status: content[1],
@@ -54,8 +59,8 @@ class ActivityItem extends GridItem {
     }
 
     async isSelected(){
-        const backGroundColor = await this.getAttributeByDOM('#'+this.headerId, "style");
-        return (backGroundColor.length > 0);
+        const backGroundColor = await this.getAttributeByDOM(ActivityItem.headerTag, "style");
+        return (backGroundColor && backGroundColor.length > 0);
     }
 
 }

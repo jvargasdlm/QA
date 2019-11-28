@@ -48,11 +48,6 @@ class AutoCompleteSearch extends PageElement {
         await this.pageExt.clickOut();
     }
 
-    async typeAndClickOnItemList(inputSelector, text, index){
-        await this.pageExt.typeWithWait(inputSelector, text);
-        await this._clickOnSomeSuggestionOfList(index);
-    }
-
     async type(text){
         await this.inputText.type(text);
     }
@@ -62,16 +57,6 @@ class AutoCompleteSearch extends PageElement {
         await this.pageExt.waitForMilliseconds(1000); // wait options appear
         await this.inputText.type(text);
         await this.pageExt.waitForMilliseconds(1000); // wait options appear
-        await this._clickOnSomeSuggestionOfList(0);
-    }
-
-    async clickOnInputAndOnItemList(inputSelector, index=0){
-        await this.pageExt.clickWithWait(inputSelector);
-        await this._clickOnSomeSuggestionOfList(index);
-    }
-
-    async clickOnInputAndOnFirstOfList(inputSelector){
-        await this.pageExt.clickWithWait(inputSelector);
         await this._clickOnSomeSuggestionOfList(0);
     }
 

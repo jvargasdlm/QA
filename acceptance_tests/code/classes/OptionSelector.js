@@ -29,7 +29,7 @@ class OptionSelector extends PageElement {
 
     async selectOptionByIndex_temp(optionIndex){
         await this.elementHandle.click();
-        await this.pageExt.waitForSelector(selectors.OPTIONS_OPENED); // wait open options
+        await this.pageExt.waitForSelector(`${this.tagName}[aria-expanded='true']`); // wait open options
         const option = (await this.pageExt.page.$$("md-option"))[optionIndex];
         await option.click();
     }
@@ -37,7 +37,7 @@ class OptionSelector extends PageElement {
     async selectOptionBySelectors(selectAttributesSelector, optionValue, optionExtraAttrSelector=''){
         await this.pageExt.clickWithWait(`${this.tagName}${selectAttributesSelector}`);
         await this.pageExt.waitForSelector(selectors.OPTIONS_OPENED); // wait open options
-        await this.pageExt.clickWithWait(`md-option${optionExtraAttrSelector}[value='${optionValue}']`);
+        await this.pageExt.clickWithWait(`md-option[value='${optionValue}']${optionExtraAttrSelector}`);
     }
 
     async waitCloseForFirstTime(){

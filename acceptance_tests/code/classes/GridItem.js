@@ -11,16 +11,24 @@ class GridItem extends PageElement {
         this.headerId = undefined;
     }
 
+    static get headerTag(){
+        return selectors.HEADER;
+    }
+
     async initHeader(){
         this.headerId = this.id + '_header';
         await this.findChildrenToSetTempIds(selectors.HEADER, [this.headerId]);
     }
 
-    async extractBodyContent(){
+    async extractContent(){
         const text = await this.pageExt.page.evaluate((selector) => {
-            return document.body.querySelector(selector).innerText;
+            let text = document.body.querySelector(selector).innerText;
+            ['delete\n','Informações do Usuário\.\n','ID Externo não requerido *']
+                .forEach(word => {text = text.replace(word, '')});
+            return text;
         }, '#'+this.id);
-        return text.split('\n');
+        //console.log(text);
+        return text.split('\n').filter(w => w.length > 0); //todo
     }
 
 }

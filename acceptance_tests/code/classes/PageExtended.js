@@ -251,15 +251,19 @@ class PageExtended {
      * Query selector
      */
 
+    async findChildrenButtonToSetTempIdsFromInnerText(parentSelector){
+        return await this.findChildrenToSetTempIdsFromInnerText(parentSelector, "button");
+    }
+
     async findChildrenToSetTempIdsFromInnerText(parentSelector, childrenTag){
         //this.enableConsoleLog();//.
-        return await this.page.evaluate((_parentSelector, _childrenTag) => {
-            let parentNode = document.body.querySelector(_parentSelector);
+        return await this.page.evaluate((parentSelector, childrenTag) => {
+            let parentNode = document.body.querySelector(parentSelector);
             let tempIdArray = [];
 
             function pushId(currentNode) {
                 const isNodeEmpty = (Object.entries(currentNode).length === 0);
-                if (!isNodeEmpty && currentNode.tagName.toLowerCase() === _childrenTag) {
+                if (!isNodeEmpty && currentNode.tagName.toLowerCase() === childrenTag) {
                     let id = currentNode.getAttribute('id');
                     if(!id){
                         id = currentNode.innerText.replace('\n', '');
@@ -286,10 +290,6 @@ class PageExtended {
             return tempIdArray;
 
         }, parentSelector, childrenTag);
-    }
-
-    async findChildrenButtonToSetTempIdsFromInnerText(parentSelector){
-        return await this.findChildrenToSetTempIdsFromInnerText(parentSelector, "button");
     }
 
     async findChildrenToSetTempIds(parentSelector, childrenTag, tempIdArr, index=0){

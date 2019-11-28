@@ -70,13 +70,16 @@ const selectors = {
             EXTERNAL_ID: 'requiredExternalID',
             STATUS: 'status',
             REALIZATION_DATE: 'realizationDate',
-            CATEGORY: 'category'
+            CATEGORY_ATTRIBUTES: 'category'
         }
     },
     reportButtonStateIds: {
         LOAD: "loadReport",
         GENERATE: "generateReport",
         PENDING_INFO: 'pendingInformation'
+    },
+    viewsPerPage: {
+        SHOW_ALL_BUTTON: "button[aria-label='Exibir todos os Registros: Desabilita Paginação']"
     }
 };
 
@@ -232,7 +235,7 @@ class ActivitiesPage extends PageOtus {
     async extractDataFromActivityByIndex(activityIndex){
         const activityItem = new ActivityItem(this);
         await activityItem.init(activityIndex);
-        return (await activityItem.extractInfo());
+        return (await activityItem.extractData());
     }
 
     async extractAllActivitiesData(){
@@ -288,8 +291,9 @@ class ActivitiesPage extends PageOtus {
         await this.sortMenu.clickOnItemById(id);
     }
 
-    // -----------------------------------------------------
-    // Report button
+    /*******************************************************
+     * Report button
+     */
 
     async clickOnReportButton(){
         await this.reportButton.click();
@@ -311,6 +315,15 @@ class ActivitiesPage extends PageOtus {
             throw `New state of dynamic element should be '${expectedNextState}', but this state was not found.`;
         }
         await this.reportButton.init(expectedNextState);
+    }
+
+    /*******************************************************
+     * View per Page controls
+     */
+
+    async clickOnShowAllActivitiesButton(){
+        await this.clickWithWait(selectors.viewsPerPage.SHOW_ALL_BUTTON);
+        await this.waitForMilliseconds(2000); // wait to load all activities
     }
 
 }

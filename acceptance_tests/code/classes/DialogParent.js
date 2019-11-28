@@ -15,7 +15,7 @@ class DialogParent extends PageElement {
         super(pageExt, selectors.DIALOG);
     }
 
-    async waitForOpen() {
+    async waitForOpenAndSetIds() {
         await this.pageExt.waitForSelector(selectors.DIALOG);
         this.elementHandle = this.pageExt.page.$(selectors.DIALOG);
         if(!closeButtonId){

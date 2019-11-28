@@ -77,11 +77,8 @@ class Calendar extends Dialog {
 
     async openAndSelectPeriod(year, month) {
         await this.open();
-        const today = new Date();
-
-        await this.selectYear(yearSteps);
-        const monthSteps = month - (today.getMonth());
-        await this.selectMonth(monthSteps);
+        await this.selectYear(year);
+        await this.selectMonth(month);
         await this.clickOnOkButton();
     }
 

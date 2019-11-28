@@ -8,7 +8,7 @@ class DialogWarning extends DialogParent {
     }
 
     async waitForOpen(){
-        const allButtonIds = await super.waitForOpen();
+        const allButtonIds = await super.waitForOpenAndSetIds();
         let numButtons = allButtonIds.length;
         if(numButtons > 1){
             throw `DialogWarning must have only 1 button, but has ${numButtons}`;
