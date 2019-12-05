@@ -67,7 +67,7 @@ class PageOtus extends PageExtended {
 
     async waitLoad(){
         try {
-            await this.waitForSelector(selectors.LOADING_PAGE); // appear
+            await this.waitForSelector(selectors.LOADING_PAGE, false); // appear
         }
         catch (e) {
             return; // not appear... ok!

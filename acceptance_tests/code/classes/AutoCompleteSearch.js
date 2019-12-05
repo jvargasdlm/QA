@@ -37,7 +37,7 @@ class AutoCompleteSearch extends PageElement {
         this.clearButton.elementHandle = await this.elementHandle.$(this.clearButton.tagName);
 
         const suggestionsId = `suggestionList${suggestionsContainerIndex}`;
-        await this.suggestionsContainer.initByTagAndSetTempId(suggestionsId, suggestionsContainerIndex);
+        //await this.suggestionsContainer.initByTagAndSetTempId(suggestionsId, suggestionsContainerIndex);
     }
 
     async clear(){
@@ -53,6 +53,14 @@ class AutoCompleteSearch extends PageElement {
     }
 
     async typeAndClickOnFirstOfList(text){
+        // force hide all autocompletes
+        await this.pageExt.page.evaluate((selector) => {
+            const elements = Array.from(document.body.querySelectorAll(selector));
+            for (let i = 0; i < elements.length; i++) {
+                elements[i].setAttribute('aria-hidden', 'true');
+            }
+        }, selectors.SUGGESTIONS_CONTAINER);
+
         await this.inputText.click();
         await this.pageExt.waitForMilliseconds(1000); // wait options appear
         await this.inputText.type(text);
@@ -60,26 +68,22 @@ class AutoCompleteSearch extends PageElement {
         await this._clickOnSomeSuggestionOfList(0);
     }
 
-    async _clickOnSomeSuggestionOfList(suggestionIndex, optionPrefixId="autoCompleteOption"){
-        const id = `${optionPrefixId}${suggestionIndex}`;
+    async _clickOnSomeSuggestionOfList(suggestionIndex){
+        const containerVisibleOptionsSelector = selectors.SUGGESTIONS_CONTAINER + `[aria-hidden='false']`;
         try{
-            //await this.inputText.click();
-            // const selector = `${this.suggestionsContainer.tagName}[aria-hidden='false']`;
-            // await this.pageExt.waitForSelector(selector);
-
-            await this.pageExt.setHiddenAttributeValue('#'+this.suggestionsContainer.id, false);
-
-            await this.pageExt.findChildrenToSetTempIds(
-                '#'+this.suggestionsContainer.id,
-                selectors.SUGGESTION_ITEM_LIST,
-                [id], suggestionIndex);
-
-            await this.pageExt.clickWithWait(`[id='${id}']`);
+            const container = await this.pageExt.waitForSelector(containerVisibleOptionsSelector);
+            const options = await container.$$(selectors.SUGGESTION_ITEM_LIST);
+            await options[suggestionIndex].click();
         }
         catch (e) {
-            console.log("option id =", id);
+            console.log(await this.pageExt.page.evaluate((containerVisibleOptionsSelector) => {
+                const container = document.body.querySelector(containerVisibleOptionsSelector);
+                return container.outerHTML;
+            }, containerVisibleOptionsSelector)
+            );
             throw e;
         }
+
     }
 }
 

@@ -33,8 +33,16 @@ class ActivityItem extends GridItem {
         return statusEnum;
     }
 
+    get idPrefix(){
+        return "activity";
+    }
+
     getId(index){
-        return "activity" + index;
+        return this.idPrefix + index;
+    }
+
+    extractIndexFromId(){
+        return this.id.replace(this.idPrefix, '');
     }
 
     async init(index){

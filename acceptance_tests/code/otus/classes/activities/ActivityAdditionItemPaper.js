@@ -8,8 +8,8 @@ class ActivityAdditionItemPaper extends ActivityAdditionItem {
         this.inspectorAutoComplete = pageExt.getNewAutoCompleteSearch();
     }
 
-    async init(index, childrenIndex){
-        await super.init(index);
+    async init(indexInHtml, childrenIndex){
+        await super.init(indexInHtml);
         let local = 'realizationDate';//.
         try {
             await this.realizationDate.init(childrenIndex);
@@ -18,7 +18,7 @@ class ActivityAdditionItemPaper extends ActivityAdditionItem {
         }
         catch (e) {
             console.log(local+'\n', e);
-            //throw e;
+            throw e;
         }
     }
 
@@ -27,7 +27,7 @@ class ActivityAdditionItemPaper extends ActivityAdditionItem {
     }
 
     async insertInspector(inspectorName){
-        await this.inspectorAutoComplete.type(inspectorName);
+        await this.inspectorAutoComplete.typeAndClickOnFirstOfList(inspectorName);
         await this.pageExt.clickOut();
     }
 
@@ -42,6 +42,20 @@ class ActivityAdditionItemPaper extends ActivityAdditionItem {
             }
             throw e;
         }
+    }
+
+    async extractData(){
+        const content = await super.extractContent();
+        this.data = {
+            acronym: content[0],
+            type: ActivityAdditionItemPaper.typeEnum.PAPER,
+            status: ActivityAdditionItemPaper.statusEnum.NEW,
+            name: content[1],
+            externalId: (this.externalIdInput.elementHandle? this.externalIdInput.content : null),
+            realizationDate: this.realizationDate.currDate,
+            category: (content[2].split(": ")[1]).toUpperCase()
+        };
+        return this.data;
     }
 
 }

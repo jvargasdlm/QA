@@ -7,6 +7,7 @@ let activitiesDataBefore = {};
 
 beforeAll(async () => {
     [browser, pageOtus, errorLogger, selectors] = await lib.doBeforeAll(suiteArray);
+    lib.setTestTimeoutSeconds(600);
     await openParticipantActivities();
 });
 
@@ -17,7 +18,8 @@ beforeEach(async () => {
 
 afterEach(async () => {
     errorLogger.advanceToNextSpec();
-    await pageOtus.waitForMilliseconds(2000);//.
+    await goToActivityPage();
+    //await pageOtus.waitForMilliseconds(2000);//.
 });
 
 afterAll(async () => {
@@ -34,7 +36,8 @@ const ActivityAdditionItemPaper     = require('../../code/otus/classes/activitie
 
 // Constants
 const enums = ActivityAdditionPage.enums;
-const recruitmentNumber = '5001007'; //'2000735';
+const withActivities = false;
+const recruitmentNumber = (withActivities? '5001007' : '5001184');
 let activityPageUrl = '';
 
 // *****************************************************************
@@ -48,12 +51,22 @@ async function openParticipantActivities(){
 
 async function goToActivityPage(){
     await pageOtus.gotoUrlAndWaitLoad(activityPageUrl);
+    await pageOtus.refresh(); // don't use refreshAndWaitLoad to do'nt call init for activitiesPage (is the old version)
+    await pageOtus.waitLoad();
 }
-
 
 async function extractAllActivityDataFromOldPage(){
     const rowSelector = "div[layout='row'][tabindex='0']";
-    await activitiesPage.waitForSelector(rowSelector);
+    try {
+        await activitiesPage.waitForSelector(rowSelector, false, 1000);
+    }
+    catch(e){
+        if( (await activitiesPage.page.$$(rowSelector)).length === 0){
+            return [];
+        }
+    }
+
+    await activitiesPage.clickOnShowAllActivitiesButton();
 
     return await activitiesPage.page.evaluate((rowSelector, enums) => { // using the old activities page version
         const categoryDict = {
@@ -69,10 +82,12 @@ async function extractAllActivityDataFromOldPage(){
             let columns = Array.from(rows[i].querySelectorAll("div[ng-repeat='column in row.columns']"));
             data.push({
                 acronym: columns[1].innerText,
-                type: (columns[2].innerText === "description" ? enums.type.PAPER : enums.type.ON_LINE),
-                realizationDate: columns[3].innerText,
+                type: (columns[2].innerText === "description" ?
+                    enums.type.PAPER :
+                    enums.type.ON_LINE),
+                realizationDate: (columns[3].innerText? columns[3].innerText : ''),
                 status: columns[4].innerText,
-                category: categoryDict[columns[5].innerText]
+                category: categoryDict[columns[5].innerText].value
             });
         }
         return data;
@@ -81,7 +96,6 @@ async function extractAllActivityDataFromOldPage(){
 
 async function getCurrActivityDataAndGoToAdderPage(){
     activitiesPage = new ActivitiesPage(pageOtus.page);
-    await activitiesPage.clickOnShowAllActivitiesButton();
     activitiesDataBefore = await extractAllActivityDataFromOldPage();
     await activitiesPage.clickWithWait("md-fab-trigger[aria-label='Adicionar atividade']"); // old button selector
     await pageOtus.waitLoad();
@@ -99,20 +113,42 @@ async function checkActivityItemsIsClear(){
     }
 }
 
-async function addActivitiesUnitary(activitiesDataToAdd, notInsertPaperDataInIndexes=[], notInsertExternalIdInIndexes=[]){
-    await activitiyAdderPage.switchQuantityToUnit();
-
+async function addActivitiesUnitary(activitiesDataToAdd){
     const classDict = {};
     classDict[enums.type.ON_LINE] = ActivityAdditionItem;
     classDict[enums.type.PAPER] = ActivityAdditionItemPaper;
 
-    let i=0;
+    await activitiyAdderPage.switchQuantityToUnit();
+
+    let failMessage = '';
     try {
         for (let i = 0; i < activitiesDataToAdd.length; i++) {
+            failMessage = `Error at activity index=${i} addition:`;
             let data = activitiesDataToAdd[i];
             await activitiyAdderPage.switchTypeTo(data.type);
             await activitiyAdderPage.selectCategory(data.category);
-            const activityItem = await activitiyAdderPage.addActivity(data.acronym, classDict[data.type]);
+            await activitiyAdderPage.addActivity(data.acronym, classDict[data.type]);
+        }
+
+        await activitiyAdderPage.initItems();
+    }
+    catch (e) {
+        console.log(failMessage, e.message);//.
+        throw e;//.
+    }
+}
+
+async function addActivitiesUnitaryAndFill(activitiesDataToAdd, notInsertPaperDataInIndexes=[], notInsertExternalIdInIndexes=[]){
+    let failMessage = '';
+    try {
+        await addActivitiesUnitary(activitiesDataToAdd);
+
+        let index = 0;
+
+        for (let i = activitiesDataToAdd.length-1; i >= 0 ; i--) {
+            failMessage = `Error at activity index=${i} fill:`;
+            let data = activitiesDataToAdd[i];
+            let activityItem = activitiyAdderPage.activityAddItems[index++];
             if (!notInsertPaperDataInIndexes.includes(i) && data.type === enums.type.PAPER) {
                 await activityItem.insertPaperExclusiveData(data.realizationDate, data.inspectorName);
             }
@@ -122,7 +158,7 @@ async function addActivitiesUnitary(activitiesDataToAdd, notInsertPaperDataInInd
         }
     }
     catch (e) {
-        console.log(`Error at activity index=${i} addition:`, e.message);//.
+        console.log(failMessage, e.message);//.
         throw e;//.
     }
 }
@@ -130,29 +166,51 @@ async function addActivitiesUnitary(activitiesDataToAdd, notInsertPaperDataInInd
 async function checkAddition(addedActivitiesData){
 
     function filterDataToCheck(activityData){
-        return {
-            acronym: activityData.acronym,
-            category: activityData.category,
-            externalId: activityData.externalId,
-            realizationDate: activityData.realizationDate
-        };
+
+        function dateToString(date){
+            try{
+                return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
+            }
+            catch (e) { // date is string
+                if(!date){
+                    return '';
+                }
+                return date;
+            }
+        }
+
+        try {
+
+            return {
+                acronym: activityData.acronym,
+                type: activityData.type,
+                category: (activityData.category instanceof Object? activityData.category.value.toUpperCase() : activityData.category),
+                realizationDate: dateToString(activityData.realizationDate)
+            };
+        }
+        catch (e) {
+            console.log(e);
+            throw e;
+        }
     }
 
     function myIndexOf(array, obj) {
+        let diffLog = [];
         for (let i = 0; i < array.length; i++) {
             const sameAcronym = (array[i].acronym === obj.acronym);
+            const sameType = (array[i].type === obj.type);
             const sameCategory = (array[i].category.value === obj.category.value);
             const sameDate = (array[i].realizationDate === obj.realizationDate);
-            if (sameAcronym &&
-                sameCategory &&
-                sameDate) {
+            if (sameAcronym && sameType && sameCategory && sameDate) {
                 return i;
             }
-            // if (array[i].acronym === obj.acronym &&
-            //     array[i].category.value === obj.category.value &&
-            //     array[i].realizationDate === obj.realizationDate) {
-            //     return i;
-            // }
+            if (sameAcronym && sameType && sameCategory && !sameDate) {
+                diffLog.push(`acronym? ${sameAcronym}, type? ${sameType}, category? ${sameCategory}, date? ${sameDate}`);
+                console.log(`acronym? ${obj.acronym}, activitiesDataAfter = ${array[i].realizationDate}, data = ${obj.realizationDate}`);
+            }
+        }
+        if(diffLog.length > 0) {
+            console.log(diffLog);
         }
         return -1;
     }
@@ -165,14 +223,15 @@ async function checkAddition(addedActivitiesData){
     try{
         expect(url).toBe(activityPageUrl);
 
-        await activitiesPage.clickOnShowAllActivitiesButton();
-        let activitiesDataAfter = (await extractAllActivityDataFromOldPage())
-            .map( data => filterDataToCheck(data));
+        failMessage = 'Other';
+        let activitiesDataAfter = (await extractAllActivityDataFromOldPage());
+        activitiesDataAfter = activitiesDataAfter.map( data => filterDataToCheck(data));
 
         failMessage = `The amount of activities after addition (${activitiesDataAfter.length}) is NOT equal to` +
             `the amount of activities already in existence (${activitiesDataBefore.length}) plus the amount of activities added (${addedActivitiesData.length}).`;
         expect(activitiesDataAfter).toBeArrayOfSize(activitiesDataBefore.length + addedActivitiesData.length);
 
+        failMessage = 'Other2';
         addedActivitiesData = addedActivitiesData.map(data => filterDataToCheck(data));
 
         const checkboxes = await activitiesPage.page.$$(activitiesPage.getNewCheckbox().tagName);
@@ -192,6 +251,8 @@ async function checkAddition(addedActivitiesData){
         expect(conflictData).toBeArrayOfSize(0);
     }
     catch (e) {
+        if(failMessage.includes("Other"))
+            console.log(e);
         errorLogger.addFailMessageFromCurrSpec(failMessage);
     }
     finally {
@@ -204,14 +265,23 @@ async function checkAddition(addedActivitiesData){
 }
 
 async function addActivitiesUnitaryAndCheck(activitiesDataToAdd){
+    await addActivitiesUnitaryAndFill(activitiesDataToAdd);
+    await pageOtus.waitForMilliseconds(2500); // wait fill inputs complete
+    await activitiyAdderPage.saveChanges();
+    await checkAddition(activitiesDataToAdd);
+}
+
+async function clickOnSaveButtonAndCheckDialog(){
+    await activitiyAdderPage.saveButton.click();
+    const dialog = activitiyAdderPage.getNewDialog();
+    await dialog.waitForOpen();
+    const numActionButtons = dialog.getNumActionButtons();
+    await dialog.clickOnCancelButton();
     try{
-        await addActivitiesUnitary(activitiesDataToAdd);
-        await pageOtus.waitForMilliseconds(2500); // wait fill inputs complete
-        await activitiyAdderPage.saveChanges();
-        await checkAddition(activitiesDataToAdd);
+        expect(numActionButtons).toBe(1);
     }
     catch (e) {
-        await goToActivityPage();
+        errorLogger.addFailMessageFromCurrSpec(`Dialog should be has only one action button (CANCEL), but has ${numActionButtons}`);
     }
 }
 
@@ -242,67 +312,51 @@ function getPaperActivityDataToAddObj(acronym, category, date, inspectorName, ex
 const activityData = {
     CSJ: {
         online: getOnlineActivityDataToAddObj("CSJ", enums.category.QUALITY_CONTROLL, recruitmentNumber+"001"),
-        paper: getPaperActivityDataToAddObj("CSJ", enums.category.REPETITION, new Date(2018, 4, 19),
-            "Diogo Ferreira", recruitmentNumber+"002")
+        paper: getPaperActivityDataToAddObj("CSJ", enums.category.REPETITION,
+            new Date(2018, 4, 19), "Diogo Ferreira", recruitmentNumber+"002")
     },
     ACTA: {
-        online: getOnlineActivityDataToAddObj("ACTA", enums.category.NORMAL, recruitmentNumber+"003"),
-        paper: getPaperActivityDataToAddObj("ACTA", enums.category.QUALITY_CONTROLL, new Date(2018, 6, 3),
-            "Diogo Ferreira", recruitmentNumber+"004")
+        online: getOnlineActivityDataToAddObj("ACTA", enums.category.NORMAL),
+        paper: getPaperActivityDataToAddObj("ACTA", enums.category.QUALITY_CONTROLL,
+            new Date(2018, 6, 3), "Diogo Ferreira")
     },
-    RETCLQ: {
-        online: getOnlineActivityDataToAddObj("RETCLQ", enums.category.REPETITION, recruitmentNumber+"005"),
-        paper: getPaperActivityDataToAddObj("RETCLQ", enums.category.NORMAL, new Date(2019, 10, 20),
-            "Diogo Ferreira", recruitmentNumber+"006")
+    RETC: {
+        online: getOnlineActivityDataToAddObj("RETC", enums.category.REPETITION),
+        paper: getPaperActivityDataToAddObj("RETC", enums.category.NORMAL,
+            new Date(2018, 10, 20),"Diogo Ferreira")
     }
 };
 
 // *****************************************************************
 // Tests
 
-/*
-add 1 por 1, de tipos diferentes
-add lista do mesmo tipo
-excluir do array => verificar se a lista de atividades nao tem a excluída
-salvar => vai para tela de atividades
-cancelar => reset todos os controladores para os valores default
- */
-
 suiteArray = [
 
-    xdescribe('TEMP SUITE', () => {
-
-        test('Extract item content', async() => {
-
-        });
-
-    }),
-
-    describe('Scenario #2.2: Add 1 by 1', () => {
+    xdescribe('Scenario #2.2: Add 1 by 1', () => {
 
         test('2.2a Only one of paper type', async() => {
             const activitiesDataToAdd = [ activityData.CSJ.paper ];
             await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
         });
 
-        xtest('2.2b Only one of online type', async() => {
+        test('2.2b Only one of online type', async() => {
             const activitiesDataToAdd = [ activityData.ACTA.online ];
             await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
         });
 
-        xtest('2.2c More than one', async() => {
-            const activitiesDataToAdd = [ activityData.CSJ.paper, activityData.ACTA.online ];
+        test('2.2c More than one', async() => {
+            const activitiesDataToAdd = [ activityData.ACTA.paper, activityData.ACTA.online ];
             await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
         });
 
-        xtest('2.2d One of each type/category', async() => {
+        test('2.2d One of each type/category', async() => {
             const activitiesDataToAdd = [
-                //activityData.CSJ.paper,
+                activityData.CSJ.paper,
                 activityData.CSJ.online,
-                //activityData.ACTA.paper,
+                activityData.ACTA.paper,
                 activityData.ACTA.online,
-                activityData.RETCLQ.online,
-                //activityData.RETCLQ.paper
+                activityData.RETC.online,
+                activityData.RETC.paper
             ];
             await addActivitiesUnitaryAndCheck(activitiesDataToAdd);
         });
@@ -311,111 +365,122 @@ suiteArray = [
 
     xdescribe('Scenario #2.3: Add activity blocks', () => {
 
-        async function saveBlocksAdditionAndCheck(){
-            let activitiesDataToAdd = [];
-            for(let activityAddItem of activitiyAdderPage.activityAddItems){
-                activitiesDataToAdd.push(await activityAddItem.extractData());
-            }
-            await activitiyAdderPage.saveChanges();
-            //await checkAddition(activitiesDataToAdd);
-        }
+        const blockName = 'Laboratório',
+            blockName2 = 'Desfechos';
+        const idExternalForCSJ = activityData.CSJ.paper.externalId;
 
-        test('2.3a Add only 1 block of ON-LINE type', async() => {
-            try {
-                await checkActivityItemsIsClear();
-                await activitiyAdderPage.switchTypeToOnline();
-                await activitiyAdderPage.addActivityBlock(['Laboratório'], ActivityAdditionItem);
-                await saveBlocksAdditionAndCheck();
-            }
-            catch(e){
-                console.log(e);//.
-                await goToActivityPage();
-                throw e;
-            }
-        });
+        let itemTypeToPageTypeDict = {};
+        itemTypeToPageTypeDict[ActivityAdditionItem.typeEnum.ON_LINE] = enums.type.ON_LINE;
+        itemTypeToPageTypeDict[ActivityAdditionItem.typeEnum.PAPER] = enums.type.PAPER;
 
-        test('2.3b Add only 1 block of PAPER type', async() => {
+        test('2.3a Add only 1 block of PAPER type', async() => {
+            let date = null;
             try {
                 await checkActivityItemsIsClear();
                 await activitiyAdderPage.switchTypeToPaper();
-                await activitiyAdderPage.addActivityBlock(['Laboratório'], ActivityAdditionItemPaper);
+                await activitiyAdderPage.addActivityBlock([blockName], ActivityAdditionItemPaper);
 
-                let activitiesDataToAdd = [], i=0;
-                for(let activityAddItem of activitiyAdderPage.activityAddItems){
-                    let date = new Date(2019, 3,20) + i++;
+                let activitiesDataToAdd = [], i = 0;
+                for (let activityAddItem of activitiyAdderPage.activityAddItems) {
+                    await activityAddItem.init(i, i);
+                    date = new Date(2019, 3, 30);
+                    date.setDate(date.getDate() + i++);
                     let data = await activityAddItem.extractData();
                     data.realizationDate = date;
+                    data.type = itemTypeToPageTypeDict[data.type];
                     activitiesDataToAdd.push(data);
-                    await activitiyAdderPage.activityAddItems[i].insertPaperExclusiveData(date, "Diogo Ferreira");
+                    await activityAddItem.insertPaperExclusiveData(date, "Diogo Ferreira");
+                    if(activityAddItem.requireExternalId){
+                        await activityAddItem.insertExternalId(idExternalForCSJ);
+                    }
                 }
 
                 await activitiyAdderPage.saveChanges();
-                //await checkAddition(activitiesDataToAdd);
+                await checkAddition(activitiesDataToAdd);
             }
-            catch(e){
-                console.log(e);//.
-                await goToActivityPage();
+            catch (e) {//.
+                console.log(`*${date}*\n${e}`);
                 throw e;
             }
+        });
+
+        async function saveBlocksAdditionAndCheck(){
+            await activitiyAdderPage.initItems();
+            let activitiesDataToAdd = [];
+            for(let activityAddItem of activitiyAdderPage.activityAddItems){
+                const data = await activityAddItem.extractData();
+                data.type = itemTypeToPageTypeDict[data.type];
+                activitiesDataToAdd.push(data);
+                if(activityAddItem.requireExternalId){
+                    await activityAddItem.insertExternalId(idExternalForCSJ);
+                }
+            }
+            await activitiyAdderPage.saveChanges();
+            await checkAddition(activitiesDataToAdd);
+        }
+
+        test('2.3b Add only 1 block of ON-LINE type', async() => {
+            await checkActivityItemsIsClear();
+            await activitiyAdderPage.switchTypeToOnline();
+            await activitiyAdderPage.addActivityBlock([blockName], ActivityAdditionItem);
+            await saveBlocksAdditionAndCheck();
         });
 
         test('2.3c Add 2 blocks of same type', async() => {
-            try {
-                await checkActivityItemsIsClear();
-                await activitiyAdderPage.switchTypeToOnline();
-                await activitiyAdderPage.addActivityBlock(['Laboratório', 'Desfechos'], ActivityAdditionItem);
-                await saveBlocksAdditionAndCheck();
-            }
-            catch(e){
-                console.log(e);//.
-                await goToActivityPage();
-                throw e;
-            }
+            await checkActivityItemsIsClear();
+            await activitiyAdderPage.switchTypeToOnline();
+            await activitiyAdderPage.addActivityBlock([blockName, blockName2], ActivityAdditionItem);
+            await saveBlocksAdditionAndCheck();
         });
 
         test('2.3d Add blocks AND unit activities', async() => {
-            try {
-                await checkActivityItemsIsClear();
-                await activitiyAdderPage.switchTypeToOnline();
-                await activitiyAdderPage.addActivityBlock(['Laboratório'], ActivityAdditionItem);
-                await addActivitiesUnitary([activityData.ACTA.online]);
-                await activitiyAdderPage.addActivityBlock(['Desfechos'], ActivityAdditionItem);
-                await saveBlocksAdditionAndCheck();
-            }
-            catch(e){
-                console.log(e);//.
-                await goToActivityPage();
-                throw e;
-            }
+            await checkActivityItemsIsClear();
+            await activitiyAdderPage.switchTypeToOnline();
+
+            await activitiyAdderPage.selectCategory(enums.category.REPETITION);
+            await activitiyAdderPage.addActivityBlock([blockName], ActivityAdditionItem);
+
+            await addActivitiesUnitaryAndFill([activityData.ACTA.online]);
+
+            await activitiyAdderPage.selectCategory(enums.category.QUALITY_CONTROLL);
+            await activitiyAdderPage.addActivityBlock([blockName2], ActivityAdditionItem);
+
+            await saveBlocksAdditionAndCheck();
         });
 
     }),
 
-    xdescribe('Scenario #2.4: Delete one activity from temporary array', () => {
+    describe('Scenario #2.4: Delete one activity from temporary array', () => {
 
-        test('2.4 test', async() => {
-            const activitiesDataToAdd = [
-                activityData.CSJ.paper,
-                activityData.CSJ.online,
-                activityData.ACTA.paper,
-                activityData.ACTA.online,
-                activityData.RETCLQ.online,
-                activityData.RETCLQ.paper
-            ];
-            try{
+        const activitiesDataToAdd = [
+            activityData.CSJ.paper,
+            activityData.CSJ.online,
+            activityData.ACTA.online,
+            activityData.RETC.paper
+        ];
+
+        async function deleteItem(index){
+            try {
                 await checkActivityItemsIsClear();
                 await addActivitiesUnitary(activitiesDataToAdd);
-                await activitiyAdderPage.deleteActivityFromTemporaryList(1);
-                const numActivityItems = await activitiyAdderPage.countActivities();
-                await goToActivityPage();
-
-                expect(numActivityItems).toBe(activitiesDataToAdd.length - 1);
+                await activitiyAdderPage.deleteActivityFromTemporaryList(index);
             }
             catch (e) {
-                console.log(e);//.
-                await goToActivityPage();
+                console.log(e);
                 throw e;
             }
+        }
+
+        test('2.4a Delete one activity from BEGIN of temporary array', async() => {
+            await deleteItem(0);
+        });
+
+        test('2.4b Delete one activity from MIDDLE of temporary array', async() => {
+            await deleteItem(1);
+        });
+
+        test('2.4c Delete one activity from END of temporary array', async() => {
+            await deleteItem(activitiesDataToAdd.length-1);
         });
 
     }),
@@ -428,94 +493,134 @@ suiteArray = [
                 activityData.CSJ.online,
                 activityData.ACTA.paper,
                 activityData.ACTA.online,
-                activityData.RETCLQ.online,
-                activityData.RETCLQ.paper
+                activityData.RETC.online,
+                activityData.RETC.paper
             ];
-            try{
-                await checkActivityItemsIsClear();
-                await addActivitiesUnitary(activitiesDataToAdd);
-                await activitiyAdderPage.cancelChanges();
-                await goToActivityPage();
-            }
-            catch (e) {
-                console.log(e);//.
-                await goToActivityPage();
-                throw e;
-            }
+            await checkActivityItemsIsClear();
+            await addActivitiesUnitary(activitiesDataToAdd);
+            await activitiyAdderPage.cancelChanges();
         });
     }),
 
     xdescribe('Scenario #2.6: All required fields have been filled', () => {
 
-        const activitiesDataToAdd = [
-            activityData.CSJ.paper,
-            activityData.CSJ.online,
+        async function fillActivitiesMissingSomething(activitiesDataToAdd, notInsertPaperDataInIndexes, notInsertExternalIdInIndexes){
+            await checkActivityItemsIsClear();
+            await addActivitiesUnitaryAndFill(activitiesDataToAdd, notInsertPaperDataInIndexes, notInsertExternalIdInIndexes);
+        }
+
+        /*
+         * 2.6a Missing external ID in one online activity
+         */
+        const activitiesDataToAddForOnlineTarget = [
+            activityData.CSJ.online, // online target
             activityData.ACTA.paper,
-            activityData.ACTA.online,
-            // activityData.RETCLQ.online,
-            // activityData.RETCLQ.paper
+            activityData.RETC.online,
         ];
 
-        async function fillActivitiesMissingSomething(notInsertPaperDataInIndexes, notInsertExternalIdInIndexes){
-            try{
-                await checkActivityItemsIsClear();
-                await addActivitiesUnitary(activitiesDataToAdd, notInsertPaperDataInIndexes, notInsertExternalIdInIndexes);
-            }
-            catch (e) {
-                console.log(e);//.
-                await goToActivityPage();
-                throw e;
-            }
+        test('2.6a-2 Missing external ID in one online activity (at first position)', async() => {
+            const activitiesDataToAddReverse = activitiesDataToAddForOnlineTarget.reverse().slice();
+            activitiesDataToAddForOnlineTarget.reverse();
+            const n = activitiesDataToAddForOnlineTarget.length;
+            await fillActivitiesMissingSomething(activitiesDataToAddReverse,[], [n-1]);
+            await clickOnSaveButtonAndCheckDialog();
+        });
+
+        test('2.6a-1 Missing external ID in one online activity (at last position)', async() => {
+            await fillActivitiesMissingSomething(activitiesDataToAddForOnlineTarget,[], [0]);
+            await clickOnSaveButtonAndCheckDialog();
+        });
+
+
+        test('2.6a-3 Missing external ID in one online activity (at middle position)', async() => {
+            const activitiesDataToAdd = [
+                activityData.ACTA.paper,
+                activityData.CSJ.online, // online target
+                activityData.RETC.online,
+            ];
+            await fillActivitiesMissingSomething(activitiesDataToAdd,[], [1]);
+            await clickOnSaveButtonAndCheckDialog();
+        });
+
+        /******************************************************
+         * Paper activities
+         */
+        const activitiesDataToAdd = [
+            activityData.CSJ.paper, // paper target
+            activityData.ACTA.paper,
+            activityData.RETC.online,
+        ];
+        const n = activitiesDataToAdd.length;
+
+        const activitiesDataToAddMiddle = [
+            activityData.RETC.online,
+            activityData.CSJ.paper, // paper target
+            activityData.ACTA.paper,
+        ];
+        const middleIndex = 1;
+
+        function getReverseActivitiesDataToAdd(){
+            const activitiesDataToAddReverse = activitiesDataToAdd.reverse().slice();
+            activitiesDataToAdd.reverse();
+            return activitiesDataToAddReverse;
         }
 
-        async function clickOnSaveButtonAndCheckDialog(){
-            let failMessage = null;
-            try{
-                await activitiyAdderPage.saveButton.click();
-                const dialog = activitiyAdderPage.getNewDialog();
-                await dialog.waitForOpen();
-                const numActionButtons = dialog.getNumActionButtons();
-                await dialog.clickOnCancelButton();
+        /*
+         * 2.6b Missing external ID in one paper activity
+         */
 
-                failMessage = `Dialog should be has only one action button (CANCEL), but has ${numActionButtons}`;
-                expect(numActionButtons).toBe(1);
+        test('2.6b-1 Missing external ID in a paper activity (at first position)', async() => {
+            await fillActivitiesMissingSomething(getReverseActivitiesDataToAdd(),[], [n-1]);
+            await clickOnSaveButtonAndCheckDialog();
+        });
 
-                failMessage = null;
-                await goToActivityPage();
-            }
-            catch (e) {
-                if(failMessage){
-                    errorLogger.addFailMessageFromCurrSpec(failMessage);
-                }
-                console.log(e);//.
-                await goToActivityPage();
-                throw e;
-            }
+        test('2.6b-2 Missing external ID in a paper activity (at last position)', async() => {
+            await fillActivitiesMissingSomething(activitiesDataToAdd,[], [0]);
+            await clickOnSaveButtonAndCheckDialog();
+        });
+
+        test('2.6b-3 Missing external ID in a paper activity (at middle position)', async() => {
+            await fillActivitiesMissingSomething(activitiesDataToAddMiddle,[], [middleIndex]);
+            await clickOnSaveButtonAndCheckDialog();
+        });
+
+        /*
+         * 2.6d Missing inspector name in a paper activity
+         */
+        async function fillActivitiesMissingInspectorName(activitiesDataToAdd, indexForMissing){
+            await fillActivitiesMissingSomething(activitiesDataToAdd, [indexForMissing], []);
+            await clickOnSaveButtonAndCheckDialog();
         }
 
-        test('2.6a Missing external ID in one online activity', async() => {
-            await fillActivitiesMissingSomething([], [1]);
-            await clickOnSaveButtonAndCheckDialog();
+        test('2.6c-1 Missing inspector name in a paper activity (at first position)', async() => {
+            await fillActivitiesMissingInspectorName(getReverseActivitiesDataToAdd(), n-1);
         });
 
-        test('2.6b Missing external ID in one paper activity', async() => {
-            await fillActivitiesMissingSomething([], [0]);
-            await clickOnSaveButtonAndCheckDialog();
+        test('2.6c-2 Missing inspector name in a paper activity (at last position)', async() => {
+            await fillActivitiesMissingInspectorName(activitiesDataToAdd, 0);
         });
 
-        test('2.6c Missing realization date in one paper activity', async() => {
-            const paperActivityIndex = 2;
-            await fillActivitiesMissingSomething([paperActivityIndex], []);
-            await activitiyAdderPage.activityAddItems[paperActivityIndex].insertInspector(activitiesDataToAdd[paperActivityIndex].inspectorName);
-            await clickOnSaveButtonAndCheckDialog();
+        test('2.6c-3 Missing inspector name in a paper activity (at middle position)', async() => {
+            await fillActivitiesMissingInspectorName(activitiesDataToAddMiddle, middleIndex);
+        });
+    }),
+
+    xdescribe('Scenario #2.7: Need click on autocomplete option to validate', () => {
+
+        test('2.7 Try add paper activity WITHOUT click on autocomplete suggestion', async() => {
+            const paperActivityData = activityData.ACTA.paper;
+            await checkActivityItemsIsClear();
+            await addActivitiesUnitary([paperActivityData]);
+            // insert data
+            const activityAddItem = activitiyAdderPage.activityAddItems[0];
+            await activityAddItem.insertRealizationData(paperActivityData.realizationDate);
+            // don't call insertInspectorName method to don't click on first option
+            await activityAddItem.inspectorAutoComplete.type(paperActivityData.inspectorName);
+            await activitiyAdderPage.clickOut();
+            //
+            await clickOnSaveButtonAndCheckDialog(); // calls goToActivityPage
         });
 
-        test('2.6d Missing inspector name in one paper activity', async() => {
-            const paperActivityIndex = 2;
-            await fillActivitiesMissingSomething([paperActivityIndex], []);
-            await activitiyAdderPage.activityAddItems[paperActivityIndex].insertRealizationData(activitiesDataToAdd[paperActivityIndex].realizationDate);
-            await clickOnSaveButtonAndCheckDialog();
-        });
     }),
 
 ]; // end suiteArray

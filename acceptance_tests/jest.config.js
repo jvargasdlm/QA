@@ -1,15 +1,7 @@
 module.exports = {
-  //preset: "puppeteer",
   moduleFileExtensions: ['js', 'jsx', 'json', 'vue'],
   testMatch: [
-    //'**/tests/otus-studio/custom-variables-test.js'
-    //'**/tests/otus-studio/group-questions-test.js'
-    //'**/tests/otus-studio/move-questions-test.js'
-    //'**/tests/otus-studio/*-test.js'
-    // otus
-    //'**/tests/otus/otus-test.js'
-    //'**/tests/otus/activity-report-test.js',
-    //'**/tests/otus/activity-redesign-test.js'
+    // '**/tests/otus/activity-redesign-test.js',
     '**/tests/otus/activity-adder-test.js'
   ],
   transformIgnorePatterns: ['<rootDir>/node_modules/'],

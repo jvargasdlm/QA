@@ -17,7 +17,7 @@ init: install_ set_login_data
 	mkdir $(TEST_RESULTS_DIR_PATH)
 
 run:
-	npm test -- --passWithNoTests --detectOpenHandles --verbose
+	SHOW_BROWSER=false npm test -- --passWithNoTests --detectOpenHandles --verbose
 
 show:
 	SHOW_BROWSER=true npm test -- --passWithNoTests --detectOpenHandles --verbose

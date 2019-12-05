@@ -146,15 +146,15 @@ class PageElement {
         await this.pageExt.clickAfterFindInList(this.tagName, index);
     }
 
-    async findChildrenAndSetTempIdsFromInnerText(childTagName){
-        const id = await this.getId();
-        const parentSelector = (id? `[id='${id}']` : this.tagName);
-        return await this.pageExt.findChildrenToSetTempIdsFromInnerText(parentSelector, childTagName);
-    }
-
-    async findChildrenButtonAndSetTempIdsFromInnerText(){
-        //return this.findChildrenAndSetTempIdsFromInnerText("button");
-    }
+    // async findChildrenAndSetTempIdsFromInnerText(childTagName){
+    //     const id = await this.getId();
+    //     const parentSelector = (id? `[id='${id}']` : this.tagName);
+    //     return await this.pageExt.findChildrenToSetTempIdsFromInnerText(parentSelector, childTagName);
+    // }
+    //
+    // async findChildrenButtonAndSetTempIdsFromInnerText(){
+    //     //return this.findChildrenAndSetTempIdsFromInnerText("button");
+    // }
 
     async findChildrenToSetTempIds(childTagName, tempIdArr){
         const id = await this.getId();

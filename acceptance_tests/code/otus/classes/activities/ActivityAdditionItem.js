@@ -1,6 +1,7 @@
 const ActivityItem = require('./ActivityItem');
 
 const selectors = {
+    TAG: "otus-activity-adder-card",
     deleteButton: {
         SELECTOR: "[aria-label='Remover']",
         TEMP_ID: "deleteItemButton"
@@ -12,18 +13,25 @@ class ActivityAdditionItem extends ActivityItem {
 
     constructor(pageExt){
         super(pageExt);
+        this.index = 0;
+        this.tagName = selectors.TAG;
         this.closeButton = pageExt.getNewButton();
         this.externalIdInput = pageExt.getNewInputField();
         this.realizationDate = pageExt.getNewCalendar();
         this.inspectorAutoComplete = pageExt.getNewAutoCompleteSearch();
     }
 
-    async init(index){
-        await this.initBySelectorAndSetTempId(this.tagName, this.getId(index), index);
+    async init(indexInHtml){
+        //await this.initBySelectorAndSetTempId(this.tagName, this.getId(indexForId), indexInHtml);
+        this.index = indexInHtml;
+        const id = await this.pageExt.page.evaluate((tag, index) => {
+            return (document.body.querySelectorAll(tag))[index].getAttribute('id');
+        }, selectors.TAG, indexInHtml);
+        await this.initById(id);
 
         // close button
         const closeButtonSelector = this.closeButton.tagName + selectors.deleteButton.SELECTOR;
-        const tempId = `${selectors.deleteButton.TEMP_ID}${index}`;
+        const tempId = `${selectors.deleteButton.TEMP_ID}${indexInHtml}`;
         await this.pageExt.page.evaluate( (id, buttonSelector, buttonTempId) => {
             const element = document.body.querySelector(id);
             const button = element.querySelector(buttonSelector);
@@ -33,6 +41,10 @@ class ActivityAdditionItem extends ActivityItem {
 
         const inputTag = this.externalIdInput.tagName;
         this.externalIdInput.elementHandle = await this.elementHandle.$(inputTag + selectors.EXTERNAL_ID);
+    }
+
+    get requireExternalId(){
+        return (!!this.externalIdInput.elementHandle);
     }
 
     async insertExternalId(externalId){
@@ -51,11 +63,12 @@ class ActivityAdditionItem extends ActivityItem {
         const content = await super.extractContent();
         this.data = {
             acronym: content[0],
+            type: ActivityAdditionItem.typeEnum.ON_LINE,
             status: ActivityAdditionItem.statusEnum.NEW,
             name: content[1],
-            externalId: null,
-            realizationDate: null,
-            category: content[2]
+            externalId: (this.externalIdInput.elementHandle? this.externalIdInput.content : null),
+            realizationDate: '',
+            category: (content[2].split(": ")[1]).toUpperCase()
         };
         return this.data;
     }

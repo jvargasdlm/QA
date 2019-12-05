@@ -23,7 +23,7 @@ class GridItem extends PageElement {
     async extractContent(){
         const text = await this.pageExt.page.evaluate((selector) => {
             let text = document.body.querySelector(selector).innerText;
-            ['delete\n','Informações do Usuário\.\n','ID Externo não requerido *']
+            ['delete\n','Informações do Usuário\.\n','Id externo não requerido *']
                 .forEach(word => {text = text.replace(word, '')});
             return text;
         }, '#'+this.id);

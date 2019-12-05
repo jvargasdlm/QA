@@ -20,6 +20,7 @@ class Calendar extends Dialog {
         await this.input.click();
         await this.waitForOpen();
         this.currDate = new Date();
+        await this.pageExt.waitForMilliseconds(500);
     }
 
     async chooseToday(){
@@ -68,11 +69,17 @@ class Calendar extends Dialog {
     }
 
     async openAndSelectDate(date) {
-        await this.open();
-        await this.selectYear(date.getFullYear());
-        await this.selectMonth(date.getMonth());
-        await this.selectDay(date.getDate());
-        await this.clickOnOkButton();
+        try {
+            await this.open();
+            await this.selectYear(date.getFullYear());
+            await this.selectMonth(date.getMonth());
+            await this.selectDay(date.getDate());
+            await this.clickOnOkButton();
+        }
+        catch (e) {
+            console.log(`*${date}*\n`, e);
+            throw e;
+        }
     }
 
     async openAndSelectPeriod(year, month) {

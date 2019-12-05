@@ -8,7 +8,7 @@ let _logged = false;
 
 // *****************************************************************
 
-class OtusLib {
+class OtusLib extends ParentLib {
 
     static async doBeforeAll(suiteArray) {
         let [browser, pageOtus] = await ParentLib.doBeforeAll(PageOtus, suiteArray);

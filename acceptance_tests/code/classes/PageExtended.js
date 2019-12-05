@@ -159,12 +159,14 @@ class PageExtended {
     /* ********************************************************************
      * Wait functions
      */
-    async waitForSelector(selector, timeout=WAIT_FOR_SELECTOR_TIMEOUT){
+    async waitForSelector(selector, log=true, timeout=WAIT_FOR_SELECTOR_TIMEOUT){
         try {
             return await this.page.waitForSelector(selector, {timeout: timeout});
         }
         catch (e) {
-            await this.hasElementWithLog(selector);//.
+            if(log) {
+                await this.hasElementWithLog(selector);//.
+            }
             throw e;
         }
     }
@@ -197,7 +199,7 @@ class PageExtended {
 
     async typeWithWait(selector, text){
         try {
-            let element = await this.page.waitForSelector(selector, {timeout: WAIT_FOR_SELECTOR_TIMEOUT});
+            let element = await this.page.waitForSelector(selector);
             await element.type(text);
             if(LOG_NAVIGATION_ACTIONS) {
                 console.log('type on ' + selector);//.

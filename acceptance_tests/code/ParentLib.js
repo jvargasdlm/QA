@@ -1,9 +1,10 @@
-const utils          = require('./utils');
 const BrowserHandler = require('./handlers/BrowserHandler');
 const FileHandler    = require('./handlers/FileHandler');
-const PageExtended   = require('./classes/PageExtended');
 
 // *****************************************************************
+
+require('custom-env').env('staging');
+const TIMEOUT_PER_TEST = parseInt(process.env.TIMEOUT_PER_TEST, 10);
 
 const selectors = {
     login:{
@@ -21,7 +22,7 @@ class ParentLib {
     }
 
     static async doBeforeAll(OtusPageClass, suiteArray) {
-        utils.timeout.setTestTimeout();
+        jest.setTimeout(TIMEOUT_PER_TEST);
         let browser = await BrowserHandler.createBrowser();
         let page = (await browser.pages())[0];
         let pageExt = new OtusPageClass(page);
@@ -38,6 +39,15 @@ class ParentLib {
         await pageExt.page.type(selectors.login.EMAIL_INPUT, loginData.email);
         await pageExt.page.type(selectors.login.PASSWORD_INPUT, loginData.password);
         await pageExt.page.click(buttonSelector);
+    }
+
+    /* Call after doBeforeAll method */
+    static setTestTimeoutMilliseconds(milliseconds){
+        jest.setTimeout(milliseconds);
+    }
+
+    static setTestTimeoutSeconds(seconds){
+        jest.setTimeout(seconds * 100);
     }
 
 }

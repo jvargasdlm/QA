@@ -29,38 +29,19 @@ class Dialog extends DialogParent {
     }
 
     async waitForOpen() {
-        // const allActionButtonIds = await super.waitForOpenAndSetIds();
-        // let numButtons = allActionButtonIds.length;
-        // //console.log(allActionButtonIds);//.
-        //
-        // let okButtonIndex = numButtons-2,
-        //     cancelButtonIndex = numButtons-1;
-        // const lastId = allActionButtonIds[numButtons-1];
-        // if(!lastId.includes('CANCEL')){//if(!this.pageExt.amIAOtusPage){
-        //     cancelButtonIndex = numButtons-2;
-        //     okButtonIndex = numButtons-1;
-        // }
-        // this.okButtonId = allActionButtonIds[okButtonIndex];
-        // this.cancelButtonId = allActionButtonIds[cancelButtonIndex];
-        //
-        // if(numButtons > NUM_DEFAULT_ACTION_BUTTONS){
-        //     this.customizeActionButtonIds = allActionButtonIds.slice(0, numButtons-2);
-        // }
-
         this.actionButtonIds = await super.waitForOpenAndSetIds();
         let numButtons = this.actionButtonIds.length;
         //console.log(allActionButtonIds);//.
 
         this.okButtonIndex = numButtons-2; this.cancelButtonIndex = numButtons-1;
         const lastId = this.actionButtonIds[numButtons-1];
-        if(!CANCEL_BUTTON_LABELS.some(label => lastId.includes(label))){//if(!this.pageExt.amIAOtusPage){
+        if(!CANCEL_BUTTON_LABELS.some(label => lastId.includes(label))){
             this.cancelButtonIndex = numButtons-2;
             this.okButtonIndex = numButtons-1;
         }
     }
 
     async clickOnOkButton(){
-        //await this.pageExt.clickWithWait(`[id='${this.okButtonId}']`);
         const id = this.actionButtonIds[this.okButtonIndex];
         await this.pageExt.clickWithWait(`[id='${id}']`);
         try {
@@ -73,7 +54,6 @@ class Dialog extends DialogParent {
     }
 
     async clickOnCancelButton(){
-        //await this.pageExt.clickWithWait(`[id='${this.cancelButtonId}']`);
         const id = this.actionButtonIds[this.cancelButtonIndex];
         await this.pageExt.clickWithWait(`[id='${id}']`);
         await this.waitForClose();
