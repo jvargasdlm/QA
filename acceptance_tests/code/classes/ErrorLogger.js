@@ -1,46 +1,6 @@
 const fileHandler = require('../handlers/FileHandler');
 require('custom-env').env('staging');
 
-// *******************************************
-// Private functions
-
-function _wasExecuted (spec) {
-    let pendingReason = spec.result.pendingReason;
-    return (pendingReason!==undefined && pendingReason==='');
-}
-
-function _getTestPath(spec){
-    return spec.result.testPath;
-}
-
-function _getFullNameSplited(spec, separator='\n'){
-    try{
-        const specName = spec.description;
-        const suiteName = spec.getFullName().replace(' '+specName, '');
-        return `${suiteName}${separator}${specName}`;
-    }
-    catch (e) {
-        return '(empty suite)';
-    }
-}
-
-function _setSpecArray(suiteArray, errorLogger){
-    let filteredSuiteArray = suiteArray.filter((suite) => {return !suite.markedPending;});
-    for(let suite of filteredSuiteArray){
-        for (let child of suite.children){
-            if(child.children){  // is a suite
-                let resultArray = _setSpecArray(child);
-                errorLogger.specArray = errorLogger.specArray.concat(resultArray);
-            }
-            else if(_wasExecuted(child)){ // is a spec
-                errorLogger.specArray.push(child);
-            }
-        }
-    }
-}
-
-// *******************************************
-
 class ErrorLogger {
 
     constructor(){
@@ -124,6 +84,44 @@ class ErrorLogger {
         }
         finally {
             this.reset();
+        }
+    }
+}
+
+// *******************************************
+// Private functions
+
+function _wasExecuted (spec) {
+    let pendingReason = spec.result.pendingReason;
+    return (pendingReason!==undefined && pendingReason==='');
+}
+
+function _getTestPath(spec){
+    return spec.result.testPath;
+}
+
+function _getFullNameSplited(spec, separator='\n'){
+    try{
+        const specName = spec.description;
+        const suiteName = spec.getFullName().replace(' '+specName, '');
+        return `${suiteName}${separator}${specName}`;
+    }
+    catch (e) {
+        return '(empty suite)';
+    }
+}
+
+function _setSpecArray(suiteArray, errorLogger){
+    let filteredSuiteArray = suiteArray.filter((suite) => {return !suite.markedPending;});
+    for(let suite of filteredSuiteArray){
+        for (let child of suite.children){
+            if(child.children){  // is a suite
+                let resultArray = _setSpecArray(child);
+                errorLogger.specArray = errorLogger.specArray.concat(resultArray);
+            }
+            else if(_wasExecuted(child)){ // is a spec
+                errorLogger.specArray.push(child);
+            }
         }
     }
 }
