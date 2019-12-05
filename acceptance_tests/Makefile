@@ -7,14 +7,12 @@ OUTPUT_DIR_PATH = output
 SCREENSHOT_DIR_PATH = $(OUTPUT_DIR_PATH)/screenshots
 TEST_RESULTS_DIR_PATH = $(OUTPUT_DIR_PATH)/test_results
 
-# main rules
-
 init: install_ set_login_data
 	tar xzf chrome.tar.gz
-	mkdir $(DOWNLOADS_DIR_PATH)
-	mkdir $(OUTPUT_DIR_PATH)
-	mkdir $(SCREENSHOT_DIR_PATH)
-	mkdir $(TEST_RESULTS_DIR_PATH)
+	mkdir -p $(DOWNLOADS_DIR_PATH)
+	mkdir -p $(OUTPUT_DIR_PATH)
+	mkdir -p $(SCREENSHOT_DIR_PATH)
+	mkdir -p $(TEST_RESULTS_DIR_PATH)
 
 run:
 	SHOW_BROWSER=false npm test -- --passWithNoTests --detectOpenHandles --verbose
