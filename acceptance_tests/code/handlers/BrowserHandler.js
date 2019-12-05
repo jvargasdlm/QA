@@ -1,24 +1,6 @@
 const puppeteer = require('puppeteer');
 require('custom-env').env('staging');
 
-async function _createBrowser(showBrowser) {
-    const width = process.env.WINDOW_WIDTH;
-    const height = process.env.WINDOW_HEIGHT;
-    const windowSizeArg = `--window-size=${width},${height}`;
-    let browserConfig = {
-        headless: !showBrowser,
-        executablePath: process.cwd() + process.env.CHROME_EXECUTABLE_LOCAL_PATH,
-        slowMo: parseInt(process.env.SLOW_TIME_MILLISEC_TO_FOLLOW_INTERACTION, 10),
-        defaultViewport: null,
-        args: ['--no-sandbox', windowSizeArg, '--ignore-certificate-errors', '--"acceptInsecureCerts"', '--ignoreHTTPSErrors=true'],
-        //devtools: true
-    };
-
-    let browser = await puppeteer.launch(browserConfig);
-    browser._ignoreHTTPSErrors = true; // the flag in args array does not work
-    return browser;
-}
-
 class BrowserHandler {
 
     static async createBrowser() {
@@ -37,6 +19,23 @@ class BrowserHandler {
         return page;
     }
 
+}
+
+async function _createBrowser(showBrowser) {
+    const width = process.env.WINDOW_WIDTH;
+    const height = process.env.WINDOW_HEIGHT;
+    const windowSizeArg = `--window-size=${width},${height}`;
+    let browserConfig = {
+        headless: !showBrowser,
+        executablePath: process.cwd() + process.env.CHROME_EXECUTABLE_LOCAL_PATH,
+        slowMo: parseInt(process.env.SLOW_TIME_MILLISEC_TO_FOLLOW_INTERACTION, 10),
+        defaultViewport: null,
+        args: ['--no-sandbox', windowSizeArg, '--ignore-certificate-errors', '--"acceptInsecureCerts"', '--ignoreHTTPSErrors=true']
+    };
+
+    let browser = await puppeteer.launch(browserConfig);
+    browser._ignoreHTTPSErrors = true; // the flag in args array does not work
+    return browser;
 }
 
 module.exports = BrowserHandler;
