@@ -18,7 +18,6 @@ afterEach(async () => {
 afterAll(async () => {
     await errorLogger.exportTestResultLog();
     await browser.stop();
-    
 });
 
 // *****************************************************************
