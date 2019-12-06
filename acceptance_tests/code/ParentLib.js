@@ -47,7 +47,7 @@ class ParentLib {
     }
 
     static setTestTimeoutSeconds(seconds){
-        jest.setTimeout(seconds * 100);
+        jest.setTimeout(seconds * 1000);
     }
 
 }
