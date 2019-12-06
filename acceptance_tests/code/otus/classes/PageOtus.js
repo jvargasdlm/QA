@@ -61,6 +61,11 @@ class PageOtus extends PageExtended {
         return selectors;
     }
 
+    /* Implemented in children*/
+    async init(){
+
+    }
+
     async initLeftSidenav(){
         await this.leftSidenav.init();
     }
