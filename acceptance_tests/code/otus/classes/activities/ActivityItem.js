@@ -11,6 +11,15 @@ const statusEnum = {
     FINALIZED: 2 //"check_circle"
 };
 
+function statusIconToStatusEnum(statusIcon){
+    const dict = {
+        "fiber_new": statusEnum.NEW,
+        "save": statusEnum.SAVE,
+        "check_circle": statusEnum.FINALIZED
+    };
+    return dict[statusIcon];
+}
+
 const selectors = {
     type: {
         ON_LINE: "div[aria-label='Online']",
@@ -52,17 +61,18 @@ class ActivityItem extends GridItem {
 
     async extractData() {
         const content = await super.extractContent();
+        const realizationDate = content[3].split(": ")[1];
+        const externalId = content[5].split(": ")[1];
         this.data = {
             acronym: content[0],
-            status: content[1],
+            status: statusIconToStatusEnum(content[1]),
             name: content[2],
-            externalId: content[3].split(": ")[1],
-            realizationDate: content[4].split(": ")[1],
-            category: content[5]
+            realizationDate: (realizationDate? realizationDate : ''),
+            category: (content[4].split(": ")[1]).toUpperCase(),
+            externalId: (externalId? externalId : '')
         };
         this.data.type = (await this.elementHandle.$(selectors.type.ON_LINE) ?
                 typeEnum.ON_LINE : typeEnum.PAPER);
-
         return this.data;
     }
 

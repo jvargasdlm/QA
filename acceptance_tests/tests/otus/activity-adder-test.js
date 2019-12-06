@@ -7,7 +7,7 @@ let activitiesDataBefore = {};
 
 beforeAll(async () => {
     [browser, pageOtus, errorLogger, selectors] = await lib.doBeforeAll(suiteArray);
-    lib.setTestTimeoutSeconds(600);
+    lib.setTestTimeoutSeconds(90);
     await openParticipantActivities();
 });
 
@@ -19,7 +19,6 @@ beforeEach(async () => {
 afterEach(async () => {
     errorLogger.advanceToNextSpec();
     await goToActivityPage();
-    //await pageOtus.waitForMilliseconds(2000);//.
 });
 
 afterAll(async () => {
@@ -36,7 +35,7 @@ const ActivityAdditionItemPaper     = require('../../code/otus/classes/activitie
 
 // Constants
 const enums = ActivityAdditionPage.enums;
-const withActivities = false;
+const withActivities = true;
 const recruitmentNumber = (withActivities? '5001007' : '5001184');
 let activityPageUrl = '';
 
@@ -51,54 +50,16 @@ async function openParticipantActivities(){
 
 async function goToActivityPage(){
     await pageOtus.gotoUrlAndWaitLoad(activityPageUrl);
-    await pageOtus.refresh(); // don't use refreshAndWaitLoad to do'nt call init for activitiesPage (is the old version)
-    await pageOtus.waitLoad();
-}
-
-async function extractAllActivityDataFromOldPage(){
-    const rowSelector = "div[layout='row'][tabindex='0']";
-    try {
-        await activitiesPage.waitForSelector(rowSelector, false, 1000);
-    }
-    catch(e){
-        if( (await activitiesPage.page.$$(rowSelector)).length === 0){
-            return [];
-        }
-    }
-
-    await activitiesPage.clickOnShowAllActivitiesButton();
-
-    return await activitiesPage.page.evaluate((rowSelector, enums) => { // using the old activities page version
-        const categoryDict = {
-            "Normal": enums.category.NORMAL,
-            "Controle de Qualidade": enums.category.QUALITY_CONTROLL,
-            "Repetição": enums.category.REPETITION,
-        };
-
-        const rows = Array.from(document.querySelectorAll(rowSelector));
-        console.log(rows.length);//.
-        let data = [];
-        for (let i = 0; i < rows.length; i++) {
-            let columns = Array.from(rows[i].querySelectorAll("div[ng-repeat='column in row.columns']"));
-            data.push({
-                acronym: columns[1].innerText,
-                type: (columns[2].innerText === "description" ?
-                    enums.type.PAPER :
-                    enums.type.ON_LINE),
-                realizationDate: (columns[3].innerText? columns[3].innerText : ''),
-                status: columns[4].innerText,
-                category: categoryDict[columns[5].innerText].value
-            });
-        }
-        return data;
-    }, rowSelector, enums);
+    await pageOtus.refreshAndWaitLoad();
 }
 
 async function getCurrActivityDataAndGoToAdderPage(){
     activitiesPage = new ActivitiesPage(pageOtus.page);
-    activitiesDataBefore = await extractAllActivityDataFromOldPage();
-    await activitiesPage.clickWithWait("md-fab-trigger[aria-label='Adicionar atividade']"); // old button selector
-    await pageOtus.waitLoad();
+    await activitiesPage.init();
+    activitiesDataBefore = await activitiesPage.extractAllActivitiesData();
+    await activitiesPage.pressAddActivityButton();
+    await activitiesPage.waitLoad();
+
     activitiyAdderPage = new ActivityAdditionPage(pageOtus.page);
     await activitiyAdderPage.init();
 }
@@ -120,33 +81,27 @@ async function addActivitiesUnitary(activitiesDataToAdd){
 
     await activitiyAdderPage.switchQuantityToUnit();
 
-    let failMessage = '';
+    let i;
     try {
-        for (let i = 0; i < activitiesDataToAdd.length; i++) {
-            failMessage = `Error at activity index=${i} addition:`;
+        for (i=0; i < activitiesDataToAdd.length; i++) {
             let data = activitiesDataToAdd[i];
             await activitiyAdderPage.switchTypeTo(data.type);
             await activitiyAdderPage.selectCategory(data.category);
             await activitiyAdderPage.addActivity(data.acronym, classDict[data.type]);
         }
-
         await activitiyAdderPage.initItems();
     }
     catch (e) {
-        console.log(failMessage, e.message);//.
-        throw e;//.
+        throw `Error at activity index=${i} addition: ${e}`;
     }
 }
 
 async function addActivitiesUnitaryAndFill(activitiesDataToAdd, notInsertPaperDataInIndexes=[], notInsertExternalIdInIndexes=[]){
-    let failMessage = '';
+    let i, index = 0;
     try {
         await addActivitiesUnitary(activitiesDataToAdd);
 
-        let index = 0;
-
-        for (let i = activitiesDataToAdd.length-1; i >= 0 ; i--) {
-            failMessage = `Error at activity index=${i} fill:`;
+        for (i = activitiesDataToAdd.length-1; i >= 0 ; i--) {
             let data = activitiesDataToAdd[i];
             let activityItem = activitiyAdderPage.activityAddItems[index++];
             if (!notInsertPaperDataInIndexes.includes(i) && data.type === enums.type.PAPER) {
@@ -158,40 +113,42 @@ async function addActivitiesUnitaryAndFill(activitiesDataToAdd, notInsertPaperDa
         }
     }
     catch (e) {
-        console.log(failMessage, e.message);//.
-        throw e;//.
+        throw `Error at activity index=${i} fill: ${e}`;
     }
 }
 
 async function checkAddition(addedActivitiesData){
 
+    function dateToString(date){
+        try{
+            return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
+        }
+        catch (e) { // date is string
+            if(!date){
+                return '';
+            }
+            return date;
+        }
+    }
+
     function filterDataToCheck(activityData){
+        return {
+            acronym: activityData.acronym,
+            type: activityData.type,
+            category: activityData.category,
+            realizationDate: dateToString(activityData.realizationDate)
+        };
+    }
 
-        function dateToString(date){
-            try{
-                return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
-            }
-            catch (e) { // date is string
-                if(!date){
-                    return '';
-                }
-                return date;
-            }
-        }
-
-        try {
-
-            return {
-                acronym: activityData.acronym,
-                type: activityData.type,
-                category: (activityData.category instanceof Object? activityData.category.value.toUpperCase() : activityData.category),
-                realizationDate: dateToString(activityData.realizationDate)
-            };
-        }
-        catch (e) {
-            console.log(e);
-            throw e;
-        }
+    function filterAddedDataToCheck(activityData){
+        return {
+            acronym: activityData.acronym,
+            type: (activityData.type === enums.type.ON_LINE ?
+                ActivityAdditionItem.typeEnum.ON_LINE :
+                ActivityAdditionItem.typeEnum.PAPER),
+            category: (activityData.category instanceof Object? activityData.category.value.toUpperCase() : activityData.category),
+            realizationDate: dateToString(activityData.realizationDate)
+        };
     }
 
     function myIndexOf(array, obj) {
@@ -204,9 +161,9 @@ async function checkAddition(addedActivitiesData){
             if (sameAcronym && sameType && sameCategory && sameDate) {
                 return i;
             }
-            if (sameAcronym && sameType && sameCategory && !sameDate) {
+            if (sameAcronym && sameDate && sameCategory && !sameType) {
                 diffLog.push(`acronym? ${sameAcronym}, type? ${sameType}, category? ${sameCategory}, date? ${sameDate}`);
-                console.log(`acronym? ${obj.acronym}, activitiesDataAfter = ${array[i].realizationDate}, data = ${obj.realizationDate}`);
+                console.log(`obj = ${JSON.stringify(obj,null, 4)}\narr[${i}] = ${JSON.stringify(array[i], null, 4)}`);
             }
         }
         if(diffLog.length > 0) {
@@ -222,9 +179,10 @@ async function checkAddition(addedActivitiesData){
     let failMessage = `I should be at activities page, but I'm at url = ${url}`;
     try{
         expect(url).toBe(activityPageUrl);
+        await activitiesPage.init();
 
         failMessage = 'Other';
-        let activitiesDataAfter = (await extractAllActivityDataFromOldPage());
+        let activitiesDataAfter = await activitiesPage.extractAllActivitiesData();
         activitiesDataAfter = activitiesDataAfter.map( data => filterDataToCheck(data));
 
         failMessage = `The amount of activities after addition (${activitiesDataAfter.length}) is NOT equal to` +
@@ -232,14 +190,13 @@ async function checkAddition(addedActivitiesData){
         expect(activitiesDataAfter).toBeArrayOfSize(activitiesDataBefore.length + addedActivitiesData.length);
 
         failMessage = 'Other2';
-        addedActivitiesData = addedActivitiesData.map(data => filterDataToCheck(data));
+        addedActivitiesData = addedActivitiesData.map(data => filterAddedDataToCheck(data));
 
-        const checkboxes = await activitiesPage.page.$$(activitiesPage.getNewCheckbox().tagName);
         let conflictData = [];
         for(let data of addedActivitiesData){
             let index = myIndexOf(activitiesDataAfter, data);
             if(index >= 0){
-                await checkboxes[index + 2].click();
+                await activitiesPage.selectActivityItem(index);
                 numActivitiesToDelete++;
             }
             else{
@@ -251,15 +208,14 @@ async function checkAddition(addedActivitiesData){
         expect(conflictData).toBeArrayOfSize(0);
     }
     catch (e) {
-        if(failMessage.includes("Other"))
-            console.log(e);
+        if(failMessage.includes("Other")){
+            failMessage = e.toString();
+        }
         errorLogger.addFailMessageFromCurrSpec(failMessage);
     }
     finally {
-        if(numActivitiesToDelete > 0) { // old delete version - don't use activitiesPage delete method
-            await activitiesPage.clickWithWait("button[aria-label='Excluir']");
-            await (activitiesPage.getNewDialog()).waitForOpenAndClickOnOkButton();
-            await activitiesPage.waitLoad();
+        if(numActivitiesToDelete > 0) {
+            await activitiesPage.deleteSelectedActivities();
         }
     }
 }
@@ -332,7 +288,7 @@ const activityData = {
 
 suiteArray = [
 
-    xdescribe('Scenario #2.2: Add 1 by 1', () => {
+    describe('Scenario #2.2: Add 1 by 1', () => {
 
         test('2.2a Only one of paper type', async() => {
             const activitiesDataToAdd = [ activityData.CSJ.paper ];
@@ -363,7 +319,7 @@ suiteArray = [
 
     }),
 
-    xdescribe('Scenario #2.3: Add activity blocks', () => {
+    describe('Scenario #2.3: Add activity blocks', () => {
 
         const blockName = 'Laboratório',
             blockName2 = 'Desfechos';
@@ -485,7 +441,7 @@ suiteArray = [
 
     }),
 
-    xdescribe('Scenario #2.5: Cancel button reset all', () => {
+    describe('Scenario #2.5: Cancel button reset all', () => {
 
         test('2.5 test', async() => {
             const activitiesDataToAdd = [
@@ -502,7 +458,7 @@ suiteArray = [
         });
     }),
 
-    xdescribe('Scenario #2.6: All required fields have been filled', () => {
+    describe('Scenario #2.6: All required fields have been filled', () => {
 
         async function fillActivitiesMissingSomething(activitiesDataToAdd, notInsertPaperDataInIndexes, notInsertExternalIdInIndexes){
             await checkActivityItemsIsClear();
@@ -605,7 +561,7 @@ suiteArray = [
         });
     }),
 
-    xdescribe('Scenario #2.7: Need click on autocomplete option to validate', () => {
+    describe('Scenario #2.7: Need click on autocomplete option to validate', () => {
 
         test('2.7 Try add paper activity WITHOUT click on autocomplete suggestion', async() => {
             const paperActivityData = activityData.ACTA.paper;

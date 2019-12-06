@@ -241,6 +241,9 @@ class ActivitiesPage extends PageOtus {
     async extractAllActivitiesData(){
         let data = [];
         const numActivities = await this.countActivities();
+        if(numActivities === 0){
+            console.log('whaaaaat');
+        }
         for (let i = 0; i < numActivities; i++) {
             let data_i = await this.extractDataFromActivityByIndex(i);
             data.push(data_i);

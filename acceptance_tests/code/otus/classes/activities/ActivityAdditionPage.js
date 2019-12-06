@@ -18,7 +18,7 @@ const enums = {
             index: 1, value: "CONTROLE DE QUALIDADE"
         },
         REPETITION: {
-            index: 2, value: "REPETICAO"
+            index: 2, value: "REPETIÇÃO"
         }
     }
 };
