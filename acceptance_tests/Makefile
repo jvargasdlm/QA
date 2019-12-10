@@ -1,7 +1,3 @@
-# OTUS login data
-OTUS_EMAIL=empty
-OTUS_PASSWORD=empty
-
 # paths
 DOWNLOADS_DIR_PATH = downloads
 OUTPUT_DIR_PATH = output
@@ -21,7 +17,7 @@ reinstall:
 	install_
 
 set_login_data:
-	OTUS_EMAIL=$(EMAIL) OTUS_PASSWORD=$(PASSWORD) npm start
+	node init_script.js
 
 install_:
 	sudo npm set PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true

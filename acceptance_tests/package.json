@@ -4,7 +4,6 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "node init_script.js",
         "test": "jest",
         "headless": "SHOW_BROWSER=false npm test -- --passWithNoTests --detectOpenHandles --verbose",
         "show": "SHOW_BROWSER=true npm test -- --passWithNoTests --detectOpenHandles --verbose"
