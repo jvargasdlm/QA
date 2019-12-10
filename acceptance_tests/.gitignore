@@ -10,4 +10,3 @@ screenshots/*
 uml_diagrams/*.asta.lock
 data/login_data.json
 package-lock.json
-jest.config.js
