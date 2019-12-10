@@ -22,7 +22,7 @@ class Switch extends PageElement {
     }
 
     async _initMyOwnAttributes(){
-        const checked = await this.getAttributeByDOM('#'+this.id, selectors.CHECK_ON_ATTRIBUTE);
+        const checked = await this.getAttribute(selectors.CHECK_ON_ATTRIBUTE);
         this.isOn = (checked === 'true');
     }
 

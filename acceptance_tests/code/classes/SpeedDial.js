@@ -62,8 +62,7 @@ class SpeedDial extends PageElement {
     }
 
     async isOpen(){
-        const triggerElemHandler = await this.elementHandle.$(selectors.trigger.tag);
-        return PageElement.s_getAttribute(triggerElemHandler, selectors.trigger.open());
+        return await this.pageExt.getAttributeBySelector(selectors.trigger.tag, selectors.trigger.open());
     }
 
     async forceOpen(){

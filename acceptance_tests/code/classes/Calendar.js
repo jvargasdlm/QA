@@ -1,34 +1,41 @@
-const Dialog = require('./Dialog');
+const PageElement = require('./PageElement');
 
-class Calendar extends Dialog {
+class Calendar extends PageElement {
 
     constructor(pageExt){
-        super(pageExt);
+        super(pageExt, "md-input-container");
         this.input = pageExt.getNewInputField();
-        this.currDate = null;
+        this.dialog = pageExt.getNewDialog();
+        this.currDate = new Date();
     }
 
     async init(index=0){
-        await this.initBySelector("md-input-container[id='date']", index);
+        await this.initByAttributeSelector("[id='date']", index);
+    }
+
+    async initByAttributeSelector(attributeSelector, index=0){
+        await super.initByAttributeSelectorAndSetTempId(attributeSelector, 'date', index);
     }
 
     async _initMyOwnAttributes(){
-        this.input.elementHandle = await this.elementHandle.$("input[id='datetime']");
+        this.input.elementHandle = await this.elementHandle.$(this.input.tagName+"[id='datetime']");
+
+        if(this.input.elementHandle===undefined || this.input.elementHandle===null){//.
+            console.log("Calendar.initByAttributeSelector: input ", this.input.elementHandle);
+        }
     }
 
-    async open(){
+    async _open(){
         await this.input.click();
-        await this.waitForOpen();
-        this.currDate = new Date();
+        await this.dialog.waitForOpen();
         await this.pageExt.waitForMilliseconds(500);
     }
 
     async chooseToday(){
-        await this.clickOnCustomizedActionButtonByIndex(0);
-        //await this.pageExt.clickWithWait("button[ng-click='picker.today()'");
+        await this.dialog.clickOnCustomizedActionButtonByIndex(0);
     }
 
-    async selectYear(year, millisecondsToWait=10){
+    async _selectYear(year, millisecondsToWait=10){
         const numSteps = year - this.currDate.getFullYear();
         let numClicks = Math.abs(numSteps);
         let sign = numSteps / numClicks;
@@ -40,7 +47,7 @@ class Calendar extends Dialog {
         this.currDate.year = year;
     }
 
-    async selectMonth(month, millisecondsToWait=10){
+    async _selectMonth(month, millisecondsToWait=10){
         const numSteps = month - (this.currDate.getMonth()+1);
         let numClicks = Math.abs(numSteps);
         let sign = numSteps / numClicks;
@@ -52,7 +59,7 @@ class Calendar extends Dialog {
         this.currDate.month = month-1;
     }
 
-    async selectDay(day){
+    async _selectDay(day){
         let actualMonthName = await this.pageExt.page.evaluate(() =>
             document.querySelector("div[class='dtp-actual-month ng-binding flex']").innerText);
         const MONTHS = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
@@ -70,11 +77,11 @@ class Calendar extends Dialog {
 
     async openAndSelectDate(date) {
         try {
-            await this.open();
-            await this.selectYear(date.getFullYear());
-            await this.selectMonth(date.getMonth());
-            await this.selectDay(date.getDate());
-            await this.clickOnOkButton();
+            await this._open();
+            await this._selectYear(date.getFullYear());
+            await this._selectMonth(date.getMonth());
+            await this._selectDay(date.getDate());
+            await this.dialog.clickOnOkButton();
         }
         catch (e) {
             console.log(`*${date}*\n`, e);
@@ -83,10 +90,10 @@ class Calendar extends Dialog {
     }
 
     async openAndSelectPeriod(year, month) {
-        await this.open();
-        await this.selectYear(year);
-        await this.selectMonth(month);
-        await this.clickOnOkButton();
+        await this._open();
+        await this._selectYear(year);
+        await this._selectMonth(month);
+        await this.dialog.clickOnOkButton();
     }
 
 }

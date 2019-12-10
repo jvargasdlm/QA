@@ -241,9 +241,6 @@ class ActivitiesPage extends PageOtus {
     async extractAllActivitiesData(){
         let data = [];
         const numActivities = await this.countActivities();
-        if(numActivities === 0){
-            console.log('whaaaaat');
-        }
         for (let i = 0; i < numActivities; i++) {
             let data_i = await this.extractDataFromActivityByIndex(i);
             data.push(data_i);
@@ -311,7 +308,6 @@ class ActivitiesPage extends PageOtus {
         const currState = this.reportButton.state;
         await this.clickOnReportButton();
         let element = await this.waitForSelector('#'+expectedNextState);
-        //console.log(`element '#${nextState}' was found?`, element!==undefined);//.
         if(!element){
             const realState = Object.entries(selectors.reportButtonStateIds).filter( (state) => (state !== currState && state !== expectedNextState));
             await this.reportButton.init(realState);

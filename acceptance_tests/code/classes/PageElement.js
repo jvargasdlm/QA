@@ -1,5 +1,6 @@
 /*
-Ao inves de enviar selector para waitForSelector, enviar o PageEelement, que contém toda a informação da pagina e do elemento em si (tipo) para o log !
+Ao inves de enviar selector para waitForSelector, enviar o PageEelement,
+que contém toda a informação da pagina e do elemento em si (tipo) para o log !
  */
 
 class PageElement {
@@ -28,57 +29,41 @@ class PageElement {
     }
 
     async initByTagAndSetTempId(tempId, index=0){
-        await this.pageExt.waitForSelector(this.tagName);
-        this.elementHandle = (await this.pageExt.page.$$(this.tagName))[index];
         try {
-            await this.pageExt.page.evaluate((selector, tempId, index) => {
-                const element = (document.body.querySelectorAll(selector))[index];
-                element.setAttribute("id", tempId);
-            }, this.tagName, tempId, index);
-
-            await this._initMyOwnAttributes(index);
-            this.id = tempId;
+            await this.initBySelectorAndSetTempId(this.tagName, tempId, index);
         }
-        catch (e) {//.
-            console.log(`ERROR at init pageElement by tag "${this.tagName}" with set id '${tempId}':`, e.message);
-            await this.pageExt.hasElementWithLog(this.tagName);
-            throw e;
+        catch (e) {
+            throw `ERROR at init pageElement by tag '${this.tagName} (page has tag? ${await this.pageExt.hasElement(this.tagName)})'\n${e}`;
         }
     }
 
-    async initByAttributesSelector(attributesSelector, tempId, index=0){
+    async initByAttributeSelectorAndSetTempId(attributesSelector, tempId, index=0){
         await this.initBySelectorAndSetTempId(this.tagName + attributesSelector, tempId, index);
     }
 
-    async initBySelector(selector, index=0){
+    async initBySelectorAndSetTempId(selector, tempId, index=0){
+        await this.pageExt.waitForSelector(selector);
         try {
-            await this.pageExt.waitForSelector(selector);
-            this.elementHandle = (await this.pageExt.page.$$(selector))[index];
-            await this._initMyOwnAttributes();
+            await this.setTempId(selector,tempId, index);
+            await this.initById(tempId);
         }
-        catch (e) {//.
-            console.log(`ERROR at init pageElement by selector "${selector}":`, e.message);
-            await this.pageExt.hasElementWithLog(selector);
-            throw e;
+        catch (e) {
+            throw `ERROR at init pageElement by selector '${selector} with index=${index} and tempId '${tempId}` +
+                `(page has selector? ${await this.pageExt.hasElement(selector)})'\n${e}`;
         }
     }
 
-    async initBySelectorAndSetTempId(selector, tempId, index=0){
-        try {
-            await this.pageExt.waitForSelector(selector);
+    async initByParentElement(parentElementHandle, childAttributeSelector, index=0){
+        this.elementHandle = (await parentElementHandle.$$(this.tagName+childAttributeSelector))[index];
+        await this._initMyOwnAttributes();
+    }
 
-            await this.pageExt.page.evaluate((selector, tempId, index) => {
-                const element = (document.body.querySelectorAll(selector))[index];
-                element.setAttribute("id", tempId);
-            }, selector, tempId, index);
-
-            await this.initById(tempId);
-        }
-        catch (e) {//.
-            console.log(`ERROR at init pageElement by selector "${selector}" with index=${index} and tempId '${tempId}':`, e.message);
-            await this.pageExt.hasElementWithLog(selector);
-            throw e;
-        }
+    async setTempId(selector, tempId, index=0){
+        await this.pageExt.page.evaluate((selector, tempId, index) => {
+            const element = (document.body.querySelectorAll(selector))[index];
+            element.setAttribute("id", tempId);
+        }, selector, tempId, index);
+        this.id = tempId;
     }
 
     // Implemented by children classes
@@ -86,31 +71,32 @@ class PageElement {
 
     }
 
-    async setTempId(selector, tempId, index=0){
-        await this.pageExt.page.evaluate((selector, tempId, index) => {
-            const element = (document.body.querySelectorAll(selector))[index];
-            element.setAttribute("id", tempId);
-        });
+    /********************************************************
+     * Getters
+     */
+
+    async getAttribute(attributeName){
+        try {
+            return await this.pageExt.page.evaluate((id, attributeName) => {
+                return document.getElementById(id).getAttribute(attributeName);
+            }, this.id, attributeName);
+        }
+        catch (e) {
+            if(!this.id){
+                console.log("Can't getAttribute because id is", this.id);
+            }
+            throw e;
+        }
     }
 
-    async getId(){
+    async getIdFromDOM(){
         return await this.getAttribute("id");
     }
 
-    async getAttributeByDOM(selector, attributeName){
-        return await this.pageExt.page.evaluate((selector, attributeName) => {
-            return document.body.querySelector(selector).getAttribute(attributeName);
-        }, selector, attributeName);
-    }
-
-    async getAttribute(attributeName){
-        return PageElement.s_getAttribute(this.elementHandle, attributeName);
-    }
-
-    static async s_getAttribute(elementHandle, attributeName){
-        let objectHandle = await elementHandle.getProperty(attributeName);
-        let remoteObject = objectHandle._remoteObject; //_remoteObject: { type: 'string', value: 'QSP2' },
-        return remoteObject.value;
+    async getInnerText(){
+        return await this.pageExt.page.evaluate((id) => {
+            return document.getElementById(id).innerText;
+        }, this.id);
     }
 
     extractIdFromElemHandle(){
@@ -121,7 +107,7 @@ class PageElement {
     }
 
     async isHidden(){
-        return this.isHiddenUsingSelector(`[id=${this.getId()}]`);
+        return this.isHiddenUsingSelector(`[id=${this.id}]`);
     }
 
     async isHiddenUsingSelector(selector){
@@ -131,33 +117,24 @@ class PageElement {
         }, selector);
     }
 
-    // -------------------------------------------------------
-    // Clicks
+    /********************************************************
+     * Clicks
+     */
 
     async click(){
         await this.elementHandle.click();
-    }
-
-    async clickByAttribute(uniqueAttrName, uniqueAttrValue){
-        await this.pageExt.clickWithWait(`${this.tagName}[${uniqueAttrName}='${uniqueAttrValue}']`);
     }
 
     async clickAfterFindInList(index){
         await this.pageExt.clickAfterFindInList(this.tagName, index);
     }
 
-    // async findChildrenAndSetTempIdsFromInnerText(childTagName){
-    //     const id = await this.getId();
-    //     const parentSelector = (id? `[id='${id}']` : this.tagName);
-    //     return await this.pageExt.findChildrenToSetTempIdsFromInnerText(parentSelector, childTagName);
-    // }
-    //
-    // async findChildrenButtonAndSetTempIdsFromInnerText(){
-    //     //return this.findChildrenAndSetTempIdsFromInnerText("button");
-    // }
+    /********************************************************
+     * Set id in chidren
+     */
 
     async findChildrenToSetTempIds(childTagName, tempIdArr){
-        const id = await this.getId();
+        const id = await this.getIdFromDOM();
         const parentSelector = (id? `[id='${id}']` : this.tagName);
         return await this.pageExt.findChildrenToSetTempIds(parentSelector, childTagName, tempIdArr);
     }

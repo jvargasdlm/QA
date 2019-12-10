@@ -32,7 +32,6 @@ class ActivityViewPage extends PageOtus  {
     }
 
     async extractAnswers(){
-
         return await this.page.evaluate((selectors, answerInnerText) => {
 
             function findAnswer(answerArr){
@@ -47,7 +46,6 @@ class ActivityViewPage extends PageOtus  {
                     answer = option.replace(innerText, '');
                 }
                 else {
-                //if(firstAnswer.includes(answerInnerText.checkbox.prefix)){
                     const unselectedInnerText = answerInnerText.checkbox.unselected;
                     const selectedInnerText = answerInnerText.checkbox.selected;
                     answer = [];
@@ -87,7 +85,6 @@ class ActivityViewPage extends PageOtus  {
             }
             return result;
         }, selectors, answerInnerText);
-        //console.log(result);
     }
 
 }

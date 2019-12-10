@@ -10,7 +10,6 @@ class Card extends PageElement{
         super(pageExt, selectors.tag);
     }
 
-
 }
 
 module.exports = Card;

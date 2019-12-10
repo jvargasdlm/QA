@@ -2,7 +2,7 @@ const lib = require('../../code/otus/lib');
 
 let browser, suiteArray=[], errorLogger;        // for all tests
 let pageOtus, selectors;                        // only for otus tests
-let activitiesPage, reportButtonStateIds;
+let activitiesPage, activityAdditionPage, reportButtonStateIds;
 
 beforeAll(async () => {
     [browser, pageOtus, errorLogger, selectors] = await lib.doBeforeAll(suiteArray);
@@ -16,7 +16,6 @@ beforeEach(async () => {
 afterEach(async () => {
     errorLogger.advanceToNextSpec();
     await activitiesPage.refreshAndWaitLoad();
-    await pageOtus.waitForMilliseconds(5000);//.
 });
 
 afterAll(async () => {
@@ -28,9 +27,11 @@ afterAll(async () => {
 // *****************************************************************
 // Specific modules for this suite test
 const ActivitiesPage          = require('../../code/otus/classes/activities/ActivitiesPage');
+const ActivityAdditionPage    = require('../../code/otus/classes/activities/ActivityAdditionPage');
+const ActivityAdditionItemPaper = require('../../code/otus/classes/activities/ActivityAdditionItemPaper');
 const ActivityQuestionAnswer  = require('../../code/otus/classes/activities/ActivityQuestionAnswer');
 const ActivityReportPage      = require('../../code/otus/classes/activities/ActivityReportPage');
-const ExamReportPage          = require('../../code/otus/classes/ExamReportPage');//.
+const ExamReportPage          = require('../../code/otus/classes/ExamReportPage');// used as model
 
 // Constants
 const recruitmentNumberOrName = '5001007';
@@ -45,9 +46,14 @@ async function openParticipantActivitiesAndCreateTestActivities(){
     await pageOtus.openParticipantActivitiesMenu();
     activitiesPage = new ActivitiesPage(pageOtus.page);
     reportButtonStateIds = activitiesPage.reportButton.allStateIds;
-    // create activities
+    await activitiesPage.pressAddActivityButton();
+
+    activityAdditionPage = new ActivityAdditionPage(pageOtus.page);
+    await activityAdditionPage.init();
+
+    // create activities of paper type
     for(let acronym of acronymsArr){
-        await activitiesPage.addOnlineActivity(acronym);
+        await activityAdditionPage.addActivity(acronym, ActivityAdditionItemPaper);
     }
 }
 
@@ -71,7 +77,6 @@ async function extractDataFromReportPage(){
     //.
 
     const dataObj = await reportPage.extractInfo();
-    console.log(JSON.stringify(dataObj, null, 4));//.
     await reportPage.closeAsNewTab();
     await activitiesPage.waitLoad();
     return dataObj;
@@ -175,7 +180,7 @@ suiteArray = [
             const reportPage = new ExamReportPage(newPage);
             const dataObj = await reportPage.extractInfo();
             await reportPage.close();
-            console.log(JSON.stringify(dataObj, null, 4));//.
+            console.log(JSON.stringify(dataObj, null, 4));
         });
 
     }),

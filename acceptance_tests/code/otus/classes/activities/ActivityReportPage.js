@@ -8,11 +8,8 @@ class ActivityReportPage extends ReportPage {
 
     // TODO
     async extractItems(){
-        //this.enableConsoleLog();
-        return await this.page.evaluate((valuesSelector) => {
-            const element = document.body.querySelector(valuesSelector);
-            return element.innerText.split('\n');
-        }, ReportPage.selectors.ITEMS);
+        return (await this.getInnerTextBySelector(ReportPage.selectors.ITEMS))
+            .split('\n');
     }
 
     async _replaceContent(sentencesArr){
@@ -26,8 +23,6 @@ class ActivityReportItem {
 
     // TODO
     constructor(innerTextArr) {
-        //this.questionText = '';
-        //this.answer = '';
         this.condition = '';
         this.checked = false;
     }

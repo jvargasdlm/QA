@@ -17,16 +17,11 @@ class ActivityAdditionItem extends ActivityItem {
         this.tagName = selectors.TAG;
         this.closeButton = pageExt.getNewButton();
         this.externalIdInput = pageExt.getNewInputField();
-        this.realizationDate = pageExt.getNewCalendar();
-        this.inspectorAutoComplete = pageExt.getNewAutoCompleteSearch();
     }
 
     async init(indexInHtml){
-        //await this.initBySelectorAndSetTempId(this.tagName, this.getId(indexForId), indexInHtml);
         this.index = indexInHtml;
-        const id = await this.pageExt.page.evaluate((tag, index) => {
-            return (document.body.querySelectorAll(tag))[index].getAttribute('id');
-        }, selectors.TAG, indexInHtml);
+        const id = await this.pageExt.getAttributeBySelector(selectors.TAG, 'id', indexInHtml);
         await this.initById(id);
 
         // close button
@@ -55,7 +50,6 @@ class ActivityAdditionItem extends ActivityItem {
             if(this.externalIdInput.elementHandle){
                 throw e;
             }
-            console.log("Activity has no external ID input element.");
         }
     }
 

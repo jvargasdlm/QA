@@ -21,7 +21,9 @@ class OptionSelector extends PageElement {
 
     constructor(pageExt){
         super(pageExt, 'md-select');
-        selectors = (pageExt.typeCode === pageExt.typeCodes.OTUS_STUDIO ? selectorsForOtusStudio : selectorsForOtus);
+        selectors = (pageExt.typeCode === pageExt.typeCodes.OTUS_STUDIO ?
+            selectorsForOtusStudio :
+            selectorsForOtus);
     }
 
     async _openMenu(){
@@ -40,18 +42,9 @@ class OptionSelector extends PageElement {
     }
 
     async selectOptionByIndex(optionIndex){
-        let tempIds = [];
-        try {
-            tempIds = await this._openMenuAndSetOptionTempIds();
-            await this.pageExt.waitForMilliseconds(500);
-            await this.pageExt.clickWithWait('#'+tempIds[optionIndex]);
-        }
-        catch(e){
-            await this.pageExt.hasElementWithLog(OPTION_TAG);
-            await this.pageExt.hasElementWithLog(MENU_OPTIONS_OPENED);
-            await this.pageExt.hasElementWithLog(selectors.OPTIONS_OPENED);//.
-            throw e;
-        }
+        let tempIds = await this._openMenuAndSetOptionTempIds();
+        await this.pageExt.waitForMilliseconds(500);
+        await this.pageExt.clickWithWait('#'+tempIds[optionIndex]);
     }
 
     async selectOptionBySelectors(selectAttributesSelector, optionValue, optionExtraAttrSelector=''){

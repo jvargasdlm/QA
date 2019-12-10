@@ -56,12 +56,7 @@ class PreviewPage extends PageOtus {
                     const checkbox = this.getNewCheckbox();
                     const checkBoxSelector = inputSelectors.multipleOption(answer.value);
                     checkbox.elementHandle = await this.page.$(checkBoxSelector);
-                    //!(await checkbox.isChecked())
-                    const isChecked = await this.page.evaluate((selector) => {
-                        const value = document.body.querySelector(selector).getAttribute("aria-checked");
-                        return (value === 'true');
-                    }, checkBoxSelector);
-                    if( !isChecked ){
+                    if( ! (await checkbox.isChecked()) ){
                         await checkbox.click();
                     }
                     break;
@@ -70,15 +65,13 @@ class PreviewPage extends PageOtus {
             }
 
             await this.waitForMilliseconds(500); // for NEXT BUTTON "to know" that input was filled
-            //await this.clickWithWait(selectors.commanderButtons.NEXT_QUESTION);
             await nextQuestionButtonElem.click();
         }
 
         try {
-            await this.waitForSelector(selectors.backCover.VISIBLE, 1000);
+            await this.waitForSelector(selectors.backCover.VISIBLE, true,1000);
         }
         catch (e) { // has a "thank you" question
-            //await this.clickWithWait(selectors.commanderButtons.NEXT_QUESTION);
             await nextQuestionButtonElem.click();
         }
 

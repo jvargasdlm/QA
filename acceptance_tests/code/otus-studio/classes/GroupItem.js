@@ -40,7 +40,7 @@ class GroupItem extends DynamicElement { // could be a button or checkbox
     }
 
     async updateAndGetState() {
-        this.id = await this.extractIdFromElemHandle(); // this.getAttribute('id');
+        this.id = await this.extractIdFromElemHandle(); //this.pageExt.getAttribute('id');
         this.state = _extractStateFromId(this.id);
         return this.state;
     }

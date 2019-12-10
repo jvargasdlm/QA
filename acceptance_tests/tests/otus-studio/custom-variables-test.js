@@ -11,7 +11,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async() => {
-    console.log('START TEST *******************');//.
+    console.log('START TEST *******************');
 });
 
 afterEach(async() => {
@@ -74,8 +74,6 @@ describe('Otus Studio Test', () => {
       let path = process.cwd() + process.env.DOWNLOADS_LOCAL_DIR_PATH + '/surveyTemplate.json';
       let requiredAttr = 'staticVariableList';
       let data = await FileHandler.readJsonAttribute(path, requiredAttr);
-      //console.log(requiredAttr+':', JSON.stringify(data, null, 4));
-      //console.log('VARIABLES:', JSON.stringify(VARIABLES, null, 4));
 
       assert.equal(VARIABLES.length, data.length);
 

@@ -44,11 +44,9 @@ class TemplatesPage extends PageOtusStudio {
     }
 
     async openMenu(){
-        //console.log('lets open templates menu');//.
         await this.clickOnMainMenuButton();
         await this.clickWithWait(selectors.button.MENU);
         await this.waitForSelector(selectors.input.SEARCH);
-        //console.log('\ttemplates menu opened');
     };
 
     async openTemplate(templateAcronym){
@@ -58,17 +56,13 @@ class TemplatesPage extends PageOtusStudio {
     }
 
     async clickOnAddTemplateAndWaitOptions(){
-        //await utils.pageHasElementSelector(selectors.button.ADD);
         await this.clickWithWait(selectors.button.ADD); // '+' button
-        await utils.wait.forMilliseconds(5000);//.
-
         let selector = _addOptionsSelector(false); // options must be visible
         await this.waitForSelector(selector);
     }
 
     async create(name, acronym){
         await this.clickOnAddTemplateAndWaitOptions();
-        await this.hasElementWithLog(selectors.button.NEW);//.
         await utils.wait.forMilliseconds(10000);// without does not work (why?)
 
         await this.clickWithWait(selectors.button.NEW); // 'Criar' button
@@ -83,7 +77,7 @@ class TemplatesPage extends PageOtusStudio {
         return await _initEditorPage(this.page);
     }
 
-    async uploadHeadFull(path){
+    async uploadHeadFull(){
         await this.clickOnAddTemplateAndWaitOptions();
         await this.clickWithWait(selectors.button.UPLOAD);
         await KeyboardHandler.sendTextAfterWait(); // wait OS file dialog load
@@ -97,7 +91,6 @@ class TemplatesPage extends PageOtusStudio {
             let path = template.path;
             await this.uploadHeadFull(path, template.acronym, check);
         }
-        //await this.waitForSelector(addOptionsSelector(true));
     }
 
     async uploadsHeadLess(filePaths) {
@@ -114,7 +107,6 @@ class TemplatesPage extends PageOtusStudio {
         while(elements.length !== 1 && attempt <= maxAttempts){
             elements = await this.page.$$(selectors.button.TEMPLATE);
             attempt++;
-            //console.log(`num elems = ${elements.length}, attempt = ${attempt-1}`);//.
         }
         await elements[0].click();
     };

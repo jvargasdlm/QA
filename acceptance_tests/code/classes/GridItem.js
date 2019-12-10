@@ -8,16 +8,10 @@ class GridItem extends PageElement {
 
     constructor(pageExt){
         super(pageExt, "md-grid-tile");
-        this.headerId = undefined;
     }
 
     static get headerTag(){
         return selectors.HEADER;
-    }
-
-    async initHeader(){
-        this.headerId = this.id + '_header';
-        await this.findChildrenToSetTempIds(selectors.HEADER, [this.headerId]);
     }
 
     async extractContent(){
@@ -27,8 +21,7 @@ class GridItem extends PageElement {
                 .forEach(word => {text = text.replace(word, '')});
             return text;
         }, '#'+this.id);
-        //console.log(text);
-        return text.split('\n').filter(w => w.length > 0); //todo
+        return text.split('\n').filter(w => w.length > 0);
     }
 
 }

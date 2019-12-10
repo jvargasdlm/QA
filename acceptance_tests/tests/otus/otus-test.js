@@ -81,7 +81,7 @@ describe('otus test', () => {
           await checkbox.clickByLabel(labels[i]);
       }
 
-      await pageOtus.waitForMilliseconds(2000);//.
+      await pageOtus.waitForMilliseconds(2000);
 
       for (let i = 0; i < labels.length; i++) {
           await checkbox.clickByLabel(labels[i]);

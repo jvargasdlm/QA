@@ -26,17 +26,15 @@ class Sidenav extends PageElement {
         this.side = side;
         this.index = index; // if exist more than one with same side
         this.id = `sidenav_${this.side}_${this.index}`;
-        //this.classAttrValue = undefined;
     }
 
     async init(){
-        await this.initBySelectorAndSetTempId(`${this.tagName}[${selectors.sideAttribute}=${this.side}`, this.id, this.index);
-        //this.classAttrValue = await this.getAttributeByDOM(selectors.keyAttr);
+        await this.initBySelectorAndSetTempId(
+            `${this.tagName}[${selectors.sideAttribute}=${this.side}`, this.id, this.index);
     }
 
     async isOpen(){
-        //const classAttrValue = this.getAttribute(selectors.keyAttr);
-        const classAttrValue = this.getAttributeByDOM(selectors.keyAttr);
+        const classAttrValue = this.getAttribute(selectors.keyAttr);
         return (!classAttrValue.includes(selectors.closedAttrValue.key));
     }
 
@@ -47,8 +45,9 @@ class Sidenav extends PageElement {
     }
 
     async waitForClose(){
-        await this.pageExt.page.waitForFunction(
-            `document.getElementById(${this.id}).getAttribute(${selectors.keyAttr}).includes(${selectors.closedAttrValue.key})`);
+        await this.pageExt.page.waitForFunction((id, selectors) => {
+                !document.getElementById(id).getAttribute(selectors.keyAttr).includes(selectors.closedAttrValue.key)},
+            {}, this.id, selectors);
     }
 
 }

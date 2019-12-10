@@ -7,10 +7,6 @@ class InputField extends PageElement {
         this.content = '';
     }
 
-    async initFromList(selector, index){
-        this.elementHandle = (await this.pageExt.page.$$(selector))[index];
-    }
-
     async _initMyOwnAttributes(){
         this.content = '';
     }
@@ -20,10 +16,11 @@ class InputField extends PageElement {
         this.content = text;
     }
 
-    async cleanText(){
+    async clear(){
         await this.pageExt.page.evaluate(function(selector) {
             document.querySelector(selector).value = ''
-        }, this.selector);
+        }, '#'+this.id);
+        this.content = '';
     }
 
 }

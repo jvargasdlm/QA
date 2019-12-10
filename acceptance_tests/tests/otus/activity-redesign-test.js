@@ -16,7 +16,6 @@ beforeEach(async () => {
 afterEach(async () => {
     errorLogger.advanceToNextSpec();
     await activitiesPage.refreshAndWaitLoad();
-    //await pageOtus.waitForMilliseconds(5000);//.
 });
 
 afterAll(async () => {
@@ -263,7 +262,6 @@ suiteArray = [
                 if(!isSelected){
                     await activityItem.extractData();
                     notSelectedAcronyms.push({acronym: activityItem.acronym, index: i});
-                    console.log({acronym: activityItem.acronym, index: i});//.
                 }
             }
 

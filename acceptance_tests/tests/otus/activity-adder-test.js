@@ -203,8 +203,8 @@ async function checkAddition(addedActivitiesData){
                 conflictData.push(data);
             }
         }
-        failMessage = `At least one of the added activities does NOT appear on the activity page with the same data:\n`
-            + JSON.stringify(conflictData);
+        failMessage = `There are ${conflictData.length} added activities does NOT appear on the activity page with the same data:\n`
+            + JSON.stringify(conflictData, null, 2);
         expect(conflictData).toBeArrayOfSize(0);
     }
     catch (e) {
@@ -330,34 +330,27 @@ suiteArray = [
         itemTypeToPageTypeDict[ActivityAdditionItem.typeEnum.PAPER] = enums.type.PAPER;
 
         test('2.3a Add only 1 block of PAPER type', async() => {
-            let date = null;
-            try {
-                await checkActivityItemsIsClear();
-                await activitiyAdderPage.switchTypeToPaper();
-                await activitiyAdderPage.addActivityBlock([blockName], ActivityAdditionItemPaper);
+            await checkActivityItemsIsClear();
+            await activitiyAdderPage.switchTypeToPaper();
+            await activitiyAdderPage.addActivityBlock([blockName], ActivityAdditionItemPaper);
 
-                let activitiesDataToAdd = [], i = 0;
-                for (let activityAddItem of activitiyAdderPage.activityAddItems) {
-                    await activityAddItem.init(i, i);
-                    date = new Date(2019, 3, 30);
-                    date.setDate(date.getDate() + i++);
-                    let data = await activityAddItem.extractData();
-                    data.realizationDate = date;
-                    data.type = itemTypeToPageTypeDict[data.type];
-                    activitiesDataToAdd.push(data);
-                    await activityAddItem.insertPaperExclusiveData(date, "Diogo Ferreira");
-                    if(activityAddItem.requireExternalId){
-                        await activityAddItem.insertExternalId(idExternalForCSJ);
-                    }
+            let activitiesDataToAdd = [], i = 0;
+            for (let activityAddItem of activitiyAdderPage.activityAddItems) {
+                await activityAddItem.init(i, i);
+                let date = new Date(2019, 3, 30);
+                date.setDate(date.getDate() + i++);
+                let data = await activityAddItem.extractData();
+                data.realizationDate = date;
+                data.type = itemTypeToPageTypeDict[data.type];
+                activitiesDataToAdd.push(data);
+                await activityAddItem.insertPaperExclusiveData(date, "Diogo Ferreira");
+                if(activityAddItem.requireExternalId){
+                    await activityAddItem.insertExternalId(idExternalForCSJ);
                 }
+            }
 
-                await activitiyAdderPage.saveChanges();
-                await checkAddition(activitiesDataToAdd);
-            }
-            catch (e) {//.
-                console.log(`*${date}*\n${e}`);
-                throw e;
-            }
+            await activitiyAdderPage.saveChanges();
+            await checkAddition(activitiesDataToAdd);
         });
 
         async function saveBlocksAdditionAndCheck(){
@@ -474,7 +467,7 @@ suiteArray = [
             activityData.RETC.online,
         ];
 
-        test('2.6a-2 Missing external ID in one online activity (at first position)', async() => {
+        test('2.6a-1 Missing external ID in one online activity (at first position)', async() => {
             const activitiesDataToAddReverse = activitiesDataToAddForOnlineTarget.reverse().slice();
             activitiesDataToAddForOnlineTarget.reverse();
             const n = activitiesDataToAddForOnlineTarget.length;
@@ -482,7 +475,7 @@ suiteArray = [
             await clickOnSaveButtonAndCheckDialog();
         });
 
-        test('2.6a-1 Missing external ID in one online activity (at last position)', async() => {
+        test('2.6a-2 Missing external ID in one online activity (at last position)', async() => {
             await fillActivitiesMissingSomething(activitiesDataToAddForOnlineTarget,[], [0]);
             await clickOnSaveButtonAndCheckDialog();
         });

@@ -56,7 +56,6 @@ class ActivityItem extends GridItem {
 
     async init(index){
         await this.initById(this.getId(index));
-        //await super.initHeader();
     }
 
     async extractData() {
@@ -77,7 +76,7 @@ class ActivityItem extends GridItem {
     }
 
     async isSelected(){
-        const backGroundColor = await this.getAttributeByDOM(ActivityItem.headerTag, "style");
+        const backGroundColor = await this.getAttribute("style");
         return (backGroundColor && backGroundColor.length > 0);
     }
 

@@ -10,16 +10,8 @@ class ActivityAdditionItemPaper extends ActivityAdditionItem {
 
     async init(indexInHtml, childrenIndex){
         await super.init(indexInHtml);
-        let local = 'realizationDate';//.
-        try {
-            await this.realizationDate.init(childrenIndex);
-            local = 'inspectorAutoComplete';//.
-            await this.inspectorAutoComplete.initByTag(childrenIndex+2, childrenIndex+2); //+2 coz already exist 2 autocompletes
-        }
-        catch (e) {
-            console.log(local+'\n', e);
-            throw e;
-        }
+        await this.realizationDate.initByParentElement(this.elementHandle, "[aria-label='Data de Realização']");
+        await this.inspectorAutoComplete.initByTag(childrenIndex+2, childrenIndex+2); //+2 coz already exist 2 autocompletes
     }
 
     async insertRealizationData(date){

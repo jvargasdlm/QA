@@ -48,8 +48,6 @@ describe('Move Question', () => {
         for (let i = 0; i < questionTemplateIdOrder.length; i++) {
             expect(questions[i].templateId).toBe(acronym+`${questionTemplateIdOrder[i]}`);
         }
-        //console.log('ok');
-        //await utils.wait.forSeconds(2);
     }
 
     it('Move Questions', async() => {

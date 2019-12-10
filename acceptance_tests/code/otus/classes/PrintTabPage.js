@@ -15,10 +15,7 @@ class PrintTabPage extends PageExtended {
 
     async savePdf(filenameNoExtension){
         const targets = this.page.browser().targets();
-        console.log('PrintTabPage:', targets.length, 'targets');//.
-        //targets.forEach(t => console.log(t._targetInfo));//.
 
-        //const printTarget = (targets.filter(t => t.type() === 'other'))[0];
         const printTarget = targets[targets.length-1];
         printTarget._targetInfo.type = 'page';
         this.page = await printTarget.page();

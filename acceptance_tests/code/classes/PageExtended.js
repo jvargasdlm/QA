@@ -4,7 +4,7 @@ const utils         = require('../utils');
 const FileHandler   = require('../handlers/FileHandler');
 const ErrorLogger   = require('./ErrorLogger');
 // Page elements
-const AutoCompleteSearch = require('./AutoCompleteSearch');
+const AutoCompleteSearch     = require('./AutoCompleteSearch');
 const Button                 = require('./Button');
 const Calendar               = require('./Calendar');
 const Checkbox               = require('./Checkbox');
@@ -39,19 +39,17 @@ class PageExtended {
         this.typeCode = -1;
     }
 
-    // --------------------------------------------------------
-    // env variable dependencies
+    /***************************************************
+     * env variable dependencies
+     */
 
     get isBigScreenHideXs(){
         return IS_HIDE_XS;
     }
 
-    // ----------------------------------------------------------
-    // Getters
-
-    get amIAOtusPage(){
-        return (this.typeCode === typeCodes.OTUS);
-    }
+    /***************************************************
+     * Getters
+     */
 
     get typeCodeName(){
         return Object.keys(typeCodes)[this.typeCode];
@@ -117,7 +115,7 @@ class PageExtended {
         return new Switch(this);
     }
 
-    /* ********************************************************************
+    /****************************************************
      * Page main functions
      */
 
@@ -152,11 +150,11 @@ class PageExtended {
         const path = process.cwd() + process.env.SCREENSHOT_LOCAL_DIR_PATH + '/' + filename;
         await this.page.screenshot({ path: path, fullPage: true });
         if(LOG_NAVIGATION_ACTIONS){
-            console.log('Screenshot taked and saved at', filename);//.
+            console.log('Screenshot taked and saved at', filename);
         }
     }
 
-    /* ********************************************************************
+    /****************************************************
      * Wait functions
      */
     async waitForSelector(selector, log=true, timeout=WAIT_FOR_SELECTOR_TIMEOUT){
@@ -165,19 +163,17 @@ class PageExtended {
         }
         catch (e) {
             if(log) {
-                await this.hasElementWithLog(selector);//.
+                await this.hasElementWithLog(selector);
             }
             throw e;
         }
     }
 
     async waitForSelectorVisible(selector){
-        //await this.pageHasElementSelector(selector);//.
         return await this.page.waitForSelector(selector, {hidden: false, timeout: WAIT_FOR_SELECTOR_TIMEOUT});
     }
 
     async waitForSelectorHidden(selector){
-        //await this.pageHasElementSelector(selector);//.
         return await this.page.waitForSelector(selector, {hidden: true, timeout: WAIT_FOR_SELECTOR_TIMEOUT});
     }
 
@@ -193,7 +189,7 @@ class PageExtended {
         await utils.wait.forMilliseconds(milliseconds);
     }
 
-    /* ********************************************************************
+    /****************************************************
      * Type text
      */
 
@@ -202,25 +198,19 @@ class PageExtended {
             let element = await this.page.waitForSelector(selector);
             await element.type(text);
             if(LOG_NAVIGATION_ACTIONS) {
-                console.log('type on ' + selector);//.
+                console.log('type on ' + selector);
             }
         }
         catch (e) {
             if(LOG_NAVIGATION_ACTIONS) {
-                console.log('ERROR at type on ' + selector);//.
-                await this.hasElementWithLog(selector);//.
+                console.log('ERROR at type on ' + selector);
+                await this.hasElementWithLog(selector);
             }
             throw e;
         }
     }
 
-    async clearInput(selector){
-        await this.page.evaluate(function(selector) {
-            document.querySelector(selector).value = ''
-        }, selector);
-    }
-
-    /* ********************************************************************
+    /****************************************************
      * Clicks
      */
 
@@ -229,14 +219,14 @@ class PageExtended {
             let element = await this.page.waitForSelector(selector, {timeout: WAIT_FOR_SELECTOR_TIMEOUT});
             await element.click();
             if(LOG_NAVIGATION_ACTIONS) {
-                console.log('clicked on ' + selector);//.
+                console.log('clicked on ' + selector);
             }
         }
         catch (e) {
-            //if(LOG_NAVIGATION_ACTIONS) {
-                console.log('ERROR at click on ' + selector);//.
-                await this.hasElementWithLog(selector);//.
-            //}
+            if(LOG_NAVIGATION_ACTIONS) {
+                console.log('ERROR at click on ' + selector);
+                await this.hasElementWithLog(selector);
+            }
             throw e;
         }
     };
@@ -249,7 +239,7 @@ class PageExtended {
         await this.page.mouse.click(0,0);
     }
 
-    /* ********************************************************************
+    /****************************************************
      * Query selector
      */
 
@@ -258,7 +248,6 @@ class PageExtended {
     }
 
     async findChildrenToSetTempIdsFromInnerText(parentSelector, childrenTag){
-        //this.enableConsoleLog();//.
         return await this.page.evaluate((parentSelector, childrenTag) => {
             let parentNode = document.body.querySelector(parentSelector);
             let tempIdArray = [];
@@ -268,14 +257,11 @@ class PageExtended {
                 if (!isNodeEmpty && currentNode.tagName.toLowerCase() === childrenTag) {
                     let id = currentNode.getAttribute('id');
                     if(!id){
-                        id = currentNode.innerText.replace('\n', '');
-                        //console.log(currentNode.outerHTML, `\nset id: innerText = *${id}*`);//.
-                        id += `_${tempIdArray.length}`;
+                        id = currentNode.innerText.replace('\n', '') +
+                            `_${tempIdArray.length}`;
                         currentNode.setAttribute('id', id);
                     }
                     tempIdArray.push(id);
-
-                    //console.log(typeof currentNode, "after set id: id =", currentNode.getAttribute("id"));//.
                 }
             }
 
@@ -324,29 +310,60 @@ class PageExtended {
         return await this.findChildrenToSetTempIds(parentSelector, "button", tempIdArr);
     }
 
-    async getInnerText(selector){
+    async getInnerTextBySelector(selector, index=0){
         await this.waitForSelector(selector);
         try {
-            return await this.page.evaluate((selector) => {
-                let element = document.querySelector(selector);
+            return await this.page.evaluate((selector, index) => {
+                let element = (document.querySelectorAll(selector))[index];
                 return element.innerText;
-            }, selector);
+            }, selector, index);
         }
         catch (e) {
-            console.log('getInnerText: selector =', selector);
-            await this.hasElementWithLog(selector);
+            throw `PageExtended: innerText not found for selector '${selector} (page has selector? ${await this.hasElement(selector)})'\n${e}`;
         }
     }
 
-    /* ********************************************************************
+    async getAttributeBySelector(selector, attributeName, index=0){
+        await this.waitForSelector(selector);
+        try {
+            return await this.page.evaluate((selector, attributeName, index) => {
+                let element = (document.querySelectorAll(selector))[index];
+                return element.getAttribute(attributeName);
+            }, selector, attributeName, index);
+        }
+        catch (e) {
+            throw `PageExtended: getAttribute error for selector '${selector} (page has selector? ${await this.hasElement(selector)})'\n${e}`;
+        }
+    }
+
+    async setAttributeBySelector(selector, attributeName, attributeValueAsString, index=0){
+        try {
+            await this.page.evaluate((selector, attributeName, attributeValueAsString, index) => {
+                const element = (document.body.querySelectorAll(selector))[index];
+                element.setAttribute(attributeName, attributeValueAsString);
+            }, selector, attributeName, attributeValueAsString, index);
+        }
+        catch (e) {
+            throw `PageExtended: setAttribute error for selector '${selector} (page has selector? ${await this.hasElement(selector)}'\n${e}`;
+        }
+    }
+
+    async setHiddenAttributeValue(selector, boolValue){
+        await this.setAttributeBySelector(selector, 'aria-hidden', boolValue.toString());
+    }
+
+    /****************************************************
      * Find in list
      */
 
     async getElementFromList(selector, index){
         await this.waitForSelector(selector);
         let elemList = await this.page.$$(selector);
-        //console.log(`getElementFromList (${elemList.length}): selector = ${selector}, element = \n`, elemList[index]._remoteObject);//.
-        return elemList[index];
+        let element =  elemList[index];
+        if(!element){
+            throw `Element ${index} of list '${selector}' was not found (list contains ${elemList.length} elements)`;
+        }
+        return element;
     }
 
     async _getElementFromListByAttribute(selector, index){
@@ -384,22 +401,9 @@ class PageExtended {
         await element.click();
     }
 
-    async setHiddenAttributeValue(selector, boolValue){
-        await this.page.$eval(selector, (element, boolValue) => {
-            if(element.getAttribute('aria-hidden')){
-                element.setAttribute('aria-hidden', boolValue.toString());
-            }
-            //return element.outerHTML;
-        }, boolValue);
-    }
-
-    /* ********************************************************************
+    /****************************************************
      * Checks
      */
-
-    async countElementsBySelector(selector){
-        return (await this.page.$$(selector)).length;
-    }
 
     async hasElement(selector){
         try {
@@ -411,9 +415,13 @@ class PageExtended {
         }
     }
 
-    /* ********************************************************************
-     * Debugs
+    /****************************************************
+     * Debug
      */
+
+    enableConsoleLog(){
+        this.page.on('console', consoleObj => console.log(consoleObj.text()));
+    }
 
     async hasElementWithLog(selector, index=-1){
         try {
@@ -429,10 +437,6 @@ class PageExtended {
         catch (e) {
             console.log(e);
         }
-    }
-
-    enableConsoleLog(){
-        this.page.on('console', consoleObj => console.log(consoleObj.text()));
     }
 
     async saveHTML(filenameNoExtension){

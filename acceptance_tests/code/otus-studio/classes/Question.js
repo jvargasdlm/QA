@@ -83,7 +83,6 @@ class Question extends PageElement {
     // Initialization
 
     async init() {
-        //this.editionPageTab.enableConsoleLog();//.
         await this.pageExt.waitForSelector(selectors.QUESTION_ITEM);
         let questionItemElemArray = await this.pageExt.page.$$(selectors.QUESTION_ITEM);
         await this.initFromElementHandle(questionItemElemArray[this.number - 1]);
@@ -208,7 +207,6 @@ class Question extends PageElement {
     async clickOnGroupItemButton() {
         await this.groupItem.click();
         let oldGroupItemId = this.groupItem.id;
-        await this.pageExt.waitForMilliseconds(5000);//.
         await this.pageExt.waitForSelectorHidden('#'+oldGroupItemId);
         await this.initGroupItem();
     }

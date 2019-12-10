@@ -15,22 +15,6 @@ const selectors = {
 };
 
 // ************************************************************
-// Private Functions
-
-async function _clickOnTab(editorPage, tabIndex, newActivePageTab) {
-    if(editorPage.activeTab == tabIndex){
-        console.log('click on active tab!');
-        return;
-    }
-    await (editorPage.tabs[tabIndex]).click();
-    await editorPage.waitForMilliseconds(5000);
-    await newActivePageTab.init();
-    editorPage.activeTabPage = newActivePageTab;
-
-    //console.log('finish load tab', tabIndex);//.
-}
-
-// ************************************************************
 
 class EditorPage extends PageOtusStudio {
 
@@ -74,6 +58,20 @@ class EditorPage extends PageOtusStudio {
         await this.pageExt.waitForSelector('canvas');
         await this.pageExt.page.screenshot(path);
     }
+}
+
+// ************************************************************
+// Private Functions
+
+async function _clickOnTab(editorPage, tabIndex, newActivePageTab) {
+    if(editorPage.activeTab === tabIndex){
+        console.log('click on active tab!');
+        return;
+    }
+    await (editorPage.tabs[tabIndex]).click();
+    await editorPage.waitForMilliseconds(5000);
+    await newActivePageTab.init();
+    editorPage.activeTabPage = newActivePageTab;
 }
 
 module.exports = EditorPage;

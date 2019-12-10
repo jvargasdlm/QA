@@ -31,7 +31,6 @@ class Dialog extends DialogParent {
     async waitForOpen() {
         this.actionButtonIds = await super.waitForOpenAndSetIds();
         let numButtons = this.actionButtonIds.length;
-        //console.log(allActionButtonIds);//.
 
         this.okButtonIndex = numButtons-2; this.cancelButtonIndex = numButtons-1;
         const lastId = this.actionButtonIds[numButtons-1];
