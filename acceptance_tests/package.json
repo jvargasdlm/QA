@@ -22,7 +22,8 @@
         "node-key-sender": "^1.0.11",
         "path": "^0.12.7",
         "puppeteer": "^1.19.0",
-        "query-selector-shadow-dom": "^0.3.4"
+        "query-selector-shadow-dom": "^0.3.4",
+        "readline-sync": "^1.4.10"
     },
     "devDependencies": {
         "babel-jest": "^24.8.0",
