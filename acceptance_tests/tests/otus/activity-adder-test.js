@@ -436,7 +436,7 @@ suiteArray = [
 
     describe('Scenario #2.5: Cancel button reset all', () => {
 
-        test('2.5 test', async() => {
+        test('2.5 Press cancel button', async() => {
             const activitiesDataToAdd = [
                 activityData.CSJ.paper,
                 activityData.CSJ.online,
