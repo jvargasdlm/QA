@@ -1,14 +1,14 @@
 {
-    "name": "puppeteer-jest",
+    "name": "otus-acceptance-tests",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "jest",
-        "headless": "SHOW_BROWSER=false npm test -- --passWithNoTests --detectOpenHandles --verbose",
-        "show": "SHOW_BROWSER=true npm test -- --passWithNoTests --detectOpenHandles --verbose"
+        "test": "jest --passWithNoTests --detectOpenHandles --verbose",
+        "headless": "SHOW_BROWSER=false npm test",
+        "show": "SHOW_BROWSER=true npm test"
     },
-    "author": "",
+    "author": "Flávia Pereira",
     "license": "ISC",
     "dependencies": {
         "angular": "^1.7.8",
