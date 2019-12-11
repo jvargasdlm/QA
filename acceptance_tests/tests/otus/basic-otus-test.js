@@ -30,9 +30,9 @@ const OtusMainPage = require('../../code/otus/classes/OtusMainPage');
 
 suiteArray = [
 
-describe('otus test', () => {
+describe('Basic testes in Otus', () => {
 
-  test('select participant lab', async() => {
+  xtest('Select participant lab', async() => {
       await pageOtus.clickWithWait(selectors.homePage.EXIBIR_TODOS_BUTTON);
       await pageOtus.waitForMilliseconds(500);
       await pageOtus.clickOnLastElementOfList(selectors.button.VER_PARTICIPANTE, 0);
@@ -44,7 +44,7 @@ describe('otus test', () => {
 
   test('Add participant', async() => {
 
-      await pageOtus.gotoUrl('http://localhost:3000/#/participants-manager/participant-create');
+      await pageOtus.gotoUrl('http://localhost:51001/otus/#/participants-manager/participant-create');
 
       await pageOtus.typeWithWait('#name', 'Teste da Silva');
 
@@ -57,7 +57,8 @@ describe('otus test', () => {
       await optionSelectorCenter.selectOption('RS');
 
       let calendar = pageOtus.getNewCalendar();
-      await calendar.openAndSelectDate('Data de Nascimento', -3, -4, 25);
+      await calendar.init();
+      await calendar.openAndSelectDate(new Date(1995, 8, 15));
 
       await pageOtus.clickOnButtonByAttribute('ng-click', '$ctrl.saveParticipant()');
       const dialog = pageOtus.getNewDialog();
@@ -67,7 +68,7 @@ describe('otus test', () => {
       await pageOtus.getNewDialogWarning().clickOnOkButton();
   });
 
-  xtest('test checkbox', async() => {
+  xtest('Checkbox', async() => {
 
       const otusMainPage = new OtusMainPage(pageOtus.page);
       await otusMainPage.clickWithWait(otusMainPage.getSelectors().button.ATIVIDADES_CENTRO);
@@ -77,14 +78,14 @@ describe('otus test', () => {
 
       let checkbox = pageOtus.getNewCheckbox();
 
-      for (let i = 0; i < labels.length; i++) {
-          await checkbox.clickByLabel(labels[i]);
+      for(let label of labels){
+          await checkbox.clickByLabel(label);
       }
 
       await pageOtus.waitForMilliseconds(2000);
 
-      for (let i = 0; i < labels.length; i++) {
-          await checkbox.clickByLabel(labels[i]);
+      for(let label of labels){
+          await checkbox.clickByLabel(label);
       }
   });
 
