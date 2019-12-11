@@ -19,10 +19,6 @@ class Calendar extends PageElement {
 
     async _initMyOwnAttributes(){
         this.input.elementHandle = await this.elementHandle.$(this.input.tagName+"[id='datetime']");
-
-        if(this.input.elementHandle===undefined || this.input.elementHandle===null){//.
-            console.log("Calendar.initByAttributeSelector: input ", this.input.elementHandle);
-        }
     }
 
     async _open(){
@@ -62,7 +58,9 @@ class Calendar extends PageElement {
     async _selectDay(day){
         let actualMonthName = await this.pageExt.page.evaluate(() =>
             document.querySelector("div[class='dtp-actual-month ng-binding flex']").innerText);
-        const MONTHS = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+        const MONTHS = (process.env.SHOW_BROWSER==='true' ?
+            ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'] :
+            ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']);
         let month = MONTHS.indexOf(actualMonthName) + 1;
 
         let year = await this.pageExt.page.evaluate(() =>
