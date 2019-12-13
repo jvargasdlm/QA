@@ -1,0 +1,31 @@
+    var checkbox = await pageOtus.page.$$("md-checkbox[ng-checked='row.selected']")/*seleciona todos checkbox*/
+        await checkbox[15].click();/*escolhe o 15º checkbox*/
+        await pageOtus.waitForMilliseconds(3000)
+        await pageOtus.clickWithWait("[ng-click='$ctrl.fillSelectedActivity()']")/*clica em preencher a atividade*/
+        await pageOtus.waitForMilliseconds(2000)
+        const answersArr = [];
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.singleOption, 'Sim'));
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.singleOption, 'Sim'));
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.singleOption, 'Sim'));
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.singleOption, 'Sim'));
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.singleOption, 'Sim'));
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.singleOption, 'Sim'));
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.time, '10:10'));
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.time, '15:10'));
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.multipleOption, 'Outra'));
+        answersArr.push(new ActivityQuestionAnswer(ActivityQuestionAnswer.dataTypes.text, 'Veia de difícil acesso'));
+        await pageOtus.waitForMilliseconds(3000)  
+
+
+
+
+        Fill
+        const previewPage = new PreviewPage(pageOtus.page);
+        await previewPage.fillActivityQuestions(answersArr);
+
+        // estamos de volta na pagina de atividades
+
+        let estahFinalizado = await verSeEstahFinalizado();
+        expect(estahFinalizado).toBe(true);
+        
+        
