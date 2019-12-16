@@ -40,7 +40,6 @@ class Calendar extends PageElement {
             await this.pageExt.page.click(selector);
             await this.pageExt.waitForMilliseconds(millisecondsToWait);
         }
-        this.currDate.year = year;
     }
 
     async _selectMonth(month, millisecondsToWait=10){
@@ -52,7 +51,6 @@ class Calendar extends PageElement {
             await this.pageExt.page.click(selector);
             await this.pageExt.waitForMilliseconds(millisecondsToWait);
         }
-        this.currDate.month = month-1;
     }
 
     async _selectDay(day){
@@ -70,7 +68,6 @@ class Calendar extends PageElement {
         let dayStr = day.toString().padStart(2, '0');
 
         await this.pageExt.clickWithWait(`#date-${year}-${monthStr}-${dayStr}`);
-        this.currDate.date = day;
     }
 
     async openAndSelectDate(date) {
@@ -80,6 +77,7 @@ class Calendar extends PageElement {
             await this._selectMonth(date.getMonth());
             await this._selectDay(date.getDate());
             await this.dialog.clickOnOkButton();
+            this.currDate = date;
         }
         catch (e) {
             console.log(`*${date}*\n`, e);
