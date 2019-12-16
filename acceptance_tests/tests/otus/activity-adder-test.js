@@ -49,7 +49,9 @@ async function openParticipantActivities(){
 }
 
 async function goToActivityPage(){
-    await pageOtus.gotoUrlAndWaitLoad(activityPageUrl);
+    if(pageOtus.page.url() !== activityPageUrl) {
+        await pageOtus.gotoUrlAndWaitLoad(activityPageUrl);
+    }
     await pageOtus.refreshAndWaitLoad();
 }
 
