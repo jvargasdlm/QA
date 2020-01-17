@@ -63,19 +63,8 @@ suiteArray = [
             await pageOtus.waitForMilliseconds(3000);
             await pageOtus.clickWithWait("button[aria-label='Gerenciador de Pendência']");
             await pageOtus.waitForMilliseconds(3000);
-            await pageOtus.clickWithWait("button[class='md-datepicker-button md-icon-button md-button md-ink-ripple']");
+            await pageOtus.clickWithWait("button[ng-click='vm.deleteUserActivityPendency()']");
             await pageOtus.waitForMilliseconds(3000);
-            await pageOtus.clickWithWait("td[aria-label='Thursday January 23 2020']");
-            await pageOtus.waitForMilliseconds(3000);
-            await pageOtus.typeWithWait("input[aria-label='Responsável (a)']", "Allister Ramos");
-            await pageOtus.clickWithWait("span[class='item-title']");
-            await pageOtus.waitForMilliseconds(3000);
-            await pageOtus.clickWithWait("button[ng-click='vm.createUserActivityPendency()']");
-            await pageOtus.waitForMilliseconds(3000);
-
-
-
-
 
 
         });
@@ -83,5 +72,4 @@ suiteArray = [
     })
 
 ];
-
 
