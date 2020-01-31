@@ -65,7 +65,7 @@ suiteArray = [
             await pageOtus.waitForMilliseconds(3000);
             await pageOtus.clickWithWait("button[class='md-datepicker-button md-icon-button md-button md-ink-ripple']");
             await pageOtus.waitForMilliseconds(3000);
-            await pageOtus.clickWithWait("td[aria-label='Friday January 24 2020']");
+            await pageOtus.clickWithWait("td[aria-label='Friday January 31 2020']");
             await pageOtus.waitForMilliseconds(3000);
             await pageOtus.clickWithWait("button[ng-click='$mdAutocompleteCtrl.clear($event)']");
             await pageOtus.waitForMilliseconds(2000);

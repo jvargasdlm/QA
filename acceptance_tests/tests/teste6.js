@@ -52,20 +52,20 @@ suiteArray = [
             await pageOtus.clickWithWait("button[ng-if='attrs.showParticipantsButton']"); //exibe os todos
             await pageOtus.waitLoad();
             var button = await pageOtus.page.$$("button[aria-label='Ver participante']"); //seleciona todos participante
-            await button[0].click();/*escolhe o primeiro participante*/
+            await button[3].click();/*escolhe o primeiro participante*/
             await pageOtus.waitForMilliseconds(3000);
             await pageOtus.clickWithWait("button[ng-click='$ctrl.launchSidenav()']"); //seleciona otus projeto
             await pageOtus.waitForMilliseconds(3000);
             await pageOtus.clickWithWait("button[ng-click='$ctrl.loadParticipantActivities()']");//seleciona atividades
             await pageOtus.waitForMilliseconds(3000);
             var mdGrideTiler = await pageOtus.page.$$("md-grid-tile-header[ng-style='activity.actions.colorGrid']"); //seleciona tadas as atividades
-            await mdGrideTiler[1].click();/*escolhe a segunda atividade*/
+            await mdGrideTiler[0].click();/*escolhe a segunda atividade*/
             await pageOtus.waitForMilliseconds(3000);
             await pageOtus.clickWithWait("button[aria-label='Gerenciador de Pendência']");
             await pageOtus.waitForMilliseconds(3000);
             await pageOtus.clickWithWait("button[class='md-datepicker-button md-icon-button md-button md-ink-ripple']");
             await pageOtus.waitForMilliseconds(3000);
-            await pageOtus.clickWithWait("td[aria-label='Thursday January 23 2020']");
+            await pageOtus.clickWithWait("td[aria-label='Friday January 31 2020']"); // define a data de vencimento da pendencia
             await pageOtus.waitForMilliseconds(3000);
             await pageOtus.typeWithWait("input[aria-label='Responsável (a)']", "Allister Ramos");
             await pageOtus.clickWithWait("span[class='item-title']");

@@ -41,13 +41,13 @@ suiteArray = [
             expect(x).toBe(1);
         });
 
-        xtest('Test expect FAIL', async () => {
+        test('Test expect FAIL', async () => {
             let x = 1;
             expect(x).toBe(0);
         });
 
 
-        test('Test 1', async () => {
+        xtest('Test 1', async () => {
             await pageOtus.waitForMilliseconds(3000);
             await pageOtus.clickWithWait("button[ng-click='$ctrl.loadActivityViewer(item.activityInfo.recruitmentNumber, item.activityId)']");
             await pageOtus.waitForMilliseconds(3000);

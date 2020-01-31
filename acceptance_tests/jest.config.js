@@ -2,7 +2,7 @@ module.exports = {
     moduleFileExtensions: ['js', 'jsx', 'json', 'vue'],
     testMatch: [
       // '**/tests/otus/activity-redesign-test.js',
-      '**/tests/pendencyList1.js'
+      '**/tests/teste6.js'
     ],
     transformIgnorePatterns: ['<rootDir>/node_modules/'],
     transform: {
