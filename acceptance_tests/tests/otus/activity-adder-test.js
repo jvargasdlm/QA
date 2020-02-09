@@ -5,11 +5,11 @@ let pageOtus, selectors;                        // only for otus tests
 let activitiyAdderPage, activitiesPage;
 let activitiesDataBefore = {};
 
-beforeAll(async () => {
-    [browser, pageOtus, errorLogger, selectors] = await lib.doBeforeAll(suiteArray);
-    lib.setTestTimeoutSeconds(90);
-    await openParticipantActivities();
-});
+//beforeAll(async () => {
+//    [browser, pageOtus, errorLogger, selectors] = await lib.doBeforeAll(suiteArray);
+//    lib.setTestTimeoutSeconds(90);
+//    await openParticipantActivities();
+//});
 
 beforeEach(async () => {
     console.log('RUNNING TEST\n', errorLogger.currSpecName);
@@ -290,7 +290,7 @@ const activityData = {
 
 suiteArray = [
 
-    describe('Scenario #2.2: Add 1 by 1', () => {
+    xdescribe('Scenario #2.2: Add 1 by 1', () => {
 
         test('2.2a Only one of paper type', async() => {
             const activitiesDataToAdd = [ activityData.CSJ.paper ];
@@ -321,7 +321,7 @@ suiteArray = [
 
     }),
 
-    describe('Scenario #2.3: Add activity blocks', () => {
+    xdescribe('Scenario #2.3: Add activity blocks', () => {
 
         const blockName = 'Laboratório',
             blockName2 = 'Desfechos';
@@ -401,7 +401,7 @@ suiteArray = [
 
     }),
 
-    describe('Scenario #2.4: Delete one activity from temporary array', () => {
+    xdescribe('Scenario #2.4: Delete one activity from temporary array', () => {
 
         const activitiesDataToAdd = [
             activityData.CSJ.paper,
@@ -436,7 +436,7 @@ suiteArray = [
 
     }),
 
-    describe('Scenario #2.5: Cancel button reset all', () => {
+    xdescribe('Scenario #2.5: Cancel button reset all', () => {
 
         test('2.5 Press cancel button', async() => {
             const activitiesDataToAdd = [
@@ -477,13 +477,13 @@ suiteArray = [
             await clickOnSaveButtonAndCheckDialog();
         });
 
-        test('2.6a-2 Missing external ID in one online activity (at last position)', async() => {
+        xtest('2.6a-2 Missing external ID in one online activity (at last position)', async() => {
             await fillActivitiesMissingSomething(activitiesDataToAddForOnlineTarget,[], [0]);
             await clickOnSaveButtonAndCheckDialog();
         });
 
 
-        test('2.6a-3 Missing external ID in one online activity (at middle position)', async() => {
+        xtest('2.6a-3 Missing external ID in one online activity (at middle position)', async() => {
             const activitiesDataToAdd = [
                 activityData.ACTA.paper,
                 activityData.CSJ.online, // online target
@@ -520,17 +520,17 @@ suiteArray = [
          * 2.6b Missing external ID in one paper activity
          */
 
-        test('2.6b-1 Missing external ID in a paper activity (at first position)', async() => {
+        xtest('2.6b-1 Missing external ID in a paper activity (at first position)', async() => {
             await fillActivitiesMissingSomething(getReverseActivitiesDataToAdd(),[], [n-1]);
             await clickOnSaveButtonAndCheckDialog();
         });
 
-        test('2.6b-2 Missing external ID in a paper activity (at last position)', async() => {
+        xtest('2.6b-2 Missing external ID in a paper activity (at last position)', async() => {
             await fillActivitiesMissingSomething(activitiesDataToAdd,[], [0]);
             await clickOnSaveButtonAndCheckDialog();
         });
 
-        test('2.6b-3 Missing external ID in a paper activity (at middle position)', async() => {
+        xtest('2.6b-3 Missing external ID in a paper activity (at middle position)', async() => {
             await fillActivitiesMissingSomething(activitiesDataToAddMiddle,[], [middleIndex]);
             await clickOnSaveButtonAndCheckDialog();
         });
@@ -543,20 +543,20 @@ suiteArray = [
             await clickOnSaveButtonAndCheckDialog();
         }
 
-        test('2.6c-1 Missing inspector name in a paper activity (at first position)', async() => {
+        xtest('2.6c-1 Missing inspector name in a paper activity (at first position)', async() => {
             await fillActivitiesMissingInspectorName(getReverseActivitiesDataToAdd(), n-1);
         });
 
-        test('2.6c-2 Missing inspector name in a paper activity (at last position)', async() => {
+        xtest('2.6c-2 Missing inspector name in a paper activity (at last position)', async() => {
             await fillActivitiesMissingInspectorName(activitiesDataToAdd, 0);
         });
 
-        test('2.6c-3 Missing inspector name in a paper activity (at middle position)', async() => {
+        xtest('2.6c-3 Missing inspector name in a paper activity (at middle position)', async() => {
             await fillActivitiesMissingInspectorName(activitiesDataToAddMiddle, middleIndex);
         });
     }),
 
-    describe('Scenario #2.7: Need click on autocomplete option to validate', () => {
+    xdescribe('Scenario #2.7: Need click on autocomplete option to validate', () => {
 
         test('2.7 Try add paper activity WITHOUT click on autocomplete suggestion', async() => {
             const paperActivityData = activityData.ACTA.paper;

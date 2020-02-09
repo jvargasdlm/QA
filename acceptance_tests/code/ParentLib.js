@@ -10,7 +10,11 @@ const selectors = {
     login:{
         EMAIL_INPUT: 'input[name=userEmail]',
         PASSWORD_INPUT: 'input[name=userPassword]',
-        SUBMIT_BUTTON: 'button[type=submit]'
+        SUBMIT_BUTTON: 'button[type=submit]',
+        VALOR_APLICAR: 'input[name=valorAplicar]',
+        VALOR_INVESTIR: 'input[name=valorInvestir]',
+        TEMPO: 'input[name=tempo]',
+        //SIMULAR: 'button[type=submit]'
     }
 };
 
@@ -36,9 +40,11 @@ class ParentLib {
         await pageExt.gotoUrl(mainPageUrl);
         const buttonSelector = selectors.login.SUBMIT_BUTTON;
         await pageExt.waitForSelector(buttonSelector);
-        await pageExt.page.type(selectors.login.EMAIL_INPUT, loginData.email);
-        await pageExt.page.type(selectors.login.PASSWORD_INPUT, loginData.password);
-        await pageExt.page.click(buttonSelector);
+        await pageExt.page.type(selectors.login.VALOR_APLICAR, "19,00");
+//        await pageExt.page.type(selectors.login.VALOR_INVESTIR, loginData.password);
+        await pageExt.page.type(selectors.login.VALOR_INVESTIR, "20,00");
+        await pageExt.page.type(selectors.login.TEMPO, "3");
+//        await pageExt.page.click(buttonSelector);
     }
 
     /* Call after doBeforeAll method */

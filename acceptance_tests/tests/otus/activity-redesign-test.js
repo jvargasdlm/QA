@@ -18,10 +18,10 @@ afterEach(async () => {
     await activitiesPage.refreshAndWaitLoad();
 });
 
-afterAll(async () => {
-    await errorLogger.exportTestResultLog();
-    await browser.close();
-});
+//afterAll(async () => {
+//    await errorLogger.exportTestResultLog();
+ //   await browser.close();
+//});
 
 // *****************************************************************
 // Specific modules for this suite test
