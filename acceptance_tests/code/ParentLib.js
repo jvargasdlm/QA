@@ -41,10 +41,10 @@ class ParentLib {
         await pageExt.gotoUrl(mainPageUrl);
         const buttonSelector = selectors.login.SUBMIT_BUTTON;
 //        await pageExt.waitForSelector(buttonSelector);
-        await pageExt.page.type(selectors.login.VALOR_APLICAR, "20,00");
+        await pageExt.page.type(selectors.login.VALOR_APLICAR);
 //        await pageExt.page.type(selectors.login.VALOR_INVESTIR, loginData.password);
-        await pageExt.page.type(selectors.login.VALOR_INVESTIR, "20,00");
-        await pageExt.page.type(selectors.login.TEMPO, "3");
+        await pageExt.page.type(selectors.login.VALOR_INVESTIR);
+        await pageExt.page.type(selectors.login.TEMPO);
         await pageExt.page.click(buttonSelector);
     }
 
