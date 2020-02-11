@@ -33,6 +33,16 @@ async function fillFormForCompany(amountToApply, amountToInvest, investmentTime)
     await page.click(buttonSelector);
 }
 
+async function request() {
+    var request = require('request');
+    request('http://www.google.com', function (error, response, body) {
+        console.log('error:', error); // Print the error if one occurred
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+    });
+
+}
+
 // async function verifyLabelAlert(SELETOR, amountToApply, LABEL){
 //     await page.type(SELETOR, amountToApply);
 //
@@ -55,20 +65,22 @@ afterAll(async ()=>{
 // *****************************************************************
 // Tests
 
-describe('1. Suite teste of Sicredi Investment Simulator: Profile for you',()=> {
+xdescribe('1. Test suite of Sicredi Investment Simulator: Profile for you',()=> {
 
-    test('Test 1.1: Amount to apply and amount to invest greater than 20 reais', async ()=>{
-        await fillFormForYou("20,01", "20,01", "20")
+    test('Test 1.1: Amount to apply and amount to invest equal than 20 reais', async ()=>{
+        await fillFormForYou("20,00", "20,00", "20")
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
         expect(guidanceMessageAmountToApply).toBeNull();
         const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
         expect(guidanceMessageAmountToInvest).toBeNull();
+        expect // QUE VA A LA PAGINA DE RESULTADO
     })
 
     test('Test 1.2: Amount to apply and amount to invest less than 20 reais', async ()=>{
         await fillFormForYou("19,99", "19,99", "20")
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
         expect(guidanceMessageAmountToApply).not.toBeNull();
+        expect // SABER EL VALOR, EL MENSAJE
         const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
         expect(guidanceMessageAmountToInvest).not.toBeNull();
     })
@@ -81,7 +93,7 @@ describe('1. Suite teste of Sicredi Investment Simulator: Profile for you',()=> 
         expect(guidanceMessageAmountToInvest).not.toBeNull();
     })
 
-    test('Test 1.4: Blank amount to be applied and amount to invest less than 20 reais', async ()=>{
+    xtest('Test 1.4: Blank amount to be applied and amount to invest less than 20 reais', async ()=>{
         await fillFormForYou("", "19,99", "20")
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
         expect(guidanceMessageAmountToApply).not.toBeNull();
@@ -89,16 +101,16 @@ describe('1. Suite teste of Sicredi Investment Simulator: Profile for you',()=> 
         expect(guidanceMessageAmountToInvest).not.toBeNull();
     })
 
-    test('Test 1.5: Blank amount to be applied and amount to invest greater than 20 reais',async()=>{
-       await fillFormForYou("", "20,01", "20");
-        const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
-        expect(guidanceMessageAmountToApply).not.toBeNull();
-        const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
-        expect(guidanceMessageAmountToInvest).toBeNull();
-       }
-   )
+    xtest('Test 1.5: Blank amount to be applied and amount to invest equal than 20 reais',async()=>{
+            await fillFormForYou("", "20,00", "20");
+            const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
+            expect(guidanceMessageAmountToApply).not.toBeNull();
+            const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
+            expect(guidanceMessageAmountToInvest).toBeNull();
+        }
+    )
 
-    test('Test 1.6: Amount to apply less than 20 reais and amount to invest in blank',async()=>{
+    xtest('Test 1.6: Amount to apply less than 20 reais and amount to invest in blank',async()=>{
             await fillFormForYou("19,99", "", "20");
             const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
             expect(guidanceMessageAmountToApply).not.toBeNull();
@@ -107,8 +119,8 @@ describe('1. Suite teste of Sicredi Investment Simulator: Profile for you',()=> 
         }
     )
 
-    test('Test 1.7: Amount to apply less than 20 reais and amount to invest greater than 20 reais',async()=>{
-            await fillFormForYou("19,99", "20,01", "20");
+    xtest('Test 1.7: Amount to apply less than 20 reais and amount to invest equal than 20 reais',async()=>{
+            await fillFormForYou("19,99", "20,00", "20");
             const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
             expect(guidanceMessageAmountToApply).not.toBeNull();
             const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
@@ -116,8 +128,8 @@ describe('1. Suite teste of Sicredi Investment Simulator: Profile for you',()=> 
         }
     )
 
-    test('Test 1.8: Amount to apply greater than 20 reais and amount to invest in blank',async()=>{
-            await fillFormForYou("20,01", "", "20");
+    xtest('Test 1.8: Amount to apply equal than 20 reais and amount to invest in blank',async()=>{
+            await fillFormForYou("20,00", "", "20");
             const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
             expect(guidanceMessageAmountToApply).toBeNull();
             const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
@@ -125,8 +137,8 @@ describe('1. Suite teste of Sicredi Investment Simulator: Profile for you',()=> 
         }
     )
 
-    test('Test 1.9: Amount to apply greater than 20 reais and amount to invest less than 20 reais',async()=>{
-            await fillFormForYou("20,01", "19,99", "20");
+    xtest('Test 1.9: Amount to apply equal than 20 reais and amount to invest less than 20 reais',async()=>{
+            await fillFormForYou("20,00", "19,99", "20");
             const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
             expect(guidanceMessageAmountToApply).toBeNull();
             const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
@@ -135,10 +147,10 @@ describe('1. Suite teste of Sicredi Investment Simulator: Profile for you',()=> 
     )
 });
 
-describe('2. Suite teste of Sicredi Investment Simulator: : Profile for company or agribusiness',()=> {
+xdescribe('2. Suite teste of Sicredi Investment Simulator: Profile for company or agribusiness',()=> {
 
-    test('Test 2.1: Amount to apply and amount to invest greater than 20 reais', async ()=>{
-        await fillFormForCompany("20,01", "20,01", "20")
+    test('Test 2.1: Amount to apply and amount to invest equal than 20 reais', async ()=>{
+        await fillFormForCompany("20,00", "20,00", "20")
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
         expect(guidanceMessageAmountToApply).toBeNull();
         const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
@@ -169,8 +181,8 @@ describe('2. Suite teste of Sicredi Investment Simulator: : Profile for company 
         expect(guidanceMessageAmountToInvest).not.toBeNull();
     })
 
-    test('Test 2.5: Blank amount to be applied and amount to invest greater than 20 reais',async()=>{
-            await fillFormForCompany("", "20,01", "20");
+    test('Test 2.5: Blank amount to be applied and amount to invest equal than 20 reais',async()=>{
+            await fillFormForCompany("", "20,00", "20");
             const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
             expect(guidanceMessageAmountToApply).not.toBeNull();
             const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
@@ -187,8 +199,8 @@ describe('2. Suite teste of Sicredi Investment Simulator: : Profile for company 
         }
     )
 
-    test('Test 2.7: Amount to apply less than 20 reais and amount to invest greater than 20 reais',async()=>{
-            await fillFormForCompany("19,99", "20,01", "20");
+    test('Test 2.7: Amount to apply less than 20 reais and amount to invest equal than 20 reais',async()=>{
+            await fillFormForCompany("19,99", "20,00", "20");
             const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
             expect(guidanceMessageAmountToApply).not.toBeNull();
             const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
@@ -196,8 +208,8 @@ describe('2. Suite teste of Sicredi Investment Simulator: : Profile for company 
         }
     )
 
-    test('Test 2.8: Amount to apply greater than 20 reais and amount to invest in blank',async()=>{
-            await fillFormForCompany("20,01", "", "20");
+    test('Test 2.8: Amount to apply equal than 20 reais and amount to invest in blank',async()=>{
+            await fillFormForCompany("20,00", "", "20");
             const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
             expect(guidanceMessageAmountToApply).toBeNull();
             const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
@@ -205,12 +217,25 @@ describe('2. Suite teste of Sicredi Investment Simulator: : Profile for company 
         }
     )
 
-    test('Test 2.9: Amount to apply greater than 20 reais and amount to invest less than 20 reais',async()=>{
-            await fillFormForCompany("20,01", "19,99", "20");
+    test('Test 2.9: Amount to apply equal than 20 reais and amount to invest less than 20 reais',async()=>{
+            await fillFormForCompany("20,00", "19,99", "20");
             const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
             expect(guidanceMessageAmountToApply).toBeNull();
             const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
             expect(guidanceMessageAmountToInvest).not.toBeNull();
         }
     )
+
+});
+
+describe('3. Suite teste of Sicredi Investment Simulator: Services',()=> {
+
+    it('gets the test endpoint', async done => {
+        const response = await request.get('/test')
+
+        expect(response.status).toBe(200)
+        expect(response.body.message).toBe('pass!')
+        done()
+    })
+
 });
