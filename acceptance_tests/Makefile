@@ -1,5 +1,4 @@
 # paths
-DOWNLOADS_DIR_PATH = downloads
 OUTPUT_DIR_PATH = output
 SCREENSHOT_DIR_PATH = $(OUTPUT_DIR_PATH)/screenshots
 TEST_RESULTS_DIR_PATH = $(OUTPUT_DIR_PATH)/test_results
@@ -15,9 +14,6 @@ reinstall:
 	sudo rm -rf node_modules
 	sudo rm package-lock.json
 	install_
-
-set_login_data:
-	node init_script.js
 
 install_:
 	sudo npm set PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true

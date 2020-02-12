@@ -1,5 +1,5 @@
 {
-    "name": "otus-acceptance-tests",
+    "name": "sicredi-acceptance-tests",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
@@ -8,7 +8,7 @@
         "headless": "SHOW_BROWSER=false npm test",
         "show": "SHOW_BROWSER=true npm test"
     },
-    "author": "Flávia Pereira",
+    "author": "Javier Vargas",
     "license": "ISC",
     "dependencies": {
         "angular": "^1.7.8",

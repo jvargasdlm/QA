@@ -3,6 +3,7 @@ let browser, page;
 const url = 'https://www.sicredi.com.br/html/ferramenta/simulador-investimento-poupanca/';
 const TIMEOUT_PER_TEST = 60000;
 
+
 const selectors = {
         INPUT_AMOUNT_TO_APPLY: 'input[name=valorAplicar]',
         INPUT_AMOUNT_TO_INVEST: 'input[name=valorInvestir]',
@@ -12,7 +13,8 @@ const selectors = {
         LABEL_AMOUNT_TO_INVEST: 'label[id="valorInvestir-error"]',
         LABEL_INVESTMENT_TIME:  'label[id="tempo-error"]',
         RADIO_FOR_YOU: 'input[value="paraVoce"]',
-        RADIO_FOR_COMPANY: 'input[value="paraEmpresa"]'
+        RADIO_FOR_COMPANY: 'input[value="paraEmpresa"]',
+        DIV_RESULT: 'div[class="maisOpcoes"]'
 };
 
 async function fillFormForYou(amountToApply, amountToInvest, investmentTime){
@@ -33,20 +35,11 @@ async function fillFormForCompany(amountToApply, amountToInvest, investmentTime)
     await page.click(buttonSelector);
 }
 
-async function request() {
-    var request = require('request');
-    request('http://www.google.com', function (error, response, body) {
-        console.log('error:', error); // Print the error if one occurred
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        console.log('body:', body); // Print the HTML for the Google homepage.
-    });
-
+async function extractComponent(selector){
+    return await page.evaluate((select)=>{
+        return document.querySelector(select).innerText;
+    }, selector)
 }
-
-// async function verifyLabelAlert(SELETOR, amountToApply, LABEL){
-//     await page.type(SELETOR, amountToApply);
-//
-// }
 
 beforeAll(async () => {
     jest.setTimeout(TIMEOUT_PER_TEST);
@@ -65,27 +58,29 @@ afterAll(async ()=>{
 // *****************************************************************
 // Tests
 
-xdescribe('1. Test suite of Sicredi Investment Simulator: Profile for you',()=> {
+describe('1. Test suite of Sicredi Investment Simulator: Profile for you',()=> {
 
     test('Test 1.1: Amount to apply and amount to invest equal than 20 reais', async ()=>{
         await fillFormForYou("20,00", "20,00", "20")
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
+        const componentResult = await extractComponent(selectors.DIV_RESULT);
         expect(guidanceMessageAmountToApply).toBeNull();
+        expect(componentResult.includes("Veja estas outras opções para você")).toBeTrue();
         const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
         expect(guidanceMessageAmountToInvest).toBeNull();
-        expect // QUE VA A LA PAGINA DE RESULTADO
     })
 
     test('Test 1.2: Amount to apply and amount to invest less than 20 reais', async ()=>{
         await fillFormForYou("19,99", "19,99", "20")
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
+        const componentResult = await extractComponent(selectors.LABEL_AMOUNT_TO_APPLY);
+        expect(componentResult).toBe("Valor mínimo de 20.00");
         expect(guidanceMessageAmountToApply).not.toBeNull();
-        expect // SABER EL VALOR, EL MENSAJE
         const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
         expect(guidanceMessageAmountToInvest).not.toBeNull();
     })
 
-    test('Test 1.3: Blank values', async ()=>{
+    xtest('Test 1.3: Blank values', async ()=>{
         await fillFormForYou("", "", "20")
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
         expect(guidanceMessageAmountToApply).not.toBeNull();
@@ -225,17 +220,5 @@ xdescribe('2. Suite teste of Sicredi Investment Simulator: Profile for company o
             expect(guidanceMessageAmountToInvest).not.toBeNull();
         }
     )
-
-});
-
-describe('3. Suite teste of Sicredi Investment Simulator: Services',()=> {
-
-    it('gets the test endpoint', async done => {
-        const response = await request.get('/test')
-
-        expect(response.status).toBe(200)
-        expect(response.body.message).toBe('pass!')
-        done()
-    })
 
 });
