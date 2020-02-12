@@ -1,4 +1,4 @@
-# Acceptance tests on Otus
+# Acceptance tests on Sicredi Investment Simulator
 
 ### Files organization
 
@@ -12,7 +12,7 @@
  
  * ```tests/``` : directory with the test files, organized by the platform directory (which contains a template.js file as an example)
  
- * ```.env.staging```: custom env file, with constants that can be setted by parameter (like show browser, otus login data)
+ * ```.env.staging```: custom env file, with constants that can be setted by parameter (like show browser)
  
  * ```jest.config.js``` : "main file" - config file, including test files path array (```testMatch``` attribute)
  
