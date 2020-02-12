@@ -61,31 +61,37 @@ afterAll(async ()=>{
 describe('1. Test suite of Sicredi Investment Simulator: Profile for you',()=> {
 
     test('Test 1.1: Amount to apply and amount to invest equal than 20 reais', async ()=>{
-        await fillFormForYou("20,00", "20,00", "20")
+        await fillFormForYou("20,00", "20,00", "20");
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
+        const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
         const componentResult = await extractComponent(selectors.DIV_RESULT);
         expect(guidanceMessageAmountToApply).toBeNull();
-        expect(componentResult.includes("Veja estas outras opções para você")).toBeTrue();
-        const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
         expect(guidanceMessageAmountToInvest).toBeNull();
+        expect(componentResult.includes("Veja estas outras opções para você")).toBeTrue();
     })
 
     test('Test 1.2: Amount to apply and amount to invest less than 20 reais', async ()=>{
         await fillFormForYou("19,99", "19,99", "20")
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
-        const componentResult = await extractComponent(selectors.LABEL_AMOUNT_TO_APPLY);
-        expect(componentResult).toBe("Valor mínimo de 20.00");
-        expect(guidanceMessageAmountToApply).not.toBeNull();
+        const componentApply = await extractComponent(selectors.LABEL_AMOUNT_TO_APPLY);
+        const componentInvest = await extractComponent(selectors.LABEL_AMOUNT_TO_INVEST);
         const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
+        expect(guidanceMessageAmountToApply).not.toBeNull();
         expect(guidanceMessageAmountToInvest).not.toBeNull();
+        expect(componentApply).toBe("Valor mínimo de 20.00");
+        expect(componentInvest).toBe("Valor mínimo de 20.00");
     })
 
-    xtest('Test 1.3: Blank values', async ()=>{
+    test('Test 1.3: Blank values', async ()=>{
         await fillFormForYou("", "", "20")
         const guidanceMessageAmountToApply = await page.$(selectors.LABEL_AMOUNT_TO_APPLY);
-        expect(guidanceMessageAmountToApply).not.toBeNull();
         const guidanceMessageAmountToInvest = await page.$(selectors.LABEL_AMOUNT_TO_INVEST);
+        const componentApply = await extractComponent(selectors.LABEL_AMOUNT_TO_APPLY);
+        const componentInvest = await extractComponent(selectors.LABEL_AMOUNT_TO_INVEST);
+        expect(guidanceMessageAmountToApply).not.toBeNull();
         expect(guidanceMessageAmountToInvest).not.toBeNull();
+        expect(componentApply).toBe("Valor mínimo de 20.00");
+        expect(componentInvest).toBe("Valor mínimo de 20.00");
     })
 
     xtest('Test 1.4: Blank amount to be applied and amount to invest less than 20 reais', async ()=>{
